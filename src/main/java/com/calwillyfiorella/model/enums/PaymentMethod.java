@@ -1,7 +1,7 @@
 package com.calwillyfiorella.model.enums;
 
 public enum PaymentMethod {
-    MercadoPago,
-    Transferencia,
-    Efectivo
+    MERCADO_PAGO,
+    TRANSFERENCIA,
+    EFECTIVO
 }

@@ -1,8 +1,8 @@
 package com.calwillyfiorella.model.enums;
 
 public enum PaymentStatus {
-    pendiente,
-    aprobado,
-    rechazado,
-    reembolsado
+    PENDIENTE,
+    APROBADO,
+    RECHAZADO,
+    REEMBOLSADO
 }
