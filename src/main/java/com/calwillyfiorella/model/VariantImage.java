@@ -59,11 +59,11 @@ public class VariantImage extends BaseEntity{
 
     public void setImageOrder(Integer imageOrder) {
         this.imageOrder = imageOrder;
-        afterUpdate();
+        this.afterUpdate();
     }
 
-    public UUID getImageId() { return imageId; }
-    public ProductVariant getVariant() { return variant; }
-    public String getImageUrl() { return imageUrl; }
-    public Integer getImageOrder() { return imageOrder; }
+    public UUID             getImageId      () { return this.imageId; }
+    public ProductVariant   getVariant      () { return this.variant; }
+    public String           getImageUrl     () { return this.imageUrl; }
+    public Integer          getImageOrder   () { return this.imageOrder; }
 }

@@ -66,12 +66,12 @@ public class Product extends BaseEntity{
 
     // Getters y Setters
     // Devuelve copia inmodificable
-    public List<ProductVariant> getVariants         () { return Collections.unmodifiableList(variants); }
-    public UUID                 getProductId        () { return productId; }
-    public Category             getProductCategory  () { return productCategory; }
-    public String               getProductName      () { return productName; }
-    public String               getProductShortDesc () { return productShortDesc; }
-    public String               getProductLongDesc  () { return productLongDesc; }
+    public List<ProductVariant> getVariants         () { return Collections.unmodifiableList(this.variants); }
+    public UUID                 getProductId        () { return this.productId; }
+    public Category             getProductCategory  () { return this.productCategory; }
+    public String               getProductName      () { return this.productName; }
+    public String               getProductShortDesc () { return this.productShortDesc; }
+    public String               getProductLongDesc  () { return this.productLongDesc; }
 
     // Agregar objetos a la lista. No se hace Update ya que los cambio no son del Product en si mismo
     public void addVariant(ProductVariant variant) {
@@ -80,21 +80,21 @@ public class Product extends BaseEntity{
 
     public void setProductCategory(Category productCategory) {
         this.productCategory = productCategory;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setProductName(String productName) {
         this.productName = productName;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setProductShortDesc(String productShortDesc) {
         this.productShortDesc = productShortDesc;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setProductLongDesc(String productLongDesc) {
         this.productLongDesc = productLongDesc;
-        afterUpdate();
+        this.afterUpdate();
     }
 }

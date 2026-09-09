@@ -3,77 +3,74 @@ package com.calwillyfiorella.model;
 import com.calwillyfiorella.model.enums.RowStatus;
 import java.time.LocalDateTime;
 
-public class Size {
-    private Integer         sizeId;
-    private String          size;
-    private String          sizeDesc;
-    private Integer         sizeOrder;
-    private RowStatus       rowStatus;
-    private LocalDateTime   createdAt;
-    private LocalDateTime   updatedAt;
+public class Size extends  BaseEntity{
+    private static Integer sizeIdSeq = 0;
+
+    private final Integer sizeId;
+
+    private String  size;
+    private String  sizeDesc;
+    private Integer sizeOrder;
 
     public Size(
-            Integer     sizeId,
-            String      size,
-            String      sizeDesc,
-            Integer     sizeOrder
+            String  size,
+            String  sizeDesc,
+            Integer sizeOrder
     ) {
+        this(
+                sizeIdSeq++,
+                size,
+                sizeDesc,
+                sizeOrder,
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+    }
+
+    /* Este constructor solo debe ser llamado para cargar desde registros provenientes de la DB */
+    public Size(
+            Integer         sizeId,
+            String          size,
+            String          sizeDesc,
+            Integer         sizeOrder,
+            RowStatus       rowStatus,
+            LocalDateTime   createdAt,
+            LocalDateTime   updatedAt
+    ) {
+        super(rowStatus, createdAt, updatedAt);
         this.sizeId     = sizeId;
         this.size       = size;
         this.sizeDesc   = sizeDesc;
         this.sizeOrder  = sizeOrder;
     }
 
-    protected void onCreate() {
-        this.rowStatus = RowStatus.ACTIVE;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    @Override
+    public String toString() {
+        return String.format("Size: %s - Desc: %s", this.size, this.sizeDesc);
     }
 
     public void setSize(String size) {
         this.size = size;
+        this.afterUpdate();
     }
-
     public void setSizeDesc(String sizeDesc) {
         this.sizeDesc = sizeDesc;
+        this.afterUpdate();
     }
-
     public void setSizeOrder(Integer sizeOrder) {
         this.sizeOrder = sizeOrder;
+        this.afterUpdate();
     }
 
-    public void setRowStatus(RowStatus rowStatus) {
-        this.rowStatus = rowStatus;
+    public Integer  getSizeId   () { return this.sizeId; }
+    public String   getSize     () {
+        return this.size;
     }
-
-    public Integer getSizeId() {
-        return sizeId;
+    public String   getSizeDesc () {
+        return this.sizeDesc;
     }
-
-    public String getSize() {
-        return size;
-    }
-
-    public String getSizeDesc() {
-        return sizeDesc;
-    }
-
-    public Integer getSizeOrder() {
-        return sizeOrder;
-    }
-
-    public RowStatus getRowStatus() {
-        return rowStatus;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public Integer  getSizeOrder() {
+        return this.sizeOrder;
     }
 }

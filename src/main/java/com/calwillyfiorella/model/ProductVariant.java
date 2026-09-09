@@ -105,47 +105,47 @@ public class ProductVariant extends BaseEntity {
 
     public void setColor(Color color) {
         this.color = color;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setSize(Size size) {
         this.size = size;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setTargetGender(TargetGender targetGender) {
         this.targetGender = targetGender;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setVariantDesc(String variantDesc) {
         this.variantDesc = variantDesc;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setVariantSku(String variantSku) {
         this.variantSku = variantSku;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setVariantPrice(BigDecimal variantPrice) {
         this.variantPrice = variantPrice;
-        afterUpdate();
+        this.afterUpdate();
     }
 
     public void setVariantStock(Integer variantStock) {
         this.variantStock = variantStock;
-        afterUpdate();
+        this.afterUpdate();
     }
 
-    public UUID getVariantId() { return variantId; }
-    public Product getProduct() { return product; }
-    public List<VariantImage> getImages() { return Collections.unmodifiableList(images); }
-    public Color getColor() { return color; }
-    public Size getSize() { return size; }
-    public TargetGender getTargetGender() { return targetGender; }
-    public String getVariantDesc() { return variantDesc; }
-    public String getVariantSku() { return variantSku; }
-    public BigDecimal getVariantPrice() { return variantPrice; }
-    public Integer getVariantStock() { return variantStock; }
+    public UUID                 getVariantId    () { return this.variantId; }
+    public Product              getProduct      () { return this.product; }
+    public List<VariantImage>   getImages       () { return Collections.unmodifiableList(this.images); }
+    public Color                getColor        () { return this.color; }
+    public Size                 getSize         () { return this.size; }
+    public TargetGender         getTargetGender () { return this.targetGender; }
+    public String               getVariantDesc  () { return this.variantDesc; }
+    public String               getVariantSku   () { return this.variantSku; }
+    public BigDecimal           getVariantPrice () { return this.variantPrice; }
+    public Integer              getVariantStock () { return this.variantStock; }
 }
