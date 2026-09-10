@@ -22,9 +22,21 @@ public abstract class BaseEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void setRowStatus(RowStatus rowStatus) {
+    private void setRowStatus(RowStatus rowStatus) {
         this.rowStatus = rowStatus;
         afterUpdate();
+    }
+
+    public void deactive() {
+       this.setRowStatus(RowStatus.INACTIVE);
+    }
+
+    public void activate() {
+        this.setRowStatus(RowStatus.ACTIVE);
+    }
+
+    public void delete() {
+        this.setRowStatus(RowStatus.DELETED);
     }
 
     public RowStatus getRowStatus() { return rowStatus; }

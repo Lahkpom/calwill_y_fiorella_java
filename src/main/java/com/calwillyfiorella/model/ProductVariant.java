@@ -70,8 +70,8 @@ public class ProductVariant extends BaseEntity {
         this.targetGender   = targetGender;
         this.variantDesc    = variantDesc;
         this.variantSku     = variantSku;
-        this.variantPrice   = variantPrice;
-        this.variantStock   = variantStock;
+        this.variantPrice   = variantPrice != null ? variantPrice : BigDecimal.ZERO;
+        this.variantStock   = variantStock != null ? variantStock : 0;
     }
 
     @Override
@@ -99,18 +99,83 @@ public class ProductVariant extends BaseEntity {
         };
     }
 
-    public void addImage(VariantImage image) {
-        if (image != null) this.images.add(image);
+    public boolean addImage(VariantImage image) {
+        if (image == null) return false;
+
+        if (!image.getVariant().getVariantId().equals(this.variantId)) return false;
+
+        if (this.images.stream().anyMatch(img ->
+                (
+                        image.getImageId() != null && image.getImageId().equals(img.getImageId())
+                ) || (
+                        image.getImageUrl() != null && image.getImageUrl().equalsIgnoreCase(img.getImageUrl())
+                )
+        )) return false;
+
+        this.images.add(image);
+        return true;
     }
 
-    public void setColor(Color color) {
+    public boolean removeImage(UUID imageId) {
+        if (imageId == null) return false;
+        return this.images.removeIf(img -> imageId.equals(img.getImageId()));
+    }
+
+    private VariantImage getImageById(UUID imageId) {
+        VariantImage dummy = null;
+        for (VariantImage img : this.images) {
+            if (img.getImageId().equals(imageId)) {
+                dummy = img;
+                break;
+            }
+        }
+        return dummy;
+    }
+
+    public boolean changeImageStatus(UUID imageId, RowStatus newStatus) {
+        if (imageId == null || newStatus == null) return false;
+
+        VariantImage image = this.getImageById(imageId);
+
+        if (image == null) return false;
+
+        if (image.getRowStatus() == newStatus) return false;
+
+        switch (newStatus) {
+            case ACTIVE     -> image.activate();
+            case INACTIVE   -> image.deactive();
+            case DELETED    -> image.delete();
+        }
+
+        return true;
+    }
+
+    public boolean incrementStock (Integer stock) {
+        if (stock == null || stock <= 0) return false;
+        this.variantStock += stock;
+        this.afterUpdate();
+        return true;
+    }
+
+    public boolean decrementStock (Integer stock) {
+        if (stock == null || this.variantStock - stock < 0) return false;
+        this.variantStock -= stock;
+        this.afterUpdate();
+        return true;
+    }
+
+    public boolean setColor(Color color) {
+        if (color == null) return false;
         this.color = color;
         this.afterUpdate();
+        return true;
     }
 
-    public void setSize(Size size) {
+    public boolean setSize(Size size) {
+        if (size == null) return false;
         this.size = size;
         this.afterUpdate();
+        return true;
     }
 
     public void setTargetGender(TargetGender targetGender) {
@@ -128,9 +193,11 @@ public class ProductVariant extends BaseEntity {
         this.afterUpdate();
     }
 
-    public void setVariantPrice(BigDecimal variantPrice) {
+    public boolean setVariantPrice(BigDecimal variantPrice) {
+        if (variantPrice == null || variantPrice.compareTo(BigDecimal.ZERO) == 0) return false;
         this.variantPrice = variantPrice;
         this.afterUpdate();
+        return true;
     }
 
     public void setVariantStock(Integer variantStock) {
