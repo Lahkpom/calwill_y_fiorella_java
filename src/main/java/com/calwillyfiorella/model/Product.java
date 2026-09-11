@@ -2,7 +2,9 @@ package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.model.enums.TargetGender;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -74,8 +76,32 @@ public class Product extends BaseEntity{
     public String               getProductLongDesc  () { return this.productLongDesc; }
 
     // Agregar objetos a la lista. No se hace Update ya que los cambio no son del Product en si mismo
-    public void addVariant(ProductVariant variant) {
-        if (variant != null) this.variants.add(variant);
+    public boolean addVariant(ProductVariant variant) {
+        if (variant == null) return false;
+
+        // Cuando se de este caso hay que ver de preguntarle al usuario si es que quiere cambiarle el Producto a la Variante
+        if (variant.getProduct() == null || variant.getProduct().getProductId() == null || !variant.getProduct().getProductId().equals(this.productId)) return false;
+
+        if (this.variants.stream().anyMatch(v -> variant.getVariantId() != null && variant.getVariantId().equals(v.getVariantId()))) return false;
+
+        this.variants.add(variant);
+        return true;
+    }
+
+    public boolean addVariant(
+            Color           color,
+            Size            size,
+            TargetGender    targetGender,
+            String          variantDesc,
+            String          variantSku,
+            BigDecimal      variantPrice,
+            Integer         variantStock
+    ) {
+        if (variantSku == null || this.variants.stream().anyMatch(v -> v.getVariantSku().equals(variantSku))) return false;
+
+        // Acá va un try-catch
+        this.variants.add(new ProductVariant(this, color, size, targetGender, variantDesc, variantSku, variantPrice, variantStock));
+        return true;
     }
 
     public void setProductCategory(Category productCategory) {

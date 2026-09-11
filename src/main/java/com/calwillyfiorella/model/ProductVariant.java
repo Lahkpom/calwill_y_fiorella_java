@@ -2,12 +2,13 @@ package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.net.URI;
 
 public class ProductVariant extends BaseEntity {
     private final UUID                variantId;
@@ -113,6 +114,26 @@ public class ProductVariant extends BaseEntity {
         )) return false;
 
         this.images.add(image);
+        return true;
+    }
+
+    private boolean isValidUrl(String url) {
+        if (url == null || url.isBlank()) return false;
+        try {
+            URI parsed = URI.create(url);
+            String scheme = parsed.getScheme();
+            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public boolean addImage(String imageUrl) {
+        if (!isValidUrl(imageUrl)) return false;
+
+        if (this.images.stream().anyMatch(img -> img.getImageUrl().equalsIgnoreCase(imageUrl))) return false;
+
+        this.images.add(new VariantImage(this, imageUrl, this.images.size() + 1));
         return true;
     }
 
