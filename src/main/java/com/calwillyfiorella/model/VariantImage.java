@@ -1,8 +1,11 @@
 package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
+
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Objects;
 
 public class VariantImage extends BaseEntity{
     private final UUID              imageId;
@@ -37,9 +40,12 @@ public class VariantImage extends BaseEntity{
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.imageId    = imageId;
-        this.variant    = variant;
-        this.imageUrl   = imageUrl;
+
+        if (imageOrder == null || imageOrder < 1 ) throw new IllegalArgumentException("El número de orden de la imágen no puede ser menor a uno.");
+
+        this.imageId    = Objects.requireNonNull(imageId, "imageId cannot be null");
+        this.variant    = Objects.requireNonNull(variant, "Variant cannot be null");
+        this.imageUrl   = isValidUrl(imageUrl) ? imageUrl : null;
         this.imageOrder = imageOrder;
     }
 
@@ -55,6 +61,17 @@ public class VariantImage extends BaseEntity{
                 this.variant.getVariantPrice(),
                 this.rowStatus
         );
+    }
+
+    private boolean isValidUrl(String url) {
+        if (url == null || url.isBlank()) return false;
+        try {
+            URI parsed = URI.create(url);
+            String scheme = parsed.getScheme();
+            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public void setImageOrder(Integer imageOrder) {

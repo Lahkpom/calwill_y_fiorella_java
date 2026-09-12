@@ -3,11 +3,8 @@ package com.calwillyfiorella.model;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import java.net.URI;
 
 public class ProductVariant extends BaseEntity {
@@ -100,49 +97,38 @@ public class ProductVariant extends BaseEntity {
         };
     }
 
-    public boolean addImage(VariantImage image) {
-        if (image == null) return false;
+    public void addImage(VariantImage image) {
+        if (image == null)
+            throw new NullPointerException("La VariantImage ingresada no puede ser nulla.");
 
-        if (!image.getVariant().getVariantId().equals(this.variantId)) return false;
+        if (!image.getVariant().getVariantId().equals(this.variantId))
+            throw new IllegalArgumentException("La VariantImage ingresada no corresponde a esta variante.");
 
         if (this.images.stream().anyMatch(img ->
                 (
-                        image.getImageId() != null && image.getImageId().equals(img.getImageId())
+                        image.getImageId().equals(img.getImageId())
                 ) || (
-                        image.getImageUrl() != null && image.getImageUrl().equalsIgnoreCase(img.getImageUrl())
+                        image.getImageUrl().equalsIgnoreCase(img.getImageUrl())
                 )
-        )) return false;
+        )) throw new IllegalArgumentException("La VariantImage ingresada ya se encuentra en la Lista de esta variante");
 
         this.images.add(image);
-        return true;
     }
 
-    private boolean isValidUrl(String url) {
-        if (url == null || url.isBlank()) return false;
-        try {
-            URI parsed = URI.create(url);
-            String scheme = parsed.getScheme();
-            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    public boolean addImage(String imageUrl) {
-        if (!isValidUrl(imageUrl)) return false;
-
-        if (this.images.stream().anyMatch(img -> img.getImageUrl().equalsIgnoreCase(imageUrl))) return false;
+    public void addImage(String imageUrl) {
+        if (this.images.stream().anyMatch(img -> img.getImageUrl().equalsIgnoreCase(imageUrl)))
+            throw new IllegalArgumentException("La imagen ingresada ya existe en la lista de esta variante.");
 
         this.images.add(new VariantImage(this, imageUrl, this.images.size() + 1));
-        return true;
     }
 
     public boolean removeImage(UUID imageId) {
-        if (imageId == null) return false;
         return this.images.removeIf(img -> imageId.equals(img.getImageId()));
     }
 
     private VariantImage getImageById(UUID imageId) {
+        if (imageId == null) return null;
+
         VariantImage dummy = null;
         for (VariantImage img : this.images) {
             if (img.getImageId().equals(imageId)) {
@@ -153,54 +139,50 @@ public class ProductVariant extends BaseEntity {
         return dummy;
     }
 
-    public boolean changeImageStatus(UUID imageId, RowStatus newStatus) {
-        if (imageId == null || newStatus == null) return false;
-
+    public void changeImageStatus(UUID imageId, RowStatus newStatus) {
         VariantImage image = this.getImageById(imageId);
 
-        if (image == null) return false;
+        if (image == null)
+            throw new IllegalArgumentException("La URL ingresada no corresponde a una imagen de esta variante.");
 
-        if (image.getRowStatus() == newStatus) return false;
+        if (image.getRowStatus() == newStatus) return;
 
         switch (newStatus) {
             case ACTIVE     -> image.activate();
             case INACTIVE   -> image.deactive();
             case DELETED    -> image.delete();
         }
-
-        return true;
     }
 
-    public boolean incrementStock (Integer stock) {
-        if (stock == null || stock <= 0) return false;
+    public void incrementStock (Integer stock) {
+        if (stock == null || stock <= 0)
+            throw new IllegalArgumentException("La cantidad ingresada para incrementar el stock no puede ser nula ni menor o igual a cero.");
+
         this.variantStock += stock;
         this.afterUpdate();
-        return true;
     }
 
-    public boolean decrementStock (Integer stock) {
-        if (stock == null || this.variantStock - stock < 0) return false;
+    public void decrementStock (Integer stock) {
+        if (stock == null || this.variantStock - stock < 0)
+            throw new IllegalArgumentException("La cantidad ingresada para disminuir el stock no puede ser nula ni hacer que el resultado final deje a stock menor a cero.");
+
         this.variantStock -= stock;
         this.afterUpdate();
-        return true;
     }
 
-    public boolean setColor(Color color) {
-        if (color == null) return false;
-        this.color = color;
+    public void setColor(Color color) {
+        this.color = Objects.requireNonNull(color, "color cannot be null");
         this.afterUpdate();
-        return true;
     }
 
     public boolean setSize(Size size) {
-        if (size == null) return false;
-        this.size = size;
+        this.size = Objects.requireNonNull(size, "size cannot be null");
         this.afterUpdate();
         return true;
     }
 
     public void setTargetGender(TargetGender targetGender) {
-        this.targetGender = targetGender;
+        this.targetGender = Objects.requireNonNull(targetGender, "targetGender cannot be null");
         this.afterUpdate();
     }
 
