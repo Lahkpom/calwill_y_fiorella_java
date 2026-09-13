@@ -1,6 +1,8 @@
 package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.util.ValidationUtils;
+
 import java.time.LocalDateTime;
 
 public class Size extends  BaseEntity{
@@ -18,7 +20,7 @@ public class Size extends  BaseEntity{
             Integer sizeOrder
     ) {
         this(
-                sizeIdSeq++,
+                sizeIdSeq + 1,
                 size,
                 sizeDesc,
                 sizeOrder,
@@ -39,10 +41,24 @@ public class Size extends  BaseEntity{
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.sizeId     = sizeId;
-        this.size       = size;
-        this.sizeDesc   = sizeDesc;
-        this.sizeOrder  = sizeOrder;
+        this.sizeId     = ValidationUtils.requireValidIntegerIdBySeq(sizeIdSeq, sizeId);
+        this.size       = this.validateSize(size);
+        this.sizeDesc   = this.validateSizeDesc(sizeDesc);
+        this.sizeOrder  = this.validateSizeOrder(sizeOrder);
+
+        sizeIdSeq++;
+    }
+
+    private String validateSize(String size) {
+        return ValidationUtils.requireNonBlank(size, "El talle no puede ser nulo");
+    }
+
+    private String validateSizeDesc(String sizeDesc) {
+        return ValidationUtils.requireNonBlank(sizeDesc, "La descripción del talle no puede ser nulo");
+    }
+
+    private Integer validateSizeOrder(Integer sizeOrder) {
+        return ValidationUtils.requireNonNegative(sizeOrder, "El orden del talle no puede ser nulo");
     }
 
     @Override
@@ -51,15 +67,15 @@ public class Size extends  BaseEntity{
     }
 
     public void setSize(String size) {
-        this.size = size;
+        this.size = this.validateSize(size);
         this.afterUpdate();
     }
     public void setSizeDesc(String sizeDesc) {
-        this.sizeDesc = sizeDesc;
+        this.sizeDesc = this.validateSizeDesc(sizeDesc);
         this.afterUpdate();
     }
     public void setSizeOrder(Integer sizeOrder) {
-        this.sizeOrder = sizeOrder;
+        this.sizeOrder = this.validateSizeOrder(sizeOrder);
         this.afterUpdate();
     }
 

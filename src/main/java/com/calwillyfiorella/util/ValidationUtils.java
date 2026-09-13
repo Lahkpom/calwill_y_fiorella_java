@@ -51,4 +51,10 @@ public final class ValidationUtils {
 
         return amountToDeduct;
     }
+
+    public static Integer requireValidIntegerIdBySeq(Integer currVal, Integer newVal) {
+        if (currVal == null || newVal == null || newVal != currVal - 1)
+            throw new IllegalArgumentException("El id ingresado no coincide con la secuencia. Valor actual: " + currVal);
+        return newVal;
+    }
 }

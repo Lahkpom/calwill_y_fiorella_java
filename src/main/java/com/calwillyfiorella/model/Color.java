@@ -1,8 +1,9 @@
 package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.util.ValidationUtils;
+
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class Color extends BaseEntity {
     private static Integer colorIdSeq = 0;
@@ -19,7 +20,7 @@ public class Color extends BaseEntity {
             String  colorCode
     ) {
         this(
-                colorIdSeq++,
+                colorIdSeq + 1,
                 colorName,
                 colorDesc,
                 colorCode,
@@ -40,10 +41,24 @@ public class Color extends BaseEntity {
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.colorId    = colorId;
-        this.colorName  = colorName;
-        this.colorDesc  = colorDesc;
-        this.colorCode  = colorCode;
+        this.colorId    = ValidationUtils.requireValidIntegerIdBySeq(colorIdSeq, colorId);
+        this.colorName  = this.validateColorName(colorName);
+        this.colorDesc  = this.validateColorDesc(colorDesc);
+        this.colorCode  = this.validateColorCode(colorCode);
+
+        colorIdSeq++;
+    }
+
+    private String validateColorName(String colorName) {
+        return ValidationUtils.requireNonBlank(colorName, "El nombre del color no puede ser nulo");
+    }
+
+    private String validateColorDesc(String colorDesc) {
+        return ValidationUtils.requireNonBlank(colorDesc, "La descripción del color no puede ser nulo");
+    }
+
+    private String validateColorCode(String colorCode) {
+        return ValidationUtils.requireNonBlank(colorCode, "El código del color no puede ser nulo");
     }
 
     @Override
@@ -52,15 +67,15 @@ public class Color extends BaseEntity {
     }
 
     public void setColorName(String colorName) {
-        this.colorName = colorName;
+        this.colorName  = this.validateColorName(colorName);
         this.afterUpdate();
     }
     public void setColorDesc(String colorDesc) {
-        this.colorDesc = colorDesc;
+        this.colorDesc  = this.validateColorDesc(colorDesc);
         this.afterUpdate();
     }
     public void setColorCode(String colorCode) {
-        this.colorCode = colorCode;
+        this.colorCode  = this.validateColorCode(colorCode);
         this.afterUpdate();
     }
 
