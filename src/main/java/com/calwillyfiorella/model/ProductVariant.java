@@ -2,10 +2,11 @@ package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.util.ValidationUtils;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.math.BigDecimal;
-import java.net.URI;
 
 public class ProductVariant extends BaseEntity {
     private final UUID                variantId;
@@ -61,15 +62,15 @@ public class ProductVariant extends BaseEntity {
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.variantId      = variantId;
-        this.product        = product;
-        this.color          = color;
-        this.size           = size;
-        this.targetGender   = targetGender;
-        this.variantDesc    = variantDesc;
-        this.variantSku     = variantSku;
-        this.variantPrice   = variantPrice != null ? variantPrice : BigDecimal.ZERO;
-        this.variantStock   = variantStock != null ? variantStock : 0;
+        this.variantId      = Objects.requireNonNull(variantId, "El variantId no puede ser nulo");
+        this.product        = Objects.requireNonNull(product, "Se debe indicar un producto válido al que pertenece la variante");
+        this.color          = this.validateColor(color);
+        this.size           = this.validateSize(size);
+        this.targetGender   = this.validateTargetGender(targetGender);
+        this.variantDesc    = this.validateVariantDesc(variantDesc);
+        this.variantSku     = this.validateSKU(variantSku);
+        this.variantPrice   = this.validateAmountPrice(variantPrice);
+        this.variantStock   = this.validateStock(variantStock);
     }
 
     @Override
@@ -97,6 +98,7 @@ public class ProductVariant extends BaseEntity {
         };
     }
 
+//    COMPLEX FUNCTIONS
     public void addImage(VariantImage image) {
         if (image == null)
             throw new NullPointerException("La VariantImage ingresada no puede ser nulla.");
@@ -126,19 +128,6 @@ public class ProductVariant extends BaseEntity {
         return this.images.removeIf(img -> imageId.equals(img.getImageId()));
     }
 
-    private VariantImage getImageById(UUID imageId) {
-        if (imageId == null) return null;
-
-        VariantImage dummy = null;
-        for (VariantImage img : this.images) {
-            if (img.getImageId().equals(imageId)) {
-                dummy = img;
-                break;
-            }
-        }
-        return dummy;
-    }
-
     public void changeImageStatus(UUID imageId, RowStatus newStatus) {
         VariantImage image = this.getImageById(imageId);
 
@@ -155,59 +144,98 @@ public class ProductVariant extends BaseEntity {
     }
 
     public void incrementStock (Integer stock) {
-        if (stock == null || stock <= 0)
-            throw new IllegalArgumentException("La cantidad ingresada para incrementar el stock no puede ser nula ni menor o igual a cero.");
-
-        this.variantStock += stock;
+        this.variantStock += this.validateStock(stock);
         this.afterUpdate();
     }
 
     public void decrementStock (Integer stock) {
-        if (stock == null || this.variantStock - stock < 0)
-            throw new IllegalArgumentException("La cantidad ingresada para disminuir el stock no puede ser nula ni hacer que el resultado final deje a stock menor a cero.");
-
-        this.variantStock -= stock;
+        this.variantStock -= ValidationUtils.requireSufficientQuantity(
+                this.variantStock,
+                stock,
+                "La cantidad ingresada para disminuir el stock no puede ser nula ni hacer que el resultado final deje a stock menor a cero."
+        );
         this.afterUpdate();
     }
+//    COMPLEX FUNCTIONS
 
+//    UTIL FUNCTIONS
+    private VariantImage getImageById(UUID imageId) {
+        if (imageId == null) return null;
+
+        VariantImage dummy = null;
+        for (VariantImage img : this.images) {
+            if (img.getImageId().equals(imageId)) {
+                dummy = img;
+                break;
+            }
+        }
+        return dummy;
+    }
+//    UTIL FUNCTIONS
+
+//    SETTERS
     public void setColor(Color color) {
-        this.color = Objects.requireNonNull(color, "color cannot be null");
+        this.color = this.validateColor(color);
         this.afterUpdate();
     }
 
-    public boolean setSize(Size size) {
-        this.size = Objects.requireNonNull(size, "size cannot be null");
+    public void setSize(Size size) {
+        this.size = this.validateSize(size);
         this.afterUpdate();
-        return true;
     }
 
     public void setTargetGender(TargetGender targetGender) {
-        this.targetGender = Objects.requireNonNull(targetGender, "targetGender cannot be null");
+        this.targetGender = this.validateTargetGender(targetGender);
         this.afterUpdate();
     }
 
     public void setVariantDesc(String variantDesc) {
-        this.variantDesc = variantDesc;
+        this.variantDesc = this.validateVariantDesc(variantDesc);
         this.afterUpdate();
     }
 
     public void setVariantSku(String variantSku) {
-        this.variantSku = variantSku;
+        this.variantSku = this.validateSKU(variantSku);
         this.afterUpdate();
     }
 
-    public boolean setVariantPrice(BigDecimal variantPrice) {
-        if (variantPrice == null || variantPrice.compareTo(BigDecimal.ZERO) == 0) return false;
-        this.variantPrice = variantPrice;
-        this.afterUpdate();
-        return true;
-    }
-
-    public void setVariantStock(Integer variantStock) {
-        this.variantStock = variantStock;
+    public void setVariantPrice(BigDecimal variantPrice) {
+        this.variantPrice = this.validateAmountPrice(variantPrice);
         this.afterUpdate();
     }
+//    SETTERS
 
+//    VALIDACIONES
+    private Integer validateStock(Integer stock) {
+        return ValidationUtils.requireNonNegative(stock, "La cantidad ingresada para incrementar el stock no puede ser nula ni menor o igual a cero.");
+    }
+
+    private String validateSKU(String sku) {
+        return ValidationUtils.requireNonBlank(sku, "El SKU no puede ser nulo ni estar vacío.");
+    }
+
+    private Color validateColor(Color color) {
+        return Objects.requireNonNull(color, "color cannot be null");
+    }
+
+    private Size validateSize(Size size) {
+        return Objects.requireNonNull(size, "size cannot be null");
+    }
+
+    private TargetGender validateTargetGender(TargetGender targetGender) {
+        return Objects.requireNonNull(targetGender, "targetGender cannot be null");
+    }
+
+    private String validateVariantDesc(String variantDesc) {
+        return ValidationUtils.requireNonBlank(variantDesc, "La descripción larga del producto no puede estra vacía.");
+    }
+
+    private BigDecimal validateAmountPrice (BigDecimal amountPrice) {
+        return ValidationUtils.requireAmountGreaterThanZero(amountPrice, "El Precio no puede ser menor ni igual a cero.");
+    }
+//    VALIDACIONES
+
+//    GETTERS
     public UUID                 getVariantId    () { return this.variantId; }
     public Product              getProduct      () { return this.product; }
     public List<VariantImage>   getImages       () { return Collections.unmodifiableList(this.images); }
@@ -218,4 +246,5 @@ public class ProductVariant extends BaseEntity {
     public String               getVariantSku   () { return this.variantSku; }
     public BigDecimal           getVariantPrice () { return this.variantPrice; }
     public Integer              getVariantStock () { return this.variantStock; }
+//    GETTERS
 }

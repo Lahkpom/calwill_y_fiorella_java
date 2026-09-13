@@ -67,7 +67,6 @@ public class Product extends BaseEntity{
     }
 
     // Getters y Setters
-    // Devuelve copia inmodificable
     public List<ProductVariant> getVariants         () { return Collections.unmodifiableList(this.variants); }
     public UUID                 getProductId        () { return this.productId; }
     public Category             getProductCategory  () { return this.productCategory; }
