@@ -1,6 +1,7 @@
 package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.util.ValidationUtils;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ public class VariantImage extends BaseEntity{
         this.imageId    = Objects.requireNonNull(imageId, "imageId cannot be null");
         this.variant    = Objects.requireNonNull(variant, "Variant cannot be null");
         this.imageUrl   = isValidUrl(imageUrl) ? imageUrl : null;
-        this.imageOrder = imageOrder;
+        this.imageOrder = this.validateImageOrder(imageOrder);
     }
 
     @Override
@@ -74,8 +75,12 @@ public class VariantImage extends BaseEntity{
         }
     }
 
+    private Integer validateImageOrder(Integer imageOrder) {
+        return ValidationUtils.requireNonNegative(imageOrder, "imageOrder cannot be null or minus than zero.");
+    }
+
     public void setImageOrder(Integer imageOrder) {
-        this.imageOrder = imageOrder;
+        this.imageOrder = this.validateImageOrder(imageOrder);
         this.afterUpdate();
     }
 
