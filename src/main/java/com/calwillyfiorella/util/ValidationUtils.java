@@ -53,7 +53,7 @@ public final class ValidationUtils {
     }
 
     public static Integer requireValidIntegerIdBySeq(Integer currVal, Integer newVal) {
-        if (currVal == null || newVal == null || newVal != currVal - 1)
+        if (currVal == null || newVal == null || currVal != newVal - 1)
             throw new IllegalArgumentException("El id ingresado no coincide con la secuencia. Valor actual: " + currVal);
         return newVal;
     }

@@ -7,141 +7,327 @@ import com.calwillyfiorella.model.enums.TargetGender;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    static List<Color> colors = new ArrayList<>();
-    static Color col1 = new Color(
-            1,
-            "white",
-            "white as the snow",
-            "#ffffff",
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
+    static final Scanner scanner = new Scanner(System.in);
 
-    static Color col2 = new Color(
-            2,
-            "black",
-            "black as the night",
-            "#000000",
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-
-    static List<Size> sizes = new ArrayList<>();
-    static Size size1 = new Size(
-            1,
-            "m",
-            "medium",
-            1,
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-
-    static Size size2 = new Size(
-            2,
-            "l",
-            "large",
-            2,
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-
-    static List<Product> products = new ArrayList<>();
-    static Product prod1 = new Product(
-            UUID.randomUUID(),
-            Category.CALZADO,
-            "Artículo_1",
-            "Esta es la descripción corta del Artículo_1",
-            "Esta es la descripción larga del Artículo_1",
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-
-    static Product prod2 = new Product(
-            UUID.randomUUID(),
-            Category.CALZADO,
-            "Artículo_2",
-            "Esta es la descripción corta del Artículo_2",
-            "Esta es la descripción larga del Artículo_2",
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-
-    static List<ProductVariant> variants = new ArrayList<>();
-    static ProductVariant var1 = new ProductVariant(
-            UUID.randomUUID(),
-            prod1,
-            col1,
-            size1,
-            TargetGender.NINIOS,
-            "Descripción de la variante var1 del Artículo_1",
-            "SKU-ART-1-VAR-1",
-            new BigDecimal("10000"),
-            3,
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-    static ProductVariant var2 = new ProductVariant(
-            UUID.randomUUID(),
-            prod1,
-            col2,
-            size2,
-            TargetGender.NINIAS,
-            "Descripción de la variante var2 del Artículo_1",
-            "SKU-ART-1-VAR-2",
-            new BigDecimal("11000"),
-            3,
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-    static ProductVariant var3 = new ProductVariant(
-            UUID.randomUUID(),
-            prod2,
-            col1,
-            size1,
-            TargetGender.HOMBRES,
-            "Descripción de la variante var3 del Artículo_2",
-            "SKU-ART-2-VAR-3",
-            new BigDecimal("12000"),
-            3,
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-    static ProductVariant var4 = new ProductVariant(
-            UUID.randomUUID(),
-            prod2,
-            col2,
-            size2,
-            TargetGender.MUJERES,
-            "Descripción de la variante var4 del Artículo_2",
-            "SKU-ART-2-VAR-4",
-            new BigDecimal("13000"),
-            3,
-            RowStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    );
-
-    List<VariantImage> images = new ArrayList<>();
+    static List<Color>          colors      = new ArrayList<>();
+    static List<Size>           sizes       = new ArrayList<>();
+    static List<Product>        products    = new ArrayList<>();
 
     public static void main(String[] args) {
+        preChrageData();
+
+        renderMainMenu();
+
+
 
     }
 
+    private static int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
 
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Debes ingresar un número entero válido.");
+            }
+        }
+    }
+
+    private static int requireUserInt() {
+        int     option  = 0;
+        boolean exit    = false;
+
+        while (!exit) {
+            option = readInt("Ingresar opción: ");
+            if ( !Set.of(1, 2, 3).contains(option) ) {
+                System.out.println("El valor ingresado no coresponde a ninguna de las opciones indicada!");
+                continue;
+            }
+            exit = true;
+        }
+
+        return option;
+    }
+
+    private static void renderMainMenu() {
+        System.out.format("""
+                            Ingrese el número de la opción deseada:
+                                1. Administrador.
+                                2. Cliente.
+                                3. Finalizar.
+                            """);
+
+        switch (requireUserInt()) {
+            case 1  -> renderAdminMenu();
+            case 2  -> renderCustomerMenu();
+            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
+            default -> thereWasAnUnspectedError();
+        }
+    }
+
+    private static void renderAdminMenu() {
+        // Tengo que tener una List con los administradores para poder matchear que el usuario y contraseña que se ingresen sean válidos
+        System.out.println("Este es el menú del administrador");
+    }
+
+    private static void renderCustomerMenu() {
+//        System.out.println("Este es el menú del Cliente");
+        /*
+            1. Identificars
+            2. Continuar sin identificarse
+         */
+        System.out.format("""
+                            Ingrese el número de la opción deseada:
+                                1. Ver productos.
+                                2. Ver carrito.
+                                3. Volver al menú anterior.
+                                4. Finalizar.
+                            """);
+
+        switch (requireUserInt()) {
+            case 1  -> toListAAvailableProducts();
+            case 2  -> renderProductCart();
+            case 3  -> renderMainMenu();
+            case 4  -> System.out.println("Gracias por utilizar nuestro sistema!");
+            default -> thereWasAnUnspectedError();
+        }
+    }
+
+    private static void thereWasAnUnspectedError() {
+        System.err.println("Hubo un error inesperado.");
+        renderMainMenu();
+    }
+
+    private static void renderProductCart() {
+        System.out.println("Este es el carrito de compras");
+    }
+
+    public static void toListAllColors() {
+        System.out.println("#### LISTADO COMPLETO DE COLORES ####");
+        for (int i = 0; i < colors.size(); i++) {
+            Color color = colors.get(i);
+            System.out.format(
+                    "%d. Color: %s - Código: %s - Estado: %s%n",
+                    i + 1,
+                    color.getColorName(),
+                    color.getColorCode(),
+                    color.getRowStatus()
+            );
+        }
+    }
+
+    public static void toListAAvailableColors() {
+        System.out.println("#### LISTADO DE COLORES DISPONIBLES ####");
+        for (int i = 0; i < colors.size(); i++) {
+            Color color = colors.get(i);
+            if (color.getRowStatus() != RowStatus.ACTIVE) continue;
+            System.out.format(
+                    "%d. Color: %s - Código: %s%n",
+                    i + 1,
+                    color.getColorName(),
+                    color.getColorCode()
+            );
+        }
+    }
+
+    public static void toListAllSizes() {
+        System.out.println("#### LISTADO COMPLETO DE TALLES ####");
+        for (int i = 0; i < sizes.size(); i++) {
+            Size size = sizes.get(i);
+            System.out.format(
+                    "%d. Talle: %s - Descripción: %s - Estado: %s%n",
+                    i + 1,
+                    size.getSize(),
+                    size.getSizeDesc(),
+                    size.getRowStatus()
+            );
+        }
+    }
+
+    public static void toListAAvailableSizes() {
+        System.out.println("#### LISTADO DE TALLES DISPONIBLES ####");
+        for (int i = 0; i < sizes.size(); i++) {
+            Size size = sizes.get(i);
+            if (size.getRowStatus() != RowStatus.ACTIVE) continue;
+            System.out.format(
+                    "%d. Talle: %s - Descripción: %s%n",
+                    i + 1,
+                    size.getSize(),
+                    size.getSizeDesc()
+            );
+        }
+    }
+
+    public static void toListAllProducts() {
+        System.out.println("#### LISTADO COMPLETO DE PRODUCTOS ####");
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
+            System.out.format(
+                    "%d. Producto: %s - Total Variantes: %d - Variantes Activas: %d - Estado: %s%n",
+                    i + 1,
+                    product.getProductName(),
+                    product.getTotalVariantsAmount(),
+                    product.getAvailableVariantsAmount(),
+                    product.getRowStatus()
+            );
+        }
+    }
+
+    public static void toListAAvailableProducts() {
+        System.out.println("#### LISTADO DE TALLES DISPONIBLES ####");
+        for (int i = 0; i < products.size(); i++) {
+            Product product = products.get(i);
+            if (product.getRowStatus() != RowStatus.ACTIVE) continue;
+            System.out.format(
+                    "%d. Producto: %s - Variantes: %d%n",
+                    i + 1,
+                    product.getProductName(),
+                    product.getAvailableVariantsAmount()
+            );
+        }
+    }
+
+    /*
+        Esta función la cree para simular el inicio de la aplicación con una carga de datos que provendría desde la db
+        Crea los objetos mínimos necesarios para una demostración de flujo del sistema y los almacena en una lista
+     */
+    private static void preChrageData() {
+        /*
+            Creación de objetos de la clase Color
+         */
+        Color col1 = new Color(
+                1,
+                "white",
+                "white as the snow",
+                "#ffffff",
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+        Color col2 = new Color(
+                2,
+                "black",
+                "black as the night",
+                "#000000",
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+
+        /*
+            Creación de objetos de la clase Size
+         */
+        Size size1 = new Size(
+                1,
+                "m",
+                "medium",
+                1,
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+        Size size2 = new Size(
+                2,
+                "l",
+                "large",
+                2,
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+
+        /*
+            Creación de objetos de la clase Product
+         */
+        Product prod1 = new Product(
+                UUID.randomUUID(),
+                Category.CALZADO,
+                "Artículo_1",
+                "Esta es la descripción corta del Artículo_1",
+                "Esta es la descripción larga del Artículo_1",
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+        Product prod2 = new Product(
+                UUID.randomUUID(),
+                Category.CALZADO,
+                "Artículo_2",
+                "Esta es la descripción corta del Artículo_2",
+                "Esta es la descripción larga del Artículo_2",
+                RowStatus.ACTIVE,
+                LocalDateTime.now(),
+                null
+        );
+
+        /*
+            Creación de objetos de la clase ProductVariant
+         */
+        ProductVariant var1 = prod1.addVariant(
+                col1,
+                size1,
+                TargetGender.NINIOS,
+                "Descripción de la variante var1 del Artículo_1",
+                "SKU-ART-1-VAR-1",
+                new BigDecimal("10000"),
+                3
+        );
+        ProductVariant var2 = prod1.addVariant(
+                col2,
+                size2,
+                TargetGender.NINIAS,
+                "Descripción de la variante var2 del Artículo_1",
+                "SKU-ART-1-VAR-2",
+                new BigDecimal("11000"),
+                3
+        );
+        ProductVariant var3 = prod2.addVariant(
+                col1,
+                size1,
+                TargetGender.HOMBRES,
+                "Descripción de la variante var3 del Artículo_2",
+                "SKU-ART-2-VAR-3",
+                new BigDecimal("12000"),
+                3
+        );
+        ProductVariant var4 = prod2.addVariant(
+                col2,
+                size2,
+                TargetGender.MUJERES,
+                "Descripción de la variante var4 del Artículo_2",
+                "SKU-ART-2-VAR-4",
+                new BigDecimal("13000"),
+                3
+        );
+
+        /*
+            Creación de objetos de la clase VariantImage
+         */
+        // Variante 1
+        var1.addImage("https://www.prueba_imagen_1.com");
+        var1.addImage("https://www.prueba_imagen_2.com");
+        // Variante 2
+        var2.addImage("https://www.prueba_imagen_3.com");
+        var2.addImage("https://www.prueba_imagen_4.com");
+        // Variante 3
+        var3.addImage("https://www.prueba_imagen_5.com");
+        var3.addImage("https://www.prueba_imagen_6.com");
+        // Variante 4
+        var4.addImage("https://www.prueba_imagen_7.com");
+        var4.addImage("https://www.prueba_imagen_8.com");
+
+        /*
+            Carga de todas las instancias creadas a las listas estáticas del main
+         */
+        colors  .addAll(List.of(col1, col2));
+        sizes   .addAll(List.of(size1, size2));
+        products.addAll(List.of(prod1, prod2));
+    }
 }

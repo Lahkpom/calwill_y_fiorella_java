@@ -68,12 +68,14 @@ public class Product extends BaseEntity{
     }
 
     // Getters y Setters
-    public List<ProductVariant> getVariants         () { return Collections.unmodifiableList(this.variants); }
-    public UUID                 getProductId        () { return this.productId; }
-    public Category             getProductCategory  () { return this.productCategory; }
-    public String               getProductName      () { return this.productName; }
-    public String               getProductShortDesc () { return this.productShortDesc; }
-    public String               getProductLongDesc  () { return this.productLongDesc; }
+    public List<ProductVariant> getVariants                 () { return Collections.unmodifiableList(this.variants); }
+    public Integer              getTotalVariantsAmount      () { return this.variants.size(); }
+    public int                  getAvailableVariantsAmount  () { return (int) this.variants.stream().filter(variant -> variant.getRowStatus() == RowStatus.ACTIVE).count(); }
+    public UUID                 getProductId                () { return this.productId; }
+    public Category             getProductCategory          () { return this.productCategory; }
+    public String               getProductName              () { return this.productName; }
+    public String               getProductShortDesc         () { return this.productShortDesc; }
+    public String               getProductLongDesc          () { return this.productLongDesc; }
 
     // Agregar objetos a la lista. No se hace Update ya que los cambio no son del Product en si mismo
     public void addVariant(ProductVariant variant) {
@@ -87,7 +89,7 @@ public class Product extends BaseEntity{
         this.variants.add(variant);
     }
 
-    public void addVariant(
+    public ProductVariant addVariant(
             Color           color,
             Size            size,
             TargetGender    targetGender,
@@ -98,8 +100,11 @@ public class Product extends BaseEntity{
     ) {
         if (variantSku == null || this.variants.stream().anyMatch(v -> v.getVariantSku().equals(variantSku))) throw new IllegalArgumentException("Ya existe en la lista de variantes una variante con la misma SKU.");
 
-        // Acá va un try-catch
-        this.variants.add(new ProductVariant(this, color, size, targetGender, variantDesc, variantSku, variantPrice, variantStock));
+        ProductVariant pv = new ProductVariant(this, color, size, targetGender, variantDesc, variantSku, variantPrice, variantStock);
+
+        this.variants.add(pv);
+
+        return pv;
     }
 
     public void setProductCategory(Category productCategory) {

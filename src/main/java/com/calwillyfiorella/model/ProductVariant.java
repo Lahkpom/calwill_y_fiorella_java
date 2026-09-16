@@ -117,11 +117,15 @@ public class ProductVariant extends BaseEntity {
         this.images.add(image);
     }
 
-    public void addImage(String imageUrl) {
+    public VariantImage addImage(String imageUrl) {
         if (this.images.stream().anyMatch(img -> img.getImageUrl().equalsIgnoreCase(imageUrl)))
             throw new IllegalArgumentException("La imagen ingresada ya existe en la lista de esta variante.");
 
-        this.images.add(new VariantImage(this, imageUrl, this.images.size() + 1));
+        VariantImage vi = new VariantImage(this, imageUrl, this.images.size() + 1);
+
+        this.images.add(vi);
+
+        return vi;
     }
 
     public boolean removeImage(UUID imageId) {

@@ -53,13 +53,15 @@ public class VariantImage extends BaseEntity{
     @Override
     public String toString() {
         return String.format(
-                "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - URL Imagen: %d - Orden Imagen: %d - Estado: %s",
+                "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - URL Imagen: %s - Orden Imagen: %d - Estado: %s",
                 this.variant.getProduct().getProductName(),
                 this.variant.getProduct().getProductCategory(),
                 ProductVariant.targetGenderDecode(this.variant.getTargetGender()),
                 this.variant.getColor().getColorName(),
                 this.variant.getSize().getSize(),
                 this.variant.getVariantPrice(),
+                this.imageUrl,
+                this.imageOrder,
                 this.rowStatus
         );
     }
