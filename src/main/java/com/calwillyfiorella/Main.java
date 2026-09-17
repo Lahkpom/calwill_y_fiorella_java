@@ -18,42 +18,45 @@ public class Main {
     static List<Size>           sizes       = new ArrayList<>();
     static List<Product>        products    = new ArrayList<>();
 
+    static List<Color>          avaliableColors     = new ArrayList<>();
+    static List<Size>           avaliableSizes      = new ArrayList<>();
+    static List<Product>        avaliableProducts   = new ArrayList<>();
+
+
+
     public static void main(String[] args) {
         preChrageData();
+
 
         renderMainMenu();
 
 
-
+        scanner.close();
     }
 
     private static int readInt(String prompt) {
         while (true) {
-            System.out.print(prompt);
+            System.out.println(prompt);
             String input = scanner.nextLine().trim();
 
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("Error: Debes ingresar un número entero válido.");
+                System.err.println("Error: Debes ingresar un número entero válido.");
             }
         }
     }
 
-    private static int requireUserInt() {
-        int     option  = 0;
-        boolean exit    = false;
-
-        while (!exit) {
-            option = readInt("Ingresar opción: ");
-            if ( !Set.of(1, 2, 3).contains(option) ) {
-                System.out.println("El valor ingresado no coresponde a ninguna de las opciones indicada!");
+    private static int requireUserOption(Integer... allowedOptions) {
+        Set<Integer> validOptions = Set.of(allowedOptions);
+        while (true) {
+            int option = readInt("Ingresar opción: ");
+            if (!validOptions.contains(option)) {
+                System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
                 continue;
             }
-            exit = true;
+            return option; // Retorno directo, sin necesidad del booleano 'exit'
         }
-
-        return option;
     }
 
     private static void renderMainMenu() {
@@ -64,7 +67,7 @@ public class Main {
                                 3. Finalizar.
                             """);
 
-        switch (requireUserInt()) {
+        switch (requireUserOption(1, 2, 3)) {
             case 1  -> renderAdminMenu();
             case 2  -> renderCustomerMenu();
             case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
@@ -81,7 +84,8 @@ public class Main {
 //        System.out.println("Este es el menú del Cliente");
         /*
             1. Identificars
-            2. Continuar sin identificarse
+            2. Crear una cuenta
+            3. Continuar sin identificarse
          */
         System.out.format("""
                             Ingrese el número de la opción deseada:
@@ -91,13 +95,61 @@ public class Main {
                                 4. Finalizar.
                             """);
 
-        switch (requireUserInt()) {
-            case 1  -> toListAAvailableProducts();
+        switch (requireUserOption(1, 2, 3, 4)) {
+            case 1  -> renderProductMenu();
             case 2  -> renderProductCart();
             case 3  -> renderMainMenu();
             case 4  -> System.out.println("Gracias por utilizar nuestro sistema!");
             default -> thereWasAnUnspectedError();
         }
+    }
+
+    private static void renderProductMenu() {
+        toListAAvailableProducts();
+
+        System.out.format("""
+                            Ingrese el número de la opción deseada:
+                                1. Ver variantes de un producto.
+                                2. Volver al menú anterior.
+                                3. Finalizar.
+                            """);
+
+        switch (requireUserOption(1, 2, 3, 4)) {
+            case 1  -> renderProductVariantMenu();
+            case 2  -> renderCustomerMenu();
+            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
+            default -> thereWasAnUnspectedError();
+        }
+    }
+
+    private static void renderProductVariantMenu() {
+        int productIdx = 0;
+        boolean done = false;
+
+        while (!done) {
+            productIdx = readInt("Ingresar el número del producto cuyas variantes desea ver: ") - 1;
+            if (productIdx < 0 || productIdx >= products.size()) {
+                System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
+                continue;
+            }
+            done = true;
+        }
+
+        avaliableProducts.get(productIdx).toListAvailableVariants();
+
+//        System.out.format("""
+//                            Ingrese el número de la opción deseada:
+//                                1. Ver variantes de un producto.
+//                                2. Volver al menú anterior.
+//                                3. Finalizar.
+//                            """);
+//
+//        switch (requireUserOption(1, 2, 3, 4)) {
+//            case 1  -> renderProductVariantMenu();
+//            case 2  -> renderCustomerMenu();
+//            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
+//            default -> thereWasAnUnspectedError();
+//        }
     }
 
     private static void thereWasAnUnspectedError() {
@@ -125,9 +177,8 @@ public class Main {
 
     public static void toListAAvailableColors() {
         System.out.println("#### LISTADO DE COLORES DISPONIBLES ####");
-        for (int i = 0; i < colors.size(); i++) {
-            Color color = colors.get(i);
-            if (color.getRowStatus() != RowStatus.ACTIVE) continue;
+        for (int i = 0; i < avaliableColors.size(); i++) {
+            Color color = avaliableColors.get(i);
             System.out.format(
                     "%d. Color: %s - Código: %s%n",
                     i + 1,
@@ -153,9 +204,8 @@ public class Main {
 
     public static void toListAAvailableSizes() {
         System.out.println("#### LISTADO DE TALLES DISPONIBLES ####");
-        for (int i = 0; i < sizes.size(); i++) {
-            Size size = sizes.get(i);
-            if (size.getRowStatus() != RowStatus.ACTIVE) continue;
+        for (int i = 0; i < avaliableSizes.size(); i++) {
+            Size size = avaliableSizes.get(i);
             System.out.format(
                     "%d. Talle: %s - Descripción: %s%n",
                     i + 1,
@@ -181,10 +231,9 @@ public class Main {
     }
 
     public static void toListAAvailableProducts() {
-        System.out.println("#### LISTADO DE TALLES DISPONIBLES ####");
-        for (int i = 0; i < products.size(); i++) {
-            Product product = products.get(i);
-            if (product.getRowStatus() != RowStatus.ACTIVE) continue;
+        System.out.println("#### LISTADO DE PRODUCTOS DISPONIBLES ####");
+        for (int i = 0; i < avaliableProducts.size(); i++) {
+            Product product = avaliableProducts.get(i);
             System.out.format(
                     "%d. Producto: %s - Variantes: %d%n",
                     i + 1,
@@ -329,5 +378,12 @@ public class Main {
         colors  .addAll(List.of(col1, col2));
         sizes   .addAll(List.of(size1, size2));
         products.addAll(List.of(prod1, prod2));
+
+        /*
+            Carga de todas las instancias con RowStatus.ACTIVE a las listas estáticas del main
+         */
+        avaliableColors     .addAll(colors.stream().filter(col -> col.getRowStatus() == RowStatus.ACTIVE).toList());
+        avaliableSizes      .addAll(sizes.stream().filter(size -> size.getRowStatus() == RowStatus.ACTIVE).toList());
+        avaliableProducts   .addAll(products.stream().filter(prod -> prod.getRowStatus() == RowStatus.ACTIVE).toList());
     }
 }

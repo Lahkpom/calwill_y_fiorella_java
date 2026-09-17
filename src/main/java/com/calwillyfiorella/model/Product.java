@@ -69,13 +69,25 @@ public class Product extends BaseEntity{
 
     // Getters y Setters
     public List<ProductVariant> getVariants                 () { return Collections.unmodifiableList(this.variants); }
+    public List<ProductVariant> getAvailableVariants        () { return this.variants.stream().filter(variant -> variant.getRowStatus() == RowStatus.ACTIVE).toList(); }
     public Integer              getTotalVariantsAmount      () { return this.variants.size(); }
-    public int                  getAvailableVariantsAmount  () { return (int) this.variants.stream().filter(variant -> variant.getRowStatus() == RowStatus.ACTIVE).count(); }
+    public int                  getAvailableVariantsAmount  () { return this.getAvailableVariants().size(); }
     public UUID                 getProductId                () { return this.productId; }
     public Category             getProductCategory          () { return this.productCategory; }
     public String               getProductName              () { return this.productName; }
     public String               getProductShortDesc         () { return this.productShortDesc; }
     public String               getProductLongDesc          () { return this.productLongDesc; }
+
+    public void toListAvailableVariants() {
+        List<ProductVariant> availableVariants = this.getAvailableVariants();
+
+        System.out.println("#### LISTADO DE VARIANTES DISPONIBLES ####");
+        for (int i = 0; i < availableVariants.size(); i++) {
+            ProductVariant variant = availableVariants.get(i);
+            System.out.println((i + 1) + ". " + variant);
+            variant.toListAvailableImages();
+        }
+    }
 
     // Agregar objetos a la lista. No se hace Update ya que los cambio no son del Product en si mismo
     public void addVariant(ProductVariant variant) {

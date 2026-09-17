@@ -240,15 +240,24 @@ public class ProductVariant extends BaseEntity {
 //    VALIDACIONES
 
 //    GETTERS
-    public UUID                 getVariantId    () { return this.variantId; }
-    public Product              getProduct      () { return this.product; }
-    public List<VariantImage>   getImages       () { return Collections.unmodifiableList(this.images); }
-    public Color                getColor        () { return this.color; }
-    public Size                 getSize         () { return this.size; }
-    public TargetGender         getTargetGender () { return this.targetGender; }
-    public String               getVariantDesc  () { return this.variantDesc; }
-    public String               getVariantSku   () { return this.variantSku; }
-    public BigDecimal           getVariantPrice () { return this.variantPrice; }
-    public Integer              getVariantStock () { return this.variantStock; }
+    public UUID                 getVariantId        () { return this.variantId; }
+    public Product              getProduct          () { return this.product; }
+    public List<VariantImage>   getImages           () { return Collections.unmodifiableList(this.images); }
+    public List<VariantImage>   getAvailableImages  () { return this.images.stream().filter(s -> s.getRowStatus() == RowStatus.ACTIVE).toList(); }
+    public Color                getColor            () { return this.color; }
+    public Size                 getSize             () { return this.size; }
+    public TargetGender         getTargetGender     () { return this.targetGender; }
+    public String               getVariantDesc      () { return this.variantDesc; }
+    public String               getVariantSku       () { return this.variantSku; }
+    public BigDecimal           getVariantPrice     () { return this.variantPrice; }
+    public Integer              getVariantStock     () { return this.variantStock; }
+
+    public void toListAvailableImages () {
+        List<VariantImage> availableImages = this.getAvailableImages();
+        System.out.println("#### LISTADO DE IMAGENES DISPONIBLES ####");
+        for (int i = 0; i < availableImages.size(); i++) {
+            System.out.println((i + 1) + ". " + availableImages.get(i));
+        }
+    }
 //    GETTERS
 }
