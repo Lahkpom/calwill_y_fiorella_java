@@ -78,17 +78,6 @@ public class Product extends BaseEntity{
     public String               getProductShortDesc         () { return this.productShortDesc; }
     public String               getProductLongDesc          () { return this.productLongDesc; }
 
-    public void toListAvailableVariants() {
-        List<ProductVariant> availableVariants = this.getAvailableVariants();
-
-        System.out.println("#### LISTADO DE VARIANTES DISPONIBLES ####");
-        for (int i = 0; i < availableVariants.size(); i++) {
-            ProductVariant variant = availableVariants.get(i);
-            System.out.println((i + 1) + ". " + variant);
-            variant.toListAvailableImages();
-        }
-    }
-
     // Agregar objetos a la lista. No se hace Update ya que los cambio no son del Product en si mismo
     public void addVariant(ProductVariant variant) {
         if (variant == null) throw new NullPointerException("Variant cannot be null");

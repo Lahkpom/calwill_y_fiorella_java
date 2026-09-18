@@ -76,13 +76,14 @@ public class ProductVariant extends BaseEntity {
     @Override
     public String toString() {
         return String.format(
-                "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - Imágenes: %d - Estado: %s",
+                "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - Stock: %d - Imágenes: %d - Estado: %s",
                 this.product.getProductName(),
                 this.product.getProductCategory(),
                 targetGenderDecode(this.targetGender),
                 this.color.getColorName(),
                 this.size.getSize(),
                 this.variantPrice,
+                this.variantStock,
                 this.images.size(),
                 this.rowStatus
         );

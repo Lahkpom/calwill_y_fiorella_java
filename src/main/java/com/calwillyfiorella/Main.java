@@ -18,11 +18,11 @@ public class Main {
     static List<Size>           sizes       = new ArrayList<>();
     static List<Product>        products    = new ArrayList<>();
 
-    static List<Color>          avaliableColors     = new ArrayList<>();
-    static List<Size>           avaliableSizes      = new ArrayList<>();
-    static List<Product>        avaliableProducts   = new ArrayList<>();
+    static List<Color>          availableColors     = new ArrayList<>();
+    static List<Size>           availableSizes      = new ArrayList<>();
+    static List<Product>        availableProducts   = new ArrayList<>();
 
-
+    static List<ProductVariant> cart = new ArrayList<>();
 
     public static void main(String[] args) {
         preChrageData();
@@ -71,7 +71,7 @@ public class Main {
             case 1  -> renderAdminMenu();
             case 2  -> renderCustomerMenu();
             case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnspectedError();
+            default -> thereWasAnUnexpectedError();
         }
     }
 
@@ -100,7 +100,7 @@ public class Main {
             case 2  -> renderProductCart();
             case 3  -> renderMainMenu();
             case 4  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnspectedError();
+            default -> thereWasAnUnexpectedError();
         }
     }
 
@@ -118,7 +118,7 @@ public class Main {
             case 1  -> renderProductVariantMenu();
             case 2  -> renderCustomerMenu();
             case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnspectedError();
+            default -> thereWasAnUnexpectedError();
         }
     }
 
@@ -135,30 +135,76 @@ public class Main {
             done = true;
         }
 
-        avaliableProducts.get(productIdx).toListAvailableVariants();
+        List<ProductVariant> availableVariants = availableProducts.get(productIdx).getAvailableVariants();
 
-//        System.out.format("""
-//                            Ingrese el número de la opción deseada:
-//                                1. Ver variantes de un producto.
-//                                2. Volver al menú anterior.
-//                                3. Finalizar.
-//                            """);
-//
-//        switch (requireUserOption(1, 2, 3, 4)) {
-//            case 1  -> renderProductVariantMenu();
-//            case 2  -> renderCustomerMenu();
-//            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
-//            default -> thereWasAnUnspectedError();
-//        }
+        System.out.println("#### LISTADO DE VARIANTES DISPONIBLES ####");
+        for (int i = 0; i < availableVariants.size(); i++) {
+            ProductVariant variant = availableVariants.get(i);
+            System.out.println((i + 1) + ". " + variant);
+            variant.toListAvailableImages();
+        }
+
+        System.out.format("""
+                            Ingrese el número de la opción deseada:
+                                1. Agregar una variante al carrito de compras.
+                                2. Volver al menú anterior.
+                                3. Finalizar.
+                            """);
+
+        switch (requireUserOption(1, 2, 3)) {
+            case 1  -> renderAddToCartMenu(availableVariants);
+            case 2  -> renderCustomerMenu();
+            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
+            default -> thereWasAnUnexpectedError();
+        }
     }
 
-    private static void thereWasAnUnspectedError() {
+    private static void renderAddToCartMenu(List<ProductVariant> availableVariants) {
+        int     variantIdx  = 0;
+        int     cant        = 0;
+        boolean done        = false;
+
+        while (!done) {
+            variantIdx = readInt("Ingresar el número de la variante que quiere añadir al carrito: ") - 1;
+            if (variantIdx < 0 || variantIdx >= products.size()) {
+                System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
+                continue;
+            }
+            done = true;
+        }
+
+        ProductVariant variant = availableVariants.get(variantIdx);
+
+        done = false;
+        while (!done) {
+            cant = readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
+            if (cant <= 0 || cant > variant.getVariantStock()) {
+                if (cant <= 0) System.err.println("El valor ingresado debe ser mayor a cero!");
+                if (cant > variant.getVariantStock()) System.err.println("La cantidad ingresada supera el stock disponible!");
+                continue;
+            }
+            done = true;
+        }
+
+        addToCart(variant);
+
+        renderMainMenu();
+    }
+
+    private static void addToCart(ProductVariant variant) {
+        cart.add(variant);
+    }
+
+    private static void thereWasAnUnexpectedError() {
         System.err.println("Hubo un error inesperado.");
         renderMainMenu();
     }
 
     private static void renderProductCart() {
-        System.out.println("Este es el carrito de compras");
+        System.out.println("#### CARRITO DE COMPRAS ####");
+        for (int i = 0; i < cart.size(); i++) {
+            System.out.println((i + 1) + ". " + cart.get(i));
+        }
     }
 
     public static void toListAllColors() {
@@ -175,10 +221,15 @@ public class Main {
         }
     }
 
+    private static void updateAvailableColors() {
+        availableColors = colors.stream().filter(c -> c.getRowStatus() == RowStatus.ACTIVE).toList();
+    }
+
     public static void toListAAvailableColors() {
+        updateAvailableColors();
         System.out.println("#### LISTADO DE COLORES DISPONIBLES ####");
-        for (int i = 0; i < avaliableColors.size(); i++) {
-            Color color = avaliableColors.get(i);
+        for (int i = 0; i < availableColors.size(); i++) {
+            Color color = availableColors.get(i);
             System.out.format(
                     "%d. Color: %s - Código: %s%n",
                     i + 1,
@@ -202,10 +253,15 @@ public class Main {
         }
     }
 
+    private static void updateAvailableSizes() {
+        availableSizes = sizes.stream().filter(s -> s.getRowStatus() == RowStatus.ACTIVE).toList();
+    }
+
     public static void toListAAvailableSizes() {
+        updateAvailableSizes();
         System.out.println("#### LISTADO DE TALLES DISPONIBLES ####");
-        for (int i = 0; i < avaliableSizes.size(); i++) {
-            Size size = avaliableSizes.get(i);
+        for (int i = 0; i < availableSizes.size(); i++) {
+            Size size = availableSizes.get(i);
             System.out.format(
                     "%d. Talle: %s - Descripción: %s%n",
                     i + 1,
@@ -230,10 +286,15 @@ public class Main {
         }
     }
 
+    private static void updateAvailableProducts() {
+        availableProducts = products.stream().filter(p -> p.getRowStatus() == RowStatus.ACTIVE).toList();
+    }
+
     public static void toListAAvailableProducts() {
+        updateAvailableProducts();
         System.out.println("#### LISTADO DE PRODUCTOS DISPONIBLES ####");
-        for (int i = 0; i < avaliableProducts.size(); i++) {
-            Product product = avaliableProducts.get(i);
+        for (int i = 0; i < availableProducts.size(); i++) {
+            Product product = availableProducts.get(i);
             System.out.format(
                     "%d. Producto: %s - Variantes: %d%n",
                     i + 1,
@@ -382,8 +443,8 @@ public class Main {
         /*
             Carga de todas las instancias con RowStatus.ACTIVE a las listas estáticas del main
          */
-        avaliableColors     .addAll(colors.stream().filter(col -> col.getRowStatus() == RowStatus.ACTIVE).toList());
-        avaliableSizes      .addAll(sizes.stream().filter(size -> size.getRowStatus() == RowStatus.ACTIVE).toList());
-        avaliableProducts   .addAll(products.stream().filter(prod -> prod.getRowStatus() == RowStatus.ACTIVE).toList());
+        availableColors     .addAll(colors.stream().filter(col -> col.getRowStatus() == RowStatus.ACTIVE).toList());
+        availableSizes      .addAll(sizes.stream().filter(size -> size.getRowStatus() == RowStatus.ACTIVE).toList());
+        availableProducts   .addAll(products.stream().filter(prod -> prod.getRowStatus() == RowStatus.ACTIVE).toList());
     }
 }
