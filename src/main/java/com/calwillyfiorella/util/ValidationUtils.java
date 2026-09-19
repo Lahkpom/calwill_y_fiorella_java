@@ -16,7 +16,11 @@ public final class ValidationUtils {
     }
 
     public static Integer requireNonNegative(Integer value, String message) {
-        if (value == null || value <= 0)
+        return requireNonNegative(value, message, false);
+    }
+
+    public static Integer requireNonNegative(Integer value, String message, boolean strict) {
+        if (value == null || value < 0 || (strict && value <= 0))
             throw new IllegalArgumentException(message);
         return value;
     }

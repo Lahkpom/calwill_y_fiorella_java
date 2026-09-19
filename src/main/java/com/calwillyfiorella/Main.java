@@ -4,6 +4,7 @@ import com.calwillyfiorella.model.*;
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.model.enums.UserRole;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,7 +23,11 @@ public class Main {
     static List<Size>           availableSizes      = new ArrayList<>();
     static List<Product>        availableProducts   = new ArrayList<>();
 
-    static List<ProductVariant> cart = new ArrayList<>();
+    static List<CartItem> cart = new ArrayList<>();
+
+    static List<Users>  users = new ArrayList<>();
+
+    static Users actualUser = null;
 
     public static void main(String[] args) {
         preChrageData();
@@ -161,7 +166,7 @@ public class Main {
 
     private static void renderAddToCartMenu(List<ProductVariant> availableVariants) {
         int     variantIdx  = 0;
-        int     cant        = 0;
+        int     quantity        = 0;
         boolean done        = false;
 
         while (!done) {
@@ -177,22 +182,22 @@ public class Main {
 
         done = false;
         while (!done) {
-            cant = readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
-            if (cant <= 0 || cant > variant.getVariantStock()) {
-                if (cant <= 0) System.err.println("El valor ingresado debe ser mayor a cero!");
-                if (cant > variant.getVariantStock()) System.err.println("La cantidad ingresada supera el stock disponible!");
+            quantity = readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
+            if (quantity <= 0 || quantity > variant.getVariantStock()) {
+                if (quantity <= 0) System.err.println("El valor ingresado debe ser mayor a cero!");
+                if (quantity > variant.getVariantStock()) System.err.println("La cantidad ingresada supera el stock disponible!");
                 continue;
             }
             done = true;
         }
 
-        addToCart(variant);
+        addToCart(variant, quantity);
 
         renderMainMenu();
     }
 
-    private static void addToCart(ProductVariant variant) {
-        cart.add(variant);
+    private static void addToCart(ProductVariant variant, Integer quantity) {
+        cart.add(new CartItem(actualUser, variant, quantity));
     }
 
     private static void thereWasAnUnexpectedError() {
@@ -416,6 +421,14 @@ public class Main {
                 new BigDecimal("13000"),
                 3
         );
+
+        /*
+            Creación de usuarios
+         */
+        users.addAll(List.of(
+                new Users(UserRole.ADMIN, "admin", "Administrador", "admin@admin.com", null, null),
+                new Users(UserRole.CUSTOMER, "cust", "Customer", "cust@cust.com", null, null)
+        ));
 
         /*
             Creación de objetos de la clase VariantImage
