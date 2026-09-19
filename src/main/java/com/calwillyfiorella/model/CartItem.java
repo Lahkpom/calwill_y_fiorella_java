@@ -21,12 +21,7 @@ public class CartItem {
     }
 
     public void setQuantity(Integer quantity) {
-        Integer validatedQuantity = this.validateQuantity(quantity);
-
-        if (validatedQuantity > this.variant.getVariantStock())
-            throw new IllegalArgumentException("No puede ingresar una cantidad mayor al stock disponible!");
-
-        this.quantity = validatedQuantity;
+        this.quantity = this.validateQuantity(quantity);
     }
 
     private Integer validateQuantity(Integer quantity) {

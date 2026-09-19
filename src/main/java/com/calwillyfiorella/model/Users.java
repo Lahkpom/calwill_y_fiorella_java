@@ -98,10 +98,13 @@ public class Users extends BaseEntity {
 
     private String validateUserPhone(String userPhone) {
         // Modificar esto, phone si puede ser null, solo verificar formato
-        return ValidationUtils.requireNonBlank(userPhone, "User phone cannot be null");
+//        return ValidationUtils.requireNonBlank(userPhone, "User phone cannot be null");
+        return userPhone;
     }
 
     private Integer validateFiledLoginAttempt(Integer filedLoginAttempt) {
         return ValidationUtils.requireNonNegative(filedLoginAttempt, "Filed login attempt cannot be negative");
     }
+
+    public boolean isAdmin() { return this.userRole.equals(UserRole.ADMIN) || this.userRole.equals(UserRole.SUPER_ADMIN); }
 }

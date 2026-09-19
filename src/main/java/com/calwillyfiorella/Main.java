@@ -5,79 +5,42 @@ import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.model.enums.UserRole;
+import com.calwillyfiorella.util.AuxiliarFuncs;
+import com.calwillyfiorella.util.MenuHelper;
+import com.calwillyfiorella.util.MenuOption;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    static final Scanner scanner = new Scanner(System.in);
+    private static final Cart cart = new Cart();
 
-    static List<Color>          colors      = new ArrayList<>();
-    static List<Size>           sizes       = new ArrayList<>();
-    static List<Product>        products    = new ArrayList<>();
+    public static final Scanner scanner = new Scanner(System.in);
 
-    static List<Color>          availableColors     = new ArrayList<>();
-    static List<Size>           availableSizes      = new ArrayList<>();
-    static List<Product>        availableProducts   = new ArrayList<>();
+    private static final List<Color>    colors      = new ArrayList<>();
+    private static final List<Size>     sizes       = new ArrayList<>();
+    private static final List<Product>  products    = new ArrayList<>();
+    private static final List<Users>    users       = new ArrayList<>();
 
-    static List<CartItem> cart = new ArrayList<>();
-
-    static List<Users>  users = new ArrayList<>();
-
-    static Users actualUser = null;
+    private static Users actualUser = null;
 
     public static void main(String[] args) {
         preChrageData();
 
-
         renderMainMenu();
-
 
         scanner.close();
     }
 
-    private static int readInt(String prompt) {
-        while (true) {
-            System.out.println(prompt);
-            String input = scanner.nextLine().trim();
+    public static void renderMainMenu() {
+        List<MenuOption> options = List.of(
+                MenuOption.of("Administrador"   , Main::renderAdminMenu),
+                MenuOption.of("Cliente"         , Main::renderCustomerMenu)
+        );
 
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.err.println("Error: Debes ingresar un número entero válido.");
-            }
-        }
-    }
-
-    private static int requireUserOption(Integer... allowedOptions) {
-        Set<Integer> validOptions = Set.of(allowedOptions);
-        while (true) {
-            int option = readInt("Ingresar opción: ");
-            if (!validOptions.contains(option)) {
-                System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
-                continue;
-            }
-            return option; // Retorno directo, sin necesidad del booleano 'exit'
-        }
-    }
-
-    private static void renderMainMenu() {
-        System.out.format("""
-                            Ingrese el número de la opción deseada:
-                                1. Administrador.
-                                2. Cliente.
-                                3. Finalizar.
-                            """);
-
-        switch (requireUserOption(1, 2, 3)) {
-            case 1  -> renderAdminMenu();
-            case 2  -> renderCustomerMenu();
-            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnexpectedError();
-        }
+        MenuHelper.renderMenuOptions(options, null);
     }
 
     private static void renderAdminMenu() {
@@ -92,132 +55,83 @@ public class Main {
             2. Crear una cuenta
             3. Continuar sin identificarse
          */
-        System.out.format("""
-                            Ingrese el número de la opción deseada:
-                                1. Ver productos.
-                                2. Ver carrito.
-                                3. Volver al menú anterior.
-                                4. Finalizar.
-                            """);
+        List<MenuOption> options = List.of(
+                MenuOption.of("Ver productos"   , Main::renderProductMenu),
+                MenuOption.of("Ver carrito"     , Main::renderProductCart)
+        );
 
-        switch (requireUserOption(1, 2, 3, 4)) {
-            case 1  -> renderProductMenu();
-            case 2  -> renderProductCart();
-            case 3  -> renderMainMenu();
-            case 4  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnexpectedError();
-        }
+        MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
     }
 
     private static void renderProductMenu() {
-        toListAAvailableProducts();
+        List<Integer> allowedOptions = toListProducts();
 
-        System.out.format("""
-                            Ingrese el número de la opción deseada:
-                                1. Ver variantes de un producto.
-                                2. Volver al menú anterior.
-                                3. Finalizar.
-                            """);
+        List<MenuOption> options = List.of(
+                MenuOption.of("Ver variantes de un producto", () -> Main.renderProductVariantMenu(allowedOptions))
+        );
 
-        switch (requireUserOption(1, 2, 3, 4)) {
-            case 1  -> renderProductVariantMenu();
-            case 2  -> renderCustomerMenu();
-            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnexpectedError();
-        }
+        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
-    private static void renderProductVariantMenu() {
-        int productIdx = 0;
-        boolean done = false;
+    private static void renderProductVariantMenu(List<Integer> allowedProductOptions) {
+        int productIdx = AuxiliarFuncs.requireUserOption(allowedProductOptions, "Ingresar el número del producto cuyas variantes quiere ver: ");
 
-        while (!done) {
-            productIdx = readInt("Ingresar el número del producto cuyas variantes desea ver: ") - 1;
-            if (productIdx < 0 || productIdx >= products.size()) {
-                System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
-                continue;
-            }
-            done = true;
-        }
+        List<ProductVariant> variants = products.get(productIdx - 1).getVariants();
 
-        List<ProductVariant> availableVariants = availableProducts.get(productIdx).getAvailableVariants();
+        List<Integer> allowedVariantOptions = toListProductVariants(variants);
 
-        System.out.println("#### LISTADO DE VARIANTES DISPONIBLES ####");
-        for (int i = 0; i < availableVariants.size(); i++) {
-            ProductVariant variant = availableVariants.get(i);
-            System.out.println((i + 1) + ". " + variant);
-            variant.toListAvailableImages();
-        }
+        List<MenuOption> options = List.of(
+                MenuOption.of("Agregar una variante al carrito de compras", () -> Main.renderAddToCartMenu(variants, allowedVariantOptions))
+        );
 
-        System.out.format("""
-                            Ingrese el número de la opción deseada:
-                                1. Agregar una variante al carrito de compras.
-                                2. Volver al menú anterior.
-                                3. Finalizar.
-                            """);
-
-        switch (requireUserOption(1, 2, 3)) {
-            case 1  -> renderAddToCartMenu(availableVariants);
-            case 2  -> renderCustomerMenu();
-            case 3  -> System.out.println("Gracias por utilizar nuestro sistema!");
-            default -> thereWasAnUnexpectedError();
-        }
+        MenuHelper.renderMenuOptions(options, Main::renderProductMenu);
     }
 
-    private static void renderAddToCartMenu(List<ProductVariant> availableVariants) {
-        int     variantIdx  = 0;
-        int     quantity        = 0;
+    private static void renderAddToCartMenu(List<ProductVariant> availableVariants, List<Integer> allowedVariantOptions) {
+        int variantIdx  = AuxiliarFuncs.requireUserOption(allowedVariantOptions, "Ingresar el número de la variante que quiere añadir al carrito: ");
+        ProductVariant variant = availableVariants.get(variantIdx - 1);
+
+        int     quantity    = 0;
         boolean done        = false;
 
         while (!done) {
-            variantIdx = readInt("Ingresar el número de la variante que quiere añadir al carrito: ") - 1;
-            if (variantIdx < 0 || variantIdx >= products.size()) {
-                System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
+            quantity = AuxiliarFuncs.readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
+
+            try {
+                cart.addItem(actualUser, variant, quantity);
+                System.out.format("La variante fue añadida al carrito con éxito!");
+            } catch (Exception e) {
+                System.err.format(e.getMessage());
                 continue;
             }
+
             done = true;
         }
 
-        ProductVariant variant = availableVariants.get(variantIdx);
+        List<MenuOption> options = List.of(
+                MenuOption.of("Agregar otro producto al carrito de compras", Main::renderProductMenu)
+        );
 
-        done = false;
-        while (!done) {
-            quantity = readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
-            if (quantity <= 0 || quantity > variant.getVariantStock()) {
-                if (quantity <= 0) System.err.println("El valor ingresado debe ser mayor a cero!");
-                if (quantity > variant.getVariantStock()) System.err.println("La cantidad ingresada supera el stock disponible!");
-                continue;
-            }
-            done = true;
-        }
-
-        addToCart(variant, quantity);
-
-        renderMainMenu();
-    }
-
-    private static void addToCart(ProductVariant variant, Integer quantity) {
-        cart.add(new CartItem(actualUser, variant, quantity));
-    }
-
-    private static void thereWasAnUnexpectedError() {
-        System.err.println("Hubo un error inesperado.");
-        renderMainMenu();
+        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
     private static void renderProductCart() {
+        List<CartItem> userCart = cart.getUserItems(actualUser);
         System.out.println("#### CARRITO DE COMPRAS ####");
-        for (int i = 0; i < cart.size(); i++) {
-            System.out.println((i + 1) + ". " + cart.get(i));
+        for (int i = 0; i < userCart.size(); i++) {
+            System.out.println("Variante " + (i + 1) + ". " + userCart.get(i));
         }
     }
 
-    public static void toListAllColors() {
-        System.out.println("#### LISTADO COMPLETO DE COLORES ####");
+    public static void toListColors() {
+        MenuHelper.printMenuTitle("LISTADO DE COLORES");
         for (int i = 0; i < colors.size(); i++) {
             Color color = colors.get(i);
+
+            if (!actualUser.isAdmin() && color.getRowStatus() != RowStatus.ACTIVE) continue;
+
             System.out.format(
-                    "%d. Color: %s - Código: %s - Estado: %s%n",
+                    "Nro %d. Color: %s - Código: %s - Estado: %s%n",
                     i + 1,
                     color.getColorName(),
                     color.getColorCode(),
@@ -226,30 +140,15 @@ public class Main {
         }
     }
 
-    private static void updateAvailableColors() {
-        availableColors = colors.stream().filter(c -> c.getRowStatus() == RowStatus.ACTIVE).toList();
-    }
-
-    public static void toListAAvailableColors() {
-        updateAvailableColors();
-        System.out.println("#### LISTADO DE COLORES DISPONIBLES ####");
-        for (int i = 0; i < availableColors.size(); i++) {
-            Color color = availableColors.get(i);
-            System.out.format(
-                    "%d. Color: %s - Código: %s%n",
-                    i + 1,
-                    color.getColorName(),
-                    color.getColorCode()
-            );
-        }
-    }
-
-    public static void toListAllSizes() {
-        System.out.println("#### LISTADO COMPLETO DE TALLES ####");
+    public static void toListSizes() {
+        MenuHelper.printMenuTitle("LISTADO DE TALLES");
         for (int i = 0; i < sizes.size(); i++) {
             Size size = sizes.get(i);
+
+            if (!actualUser.isAdmin() && size.getRowStatus() != RowStatus.ACTIVE) continue;
+
             System.out.format(
-                    "%d. Talle: %s - Descripción: %s - Estado: %s%n",
+                    "Nro %d. Talle: %s - Descripción: %s - Estado: %s%n",
                     i + 1,
                     size.getSize(),
                     size.getSizeDesc(),
@@ -258,55 +157,56 @@ public class Main {
         }
     }
 
-    private static void updateAvailableSizes() {
-        availableSizes = sizes.stream().filter(s -> s.getRowStatus() == RowStatus.ACTIVE).toList();
-    }
+    public static List<Integer> toListProducts() {
+        List<Integer> displayedIndexes = new ArrayList<>();
 
-    public static void toListAAvailableSizes() {
-        updateAvailableSizes();
-        System.out.println("#### LISTADO DE TALLES DISPONIBLES ####");
-        for (int i = 0; i < availableSizes.size(); i++) {
-            Size size = availableSizes.get(i);
-            System.out.format(
-                    "%d. Talle: %s - Descripción: %s%n",
-                    i + 1,
-                    size.getSize(),
-                    size.getSizeDesc()
-            );
-        }
-    }
-
-    public static void toListAllProducts() {
-        System.out.println("#### LISTADO COMPLETO DE PRODUCTOS ####");
+        MenuHelper.printMenuTitle("LISTADO DE PRODUCTOS");
         for (int i = 0; i < products.size(); i++) {
             Product product = products.get(i);
+            int idx = i + 1;
+
+            if (!actualUser.isAdmin() && product.getRowStatus() != RowStatus.ACTIVE) continue;
+
             System.out.format(
-                    "%d. Producto: %s - Total Variantes: %d - Variantes Activas: %d - Estado: %s%n",
-                    i + 1,
+                    "Producto %d. Nombre: %s - Variantes Activas: %d - Estado: %s%n",
+                    idx,
                     product.getProductName(),
-                    product.getTotalVariantsAmount(),
                     product.getAvailableVariantsAmount(),
                     product.getRowStatus()
             );
+            displayedIndexes.add(idx);
         }
+
+        return displayedIndexes;
     }
 
-    private static void updateAvailableProducts() {
-        availableProducts = products.stream().filter(p -> p.getRowStatus() == RowStatus.ACTIVE).toList();
-    }
+    public static List<Integer> toListProductVariants(List<ProductVariant> variants) {
+        List<Integer> displayedIndexes = new ArrayList<>();
 
-    public static void toListAAvailableProducts() {
-        updateAvailableProducts();
-        System.out.println("#### LISTADO DE PRODUCTOS DISPONIBLES ####");
-        for (int i = 0; i < availableProducts.size(); i++) {
-            Product product = availableProducts.get(i);
+        MenuHelper.printMenuTitle("LISTADO DE VARIANTES");
+        for (int i = 0; i < variants.size(); i++) {
+            ProductVariant variant = variants.get(i);
+            int idx = i + 1;
+
+            if (!actualUser.isAdmin() && variant.getRowStatus() != RowStatus.ACTIVE) continue;
+
             System.out.format(
-                    "%d. Producto: %s - Variantes: %d%n",
-                    i + 1,
-                    product.getProductName(),
-                    product.getAvailableVariantsAmount()
+                    "Variante %d. Producto: %s - Género: %s - Descripción: %s - Color: %s - Talle: %s - Imágenes: %d - Stock: %d - Precio: %.2f - Estado: %s%n",
+                    idx,
+                    variant.getProduct().getProductName(),
+                    variant.getTargetGender(),
+                    variant.getVariantDesc(),
+                    variant.getColor(),
+                    variant.getSize(),
+                    variant.getImages().size(),
+                    variant.getVariantStock(),
+                    variant.getVariantPrice(),
+                    variant.getRowStatus()
             );
+            displayedIndexes.add(idx);
         }
+
+        return displayedIndexes;
     }
 
     /*
@@ -315,120 +215,127 @@ public class Main {
      */
     private static void preChrageData() {
         /*
+            Creación de usuarios
+         */
+        users.addAll(
+                List.of(
+                        new Users(
+                                UserRole.ADMIN,
+                                "admin",
+                                "Administrador",
+                                "admin@admin.com",
+                                null,
+                                null
+                        ),
+                        new Users(
+                                UserRole.CUSTOMER,
+                                "cust",
+                                "Customer",
+                                "cust@cust.com",
+                                null,
+                                null
+                        )
+                )
+        );
+
+        actualUser = users.getFirst();
+
+        /*
             Creación de objetos de la clase Color
          */
-        Color col1 = new Color(
-                1,
-                "white",
-                "white as the snow",
-                "#ffffff",
-                RowStatus.ACTIVE,
-                LocalDateTime.now(),
-                null
-        );
-        Color col2 = new Color(
-                2,
-                "black",
-                "black as the night",
-                "#000000",
-                RowStatus.ACTIVE,
-                LocalDateTime.now(),
-                null
+        colors.addAll(
+                List.of(
+                        new Color(
+                                "white",
+                                "white as the snow",
+                                "#ffffff"
+                        ),
+                        new Color(
+                                "black",
+                                "black as the night",
+                                "#000000"
+                        )
+                )
         );
 
         /*
             Creación de objetos de la clase Size
          */
-        Size size1 = new Size(
-                1,
-                "m",
-                "medium",
-                1,
-                RowStatus.ACTIVE,
-                LocalDateTime.now(),
-                null
-        );
-        Size size2 = new Size(
-                2,
-                "l",
-                "large",
-                2,
-                RowStatus.ACTIVE,
-                LocalDateTime.now(),
-                null
+        sizes.addAll(
+                List.of(
+                        new Size(
+                                "m",
+                                "medium",
+                                1
+                        ),
+                        new Size(
+                                "l",
+                                "large",
+                                2
+                        )
+                )
         );
 
         /*
             Creación de objetos de la clase Product
          */
-        Product prod1 = new Product(
-                UUID.randomUUID(),
-                Category.CALZADO,
-                "Artículo_1",
-                "Esta es la descripción corta del Artículo_1",
-                "Esta es la descripción larga del Artículo_1",
-                RowStatus.ACTIVE,
-                LocalDateTime.now(),
-                null
-        );
-        Product prod2 = new Product(
-                UUID.randomUUID(),
-                Category.CALZADO,
-                "Artículo_2",
-                "Esta es la descripción corta del Artículo_2",
-                "Esta es la descripción larga del Artículo_2",
-                RowStatus.ACTIVE,
-                LocalDateTime.now(),
-                null
+        products.addAll(
+                List.of(
+                        new Product(
+                                Category.CALZADO,
+                                "Artículo_1",
+                                "Esta es la descripción corta del Artículo_1",
+                                "Esta es la descripción larga del Artículo_1"
+                        ),
+                        new Product(
+                                Category.CALZADO,
+                                "Artículo_2",
+                                "Esta es la descripción corta del Artículo_2",
+                                "Esta es la descripción larga del Artículo_2"
+                        )
+                )
         );
 
         /*
             Creación de objetos de la clase ProductVariant
          */
-        ProductVariant var1 = prod1.addVariant(
-                col1,
-                size1,
+        ProductVariant var1 = products.getFirst().addVariant(
+                colors.getFirst(),
+                sizes.getFirst(),
                 TargetGender.NINIOS,
                 "Descripción de la variante var1 del Artículo_1",
                 "SKU-ART-1-VAR-1",
                 new BigDecimal("10000"),
                 3
         );
-        ProductVariant var2 = prod1.addVariant(
-                col2,
-                size2,
+
+        ProductVariant var2 = products.getFirst().addVariant(
+                colors.get(1),
+                sizes.get(1),
                 TargetGender.NINIAS,
                 "Descripción de la variante var2 del Artículo_1",
                 "SKU-ART-1-VAR-2",
                 new BigDecimal("11000"),
                 3
         );
-        ProductVariant var3 = prod2.addVariant(
-                col1,
-                size1,
+        ProductVariant var3 = products.get(1).addVariant(
+                colors.getFirst(),
+                sizes.getFirst(),
                 TargetGender.HOMBRES,
                 "Descripción de la variante var3 del Artículo_2",
                 "SKU-ART-2-VAR-3",
                 new BigDecimal("12000"),
                 3
         );
-        ProductVariant var4 = prod2.addVariant(
-                col2,
-                size2,
+        ProductVariant var4 = products.get(1).addVariant(
+                colors.get(1),
+                sizes.get(1),
                 TargetGender.MUJERES,
                 "Descripción de la variante var4 del Artículo_2",
                 "SKU-ART-2-VAR-4",
                 new BigDecimal("13000"),
                 3
         );
-
-        /*
-            Creación de usuarios
-         */
-        users.addAll(List.of(
-                new Users(UserRole.ADMIN, "admin", "Administrador", "admin@admin.com", null, null),
-                new Users(UserRole.CUSTOMER, "cust", "Customer", "cust@cust.com", null, null)
-        ));
 
         /*
             Creación de objetos de la clase VariantImage
@@ -445,19 +352,5 @@ public class Main {
         // Variante 4
         var4.addImage("https://www.prueba_imagen_7.com");
         var4.addImage("https://www.prueba_imagen_8.com");
-
-        /*
-            Carga de todas las instancias creadas a las listas estáticas del main
-         */
-        colors  .addAll(List.of(col1, col2));
-        sizes   .addAll(List.of(size1, size2));
-        products.addAll(List.of(prod1, prod2));
-
-        /*
-            Carga de todas las instancias con RowStatus.ACTIVE a las listas estáticas del main
-         */
-        availableColors     .addAll(colors.stream().filter(col -> col.getRowStatus() == RowStatus.ACTIVE).toList());
-        availableSizes      .addAll(sizes.stream().filter(size -> size.getRowStatus() == RowStatus.ACTIVE).toList());
-        availableProducts   .addAll(products.stream().filter(prod -> prod.getRowStatus() == RowStatus.ACTIVE).toList());
     }
 }
