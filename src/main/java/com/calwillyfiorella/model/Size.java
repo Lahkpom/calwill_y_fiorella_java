@@ -63,7 +63,11 @@ public class Size extends  BaseEntity{
 
     @Override
     public String toString() {
-        return String.format("Size: %s - Desc: %s", this.size, this.sizeDesc);
+        return String.format("{ Talle: %s, Descripción: %s, Estado: %s }",
+                this.size,
+                this.sizeDesc,
+                this.rowStatus
+        );
     }
 
     public void setSize(String size) {

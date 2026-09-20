@@ -57,7 +57,7 @@ public class Main {
          */
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver productos"   , Main::renderProductMenu),
-                MenuOption.of("Ver carrito"     , Main::renderProductCart)
+                MenuOption.of("Ver carrito"     , Main::renderProductCartMenu)
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
@@ -99,9 +99,9 @@ public class Main {
 
             try {
                 cart.addItem(actualUser, variant, quantity);
-                System.out.format("La variante fue añadida al carrito con éxito!");
+                System.out.println("La variante fue añadida al carrito con éxito!");
             } catch (Exception e) {
-                System.err.format(e.getMessage());
+                System.err.println(e.getMessage());
                 continue;
             }
 
@@ -109,19 +109,62 @@ public class Main {
         }
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Agregar otro producto al carrito de compras", Main::renderProductMenu)
+                MenuOption.of("Agregar otro producto al carrito de compras" , Main::renderProductMenu),
+                MenuOption.of("Ver carrito de compras"                      , Main::renderProductCartMenu)
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
-    private static void renderProductCart() {
-        List<CartItem> userCart = cart.getUserItems(actualUser);
-        System.out.println("#### CARRITO DE COMPRAS ####");
-        for (int i = 0; i < userCart.size(); i++) {
-            System.out.println("Variante " + (i + 1) + ". " + userCart.get(i));
-        }
+    private static void renderProductCartMenu() {
+        List<CartItem> userCart = toListCartProducts();
+
+        if (userCart.isEmpty()) renderCustomerMenu();
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Modificar la cantidad de un Item", () -> Main.renderProductCartModifiedQuantity(userCart)),
+                MenuOption.of("Eliminar un Item"                , () -> Main.renderProductCartMRemoveItem(userCart)),
+                MenuOption.of("Vaciar carrito de compras"       , () -> {
+                    cart.clearUserItems(actualUser);
+                    Main.renderProductCartMenu();
+                }),
+                MenuOption.of("Iniciar proceso de compra"       , () -> Main.renderProductCartStartBuying(userCart))
+        );
+
+        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
+
+    private static void renderProductCartModifiedQuantity(List<CartItem> userCart) {
+        int idx = AuxiliarFuncs.requireUserOption(userCart.size(), "Ingresar el número del item cuya cantidad desea modificar: ");
+
+        CartItem cartItem = userCart.get(idx - 1);
+
+        int quantity = 0;
+
+        boolean done = false;
+        while (!done) {
+            quantity = AuxiliarFuncs.readInt("Ingrese la nueva cantidad que desa asignar: ");
+
+            try {
+                cart.updateQuantity(actualUser, cartItem.getVariant(), quantity);
+                System.out.println("La cantidad fue modificada con éxito!");
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                continue;
+            }
+
+            done = true;
+        }
+        renderProductCartMenu();
+    }
+    private static void renderProductCartMRemoveItem(List<CartItem> userCart) {
+//        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
+    }
+    private static void renderProductCartStartBuying(List<CartItem> userCart) {
+//        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
+    }
+
+
 
     public static void toListColors() {
         MenuHelper.printMenuTitle("LISTADO DE COLORES");
@@ -130,13 +173,7 @@ public class Main {
 
             if (!actualUser.isAdmin() && color.getRowStatus() != RowStatus.ACTIVE) continue;
 
-            System.out.format(
-                    "Nro %d. Color: %s - Código: %s - Estado: %s%n",
-                    i + 1,
-                    color.getColorName(),
-                    color.getColorCode(),
-                    color.getRowStatus()
-            );
+            System.out.format("Nro %d. %s%n", i + 1, color);
         }
     }
 
@@ -147,13 +184,7 @@ public class Main {
 
             if (!actualUser.isAdmin() && size.getRowStatus() != RowStatus.ACTIVE) continue;
 
-            System.out.format(
-                    "Nro %d. Talle: %s - Descripción: %s - Estado: %s%n",
-                    i + 1,
-                    size.getSize(),
-                    size.getSizeDesc(),
-                    size.getRowStatus()
-            );
+            System.out.format("Nro %d. %s%n", i + 1, size);
         }
     }
 
@@ -167,13 +198,8 @@ public class Main {
 
             if (!actualUser.isAdmin() && product.getRowStatus() != RowStatus.ACTIVE) continue;
 
-            System.out.format(
-                    "Producto %d. Nombre: %s - Variantes Activas: %d - Estado: %s%n",
-                    idx,
-                    product.getProductName(),
-                    product.getAvailableVariantsAmount(),
-                    product.getRowStatus()
-            );
+            System.out.format("Producto %d. %s%n", idx, product );
+
             displayedIndexes.add(idx);
         }
 
@@ -190,23 +216,49 @@ public class Main {
 
             if (!actualUser.isAdmin() && variant.getRowStatus() != RowStatus.ACTIVE) continue;
 
-            System.out.format(
-                    "Variante %d. Producto: %s - Género: %s - Descripción: %s - Color: %s - Talle: %s - Imágenes: %d - Stock: %d - Precio: %.2f - Estado: %s%n",
-                    idx,
-                    variant.getProduct().getProductName(),
-                    variant.getTargetGender(),
-                    variant.getVariantDesc(),
-                    variant.getColor(),
-                    variant.getSize(),
-                    variant.getImages().size(),
-                    variant.getVariantStock(),
-                    variant.getVariantPrice(),
-                    variant.getRowStatus()
-            );
+            System.out.format("Variante %d. %s%n", idx, variant);
+
             displayedIndexes.add(idx);
         }
 
         return displayedIndexes;
+    }
+
+    public static List<CartItem> toListCartProducts() {
+        List<CartItem> userCart = cart.getUserItems(actualUser);
+
+        MenuHelper.printMenuTitle("CARRITO DE COMPRAS");
+
+        if (userCart.isEmpty()) {
+            System.out.println("EL CARRITO DE COMPRAS SE ENCUENTRA VACÍO");
+        } else {
+            BigDecimal totalAmount = BigDecimal.ZERO;
+
+            for (int i = 0; i < userCart.size(); i++) {
+                CartItem cartItem = userCart.get(i);
+                int idx = i + 1;
+
+                System.out.format("Item %d. %s%n", idx, cartItem);
+
+                totalAmount = totalAmount.add(cartItem
+                        .getVariant()
+                        .getVariantPrice()
+                        .multiply(
+                                BigDecimal.valueOf(cartItem.getQuantity())
+                        )
+                );
+            }
+
+            System.out.format("""
+                -----------------------------
+                Total por la compra: $%.2f.-
+                -----------------------------
+                """,
+                    totalAmount
+            );
+        }
+
+        return userCart;
     }
 
     /*

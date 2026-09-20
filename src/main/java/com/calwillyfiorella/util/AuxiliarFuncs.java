@@ -10,8 +10,12 @@ public class AuxiliarFuncs {
     private AuxiliarFuncs() {}
 
     public static int requireUserOption(Integer totalOptions) {
+        return requireUserOption(totalOptions, "Ingresar opción: ");
+    }
+
+    public static int requireUserOption(Integer totalOptions, String prompt) {
         while (true) {
-            int option = readInt("Ingresar opción: ");
+            int option = readInt(prompt);
             if (option < 1 || option > totalOptions) {
                 System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
                 continue;

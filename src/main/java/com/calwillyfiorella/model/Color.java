@@ -63,7 +63,7 @@ public class Color extends BaseEntity {
 
     @Override
     public String toString() {
-        return String.format("Color: %s (Cod Hex: %s)", this.colorName, this.colorCode);
+        return String.format("{ Color: %s, Cod Hex: %s, Status: %s }", this.colorName, this.colorCode, this.rowStatus);
     }
 
     public void setColorName(String colorName) {

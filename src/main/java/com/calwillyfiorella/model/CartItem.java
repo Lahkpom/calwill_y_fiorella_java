@@ -20,6 +20,11 @@ public class CartItem {
         this.quantity   = this.validateQuantity(quantity);
     }
 
+    @Override
+    public String toString() {
+        return String.format("{ Cantidad: %d, Variante: $%s }", this.quantity, this.variant);
+    }
+
     public void setQuantity(Integer quantity) {
         this.quantity = this.validateQuantity(quantity);
     }

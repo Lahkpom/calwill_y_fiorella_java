@@ -59,26 +59,23 @@ public class Product extends BaseEntity{
     @Override
     public String toString() {
         return String.format(
-                "Producto: %s - Categoría: %s - Variantes: %d - Estado: %s",
+                "{ Nombre: %s, Categoría: %s, Variantes: %d, Estado: %s }",
                 this.productName,
                 this.productCategory,
-                this.variants.size(),
+                this.variants.stream().filter(v -> v.getRowStatus() == RowStatus.ACTIVE).count(),
                 this.rowStatus
         );
     }
 
     // Getters y Setters
     public List<ProductVariant> getVariants                 () { return Collections.unmodifiableList(this.variants); }
-    public List<ProductVariant> getAvailableVariants        () { return this.variants.stream().filter(variant -> variant.getRowStatus() == RowStatus.ACTIVE).toList(); }
-    public Integer              getTotalVariantsAmount      () { return this.variants.size(); }
-    public int                  getAvailableVariantsAmount  () { return this.getAvailableVariants().size(); }
     public UUID                 getProductId                () { return this.productId; }
     public Category             getProductCategory          () { return this.productCategory; }
     public String               getProductName              () { return this.productName; }
     public String               getProductShortDesc         () { return this.productShortDesc; }
     public String               getProductLongDesc          () { return this.productLongDesc; }
 
-    // Agregar objetos a la lista. No se hace Update ya que los cambio no son del Product en si mismo
+    // Agregar objetos a la lista. No se hace Update, ya que los cambios no son del Product en sí mismo
     public void addVariant(ProductVariant variant) {
         if (variant == null) throw new NullPointerException("Variant cannot be null");
 
