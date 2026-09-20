@@ -43,7 +43,7 @@ public class AuxiliarFuncs {
 
     public static int readInt(String prompt) {
         while (true) {
-            System.out.println(prompt);
+            System.out.print(prompt);
             String input = Main.scanner.nextLine().trim();
 
             try {

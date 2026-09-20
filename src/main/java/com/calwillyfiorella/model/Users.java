@@ -107,4 +107,48 @@ public class Users extends BaseEntity {
     }
 
     public boolean isAdmin() { return this.userRole.equals(UserRole.ADMIN) || this.userRole.equals(UserRole.SUPER_ADMIN); }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public UserRole getUserRole() {
+        return userRole;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUsereMail() {
+        return usereMail;
+    }
+
+    public String getUserPhone() {
+        return userPhone;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public boolean isIseMailVerified() {
+        return iseMailVerified;
+    }
+
+    public Integer getFailedLoginsAttempt() {
+        return failedLoginsAttempt;
+    }
+
+    public LocalDateTime getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public LocalDateTime getLastLoginAt() {
+        return lastLoginAt;
+    }
 }

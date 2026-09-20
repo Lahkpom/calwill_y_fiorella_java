@@ -22,9 +22,6 @@ public class Main {
     private static final List<Color>    colors      = new ArrayList<>();
     private static final List<Size>     sizes       = new ArrayList<>();
     private static final List<Product>  products    = new ArrayList<>();
-    private static final List<Users>    users       = new ArrayList<>();
-
-    private static Users actualUser = null;
 
     public static void main(String[] args) {
         preChrageData();
@@ -36,11 +33,79 @@ public class Main {
 
     public static void renderMainMenu() {
         List<MenuOption> options = List.of(
+                MenuOption.of("Ver Manual"      , Main::renderManual),
                 MenuOption.of("Administrador"   , Main::renderAdminMenu),
                 MenuOption.of("Cliente"         , Main::renderCustomerMenu)
         );
 
         MenuHelper.renderMenuOptions(options, null);
+    }
+
+    private static void renderManual() {
+        MenuHelper.printMenuTitle("MANUAL DE SISTEMA");
+        System.out.format("""
+                -----------------------
+                About:
+                -----------------------
+                - Este sistema es para un e-commerce de venta de calzados.
+                - Contempla usuarios administradores y clientes.
+                - Permite CRUD de productos y paramétricas.
+                - Contempla un flujo de carrito de compras.
+                - Permite la compra de productos.
+                - Permite la gestión de las compras en curso.
+                - Permite ver estado actual de pedidos y ventas históricas.
+                - Cada clase posee un campo de estado, el cual puede tomar los valores 'ACTIVO', 'INACTIVO' o 'ELIMINADO'
+                    - Solo los Admins pueden modificar el estado de los registros.
+                    - No se realizan bajas lógicas a modo te tener una auditoría.
+                - La única clase que no sigue el punto anterior es la del carrito de compras. Esos sí se eliminan.
+                -----------------------
+                Inicio del sistema:
+                -----------------------
+                - Al iniciar la ejecución del sistema, se crean objetos por defecto para completar las listas de colores, talles, productos, usuarios, variantes e imágenes.
+                - Estos buscan emular haber sido precargados desde una base de datos y permiten una primer navegación más fluída.
+                -----------------------
+                Usuarios:
+                -----------------------
+                - En esta primera entrega se contemplan dos tipos de usuarios, Admins y Customers.
+                - Por defecto se brindan un usuario administrador { eMail: admin@admin.com, password: admin }, y un usuario cliente { eMail: cust@cust.com, password: cust }.
+                - El usuario ADMINISTRADOR:
+                    - Tiene permitido acceder al menú del CRUD de productos y gestión de ventas.
+                    - Crear otros usuarios administradores.
+                - El usuario CLIENTE:
+                    - Tiene permitido ver solo registros activos, agregar productos a su carrito, ver el estado de sus compras.
+                    - Puede crear su propio usuario (Customer por defecto).
+                -----------------------
+                Productos:
+                -----------------------
+                - Las reglas de negocio particulares de este sistema son:
+                - Los productos en sí son un pilar general, por ejemplo un producto 'Artículo_1' es dueño del nombre, descripción general, y de qué tipo es (actualmente solo existe el tipo 'calzado').
+                - Relacionado a estos pilares, tenemos las Variantes. Dónde un producto puede tener distintas variantes, las cuales poseen:
+                    - Color.
+                    - Talle.
+                    - Género objetivo (Verisón femenina o masculina de un mismo producto).
+                    - Descripción particular de la variante.
+                    - Precio.
+                    - Stock.
+                - El Main tiene una List<> de productos.
+                - Productos tiene una List<> de sus variantes.
+                - Cada variante tiene una List<> de sus imagenes.
+                -----------------------
+                Carrito de Compras:
+                -----------------------
+                - Cada variante puede ser agregada al carrito.
+                - Cada item del carrito es almacenado en una List<> en el Main.
+                - Cada item es asociado al usuario que se encuentra logeado.
+                - Cada usuario solo puede ver los items de su propio usuario.
+                - Cada usuario puede hacer una ABM de sus propios items.
+                -----------------------
+                Paramétricas:
+                -----------------------
+                - Hay dos tipos de paramétricas, algunas son fijas a través de enums y otras que son más versátiles tienene sus propias clases.
+                - Solo son modificables por los ADMIN.
+                - Los CLIENTE solo pueden ver los registros activos.
+                - Aquellos que tienen sus propias clases son COLORES y TALLES.
+                - Ambos se alojan en una List<> de cada uno en el Main.
+                """);
     }
 
     private static void renderAdminMenu() {
@@ -51,9 +116,8 @@ public class Main {
     private static void renderCustomerMenu() {
 //        System.out.println("Este es el menú del Cliente");
         /*
-            1. Identificars
+            1. Iniciar sesión
             2. Crear una cuenta
-            3. Continuar sin identificarse
          */
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver productos"   , Main::renderProductMenu),
@@ -91,14 +155,12 @@ public class Main {
         int variantIdx  = AuxiliarFuncs.requireUserOption(allowedVariantOptions, "Ingresar el número de la variante que quiere añadir al carrito: ");
         ProductVariant variant = availableVariants.get(variantIdx - 1);
 
-        int     quantity    = 0;
-        boolean done        = false;
-
+        boolean done = false;
         while (!done) {
-            quantity = AuxiliarFuncs.readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
+            int quantity = AuxiliarFuncs.readInt("Ingrese la cantidad de unidades de la variante que quiere añadir al carrito: ");
 
             try {
-                cart.addItem(actualUser, variant, quantity);
+                cart.addItem(Auth.getActualUser(), variant, quantity);
                 System.out.println("La variante fue añadida al carrito con éxito!");
             } catch (Exception e) {
                 System.err.println(e.getMessage());
@@ -125,7 +187,7 @@ public class Main {
                 MenuOption.of("Modificar la cantidad de un Item", () -> Main.renderProductCartModifiedQuantity(userCart)),
                 MenuOption.of("Eliminar un Item"                , () -> Main.renderProductCartMRemoveItem(userCart)),
                 MenuOption.of("Vaciar carrito de compras"       , () -> {
-                    cart.clearUserItems(actualUser);
+                    cart.clearUserItems(Auth.getActualUser());
                     Main.renderProductCartMenu();
                 }),
                 MenuOption.of("Iniciar proceso de compra"       , () -> Main.renderProductCartStartBuying(userCart))
@@ -146,7 +208,7 @@ public class Main {
             quantity = AuxiliarFuncs.readInt("Ingrese la nueva cantidad que desa asignar: ");
 
             try {
-                cart.updateQuantity(actualUser, cartItem.getVariant(), quantity);
+                cart.updateQuantity(Auth.getActualUser(), cartItem.getVariant(), quantity);
                 System.out.println("La cantidad fue modificada con éxito!");
             } catch (Exception e) {
                 System.err.println(e.getMessage());
@@ -157,21 +219,26 @@ public class Main {
         }
         renderProductCartMenu();
     }
+
     private static void renderProductCartMRemoveItem(List<CartItem> userCart) {
-//        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
+        userCart.remove(
+                AuxiliarFuncs.requireUserOption(
+                        userCart.size(), "Ingresar el número del item que desea eliminar del carrito: "
+                ) - 1
+        );
+        renderProductCartMenu();
     }
+
     private static void renderProductCartStartBuying(List<CartItem> userCart) {
 //        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
     }
-
-
 
     public static void toListColors() {
         MenuHelper.printMenuTitle("LISTADO DE COLORES");
         for (int i = 0; i < colors.size(); i++) {
             Color color = colors.get(i);
 
-            if (!actualUser.isAdmin() && color.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!Auth.getActualUser().isAdmin() && color.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Nro %d. %s%n", i + 1, color);
         }
@@ -182,7 +249,7 @@ public class Main {
         for (int i = 0; i < sizes.size(); i++) {
             Size size = sizes.get(i);
 
-            if (!actualUser.isAdmin() && size.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!Auth.getActualUser().isAdmin() && size.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Nro %d. %s%n", i + 1, size);
         }
@@ -196,7 +263,7 @@ public class Main {
             Product product = products.get(i);
             int idx = i + 1;
 
-            if (!actualUser.isAdmin() && product.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!Auth.getActualUser().isAdmin() && product.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Producto %d. %s%n", idx, product );
 
@@ -214,7 +281,7 @@ public class Main {
             ProductVariant variant = variants.get(i);
             int idx = i + 1;
 
-            if (!actualUser.isAdmin() && variant.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!Auth.getActualUser().isAdmin() && variant.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Variante %d. %s%n", idx, variant);
 
@@ -225,7 +292,7 @@ public class Main {
     }
 
     public static List<CartItem> toListCartProducts() {
-        List<CartItem> userCart = cart.getUserItems(actualUser);
+        List<CartItem> userCart = cart.getUserItems(Auth.getActualUser());
 
         MenuHelper.printMenuTitle("CARRITO DE COMPRAS");
 
@@ -269,28 +336,34 @@ public class Main {
         /*
             Creación de usuarios
          */
-        users.addAll(
-                List.of(
-                        new Users(
-                                UserRole.ADMIN,
-                                "admin",
-                                "Administrador",
-                                "admin@admin.com",
-                                null,
-                                null
-                        ),
-                        new Users(
-                                UserRole.CUSTOMER,
-                                "cust",
-                                "Customer",
-                                "cust@cust.com",
-                                null,
-                                null
-                        )
-                )
+        // Como para crear un usuario administrador necesito otro usuario administrador, creo uno ficticio
+        Auth.createUser(
+                new Users(UserRole.ADMIN,
+                        "admin",
+                        "Administrador",
+                        "admin@admin.com",
+                        null,
+                        null
+                ),
+                UserRole.ADMIN,
+                "admin",
+                "Administrador",
+                "admin@admin.com",
+                null,
+                null
         );
 
-        actualUser = users.getFirst();
+        Auth.createUser(
+                null,
+                UserRole.CUSTOMER,
+                "cust",
+                "Customer",
+                "cust@cust.com",
+                null,
+                null
+        );
+
+        Auth.userLogin("admin@admin.com", "admin");
 
         /*
             Creación de objetos de la clase Color
