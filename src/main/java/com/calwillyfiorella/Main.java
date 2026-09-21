@@ -10,6 +10,7 @@ import com.calwillyfiorella.util.MenuHelper;
 import com.calwillyfiorella.util.MenuOption;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -41,84 +42,39 @@ public class Main {
         MenuHelper.renderMenuOptions(options, null);
     }
 
-    private static void renderManual() {
-        MenuHelper.printMenuTitle("MANUAL DE SISTEMA");
-        System.out.format("""
-                -----------------------
-                About:
-                -----------------------
-                - Este sistema es para un e-commerce de venta de calzados.
-                - Contempla usuarios administradores y clientes.
-                - Permite CRUD de productos y paramétricas.
-                - Contempla un flujo de carrito de compras.
-                - Permite la compra de productos.
-                - Permite la gestión de las compras en curso.
-                - Permite ver estado actual de pedidos y ventas históricas.
-                - Cada clase posee un campo de estado, el cual puede tomar los valores 'ACTIVO', 'INACTIVO' o 'ELIMINADO'
-                    - Solo los Admins pueden modificar el estado de los registros.
-                    - No se realizan bajas lógicas a modo te tener una auditoría.
-                - La única clase que no sigue el punto anterior es la del carrito de compras. Esos sí se eliminan.
-                -----------------------
-                Inicio del sistema:
-                -----------------------
-                - Al iniciar la ejecución del sistema, se crean objetos por defecto para completar las listas de colores, talles, productos, usuarios, variantes e imágenes.
-                - Estos buscan emular haber sido precargados desde una base de datos y permiten una primer navegación más fluída.
-                -----------------------
-                Usuarios:
-                -----------------------
-                - En esta primera entrega se contemplan dos tipos de usuarios, Admins y Customers.
-                - Por defecto se brindan un usuario administrador { eMail: admin@admin.com, password: admin }, y un usuario cliente { eMail: cust@cust.com, password: cust }.
-                - El usuario ADMINISTRADOR:
-                    - Tiene permitido acceder al menú del CRUD de productos y gestión de ventas.
-                    - Crear otros usuarios administradores.
-                - El usuario CLIENTE:
-                    - Tiene permitido ver solo registros activos, agregar productos a su carrito, ver el estado de sus compras.
-                    - Puede crear su propio usuario (Customer por defecto).
-                -----------------------
-                Productos:
-                -----------------------
-                - Las reglas de negocio particulares de este sistema son:
-                - Los productos en sí son un pilar general, por ejemplo un producto 'Artículo_1' es dueño del nombre, descripción general, y de qué tipo es (actualmente solo existe el tipo 'calzado').
-                - Relacionado a estos pilares, tenemos las Variantes. Dónde un producto puede tener distintas variantes, las cuales poseen:
-                    - Color.
-                    - Talle.
-                    - Género objetivo (Verisón femenina o masculina de un mismo producto).
-                    - Descripción particular de la variante.
-                    - Precio.
-                    - Stock.
-                - El Main tiene una List<> de productos.
-                - Productos tiene una List<> de sus variantes.
-                - Cada variante tiene una List<> de sus imagenes.
-                -----------------------
-                Carrito de Compras:
-                -----------------------
-                - Cada variante puede ser agregada al carrito.
-                - Cada item del carrito es almacenado en una List<> en el Main.
-                - Cada item es asociado al usuario que se encuentra logeado.
-                - Cada usuario solo puede ver los items de su propio usuario.
-                - Cada usuario puede hacer una ABM de sus propios items.
-                -----------------------
-                Paramétricas:
-                -----------------------
-                - Hay dos tipos de paramétricas, algunas son fijas a través de enums y otras que son más versátiles tienene sus propias clases.
-                - Solo son modificables por los ADMIN.
-                - Los CLIENTE solo pueden ver los registros activos.
-                - Aquellos que tienen sus propias clases son COLORES y TALLES.
-                - Ambos se alojan en una List<> de cada uno en el Main.
-                """);
+    private static void renderAdminMenu() {
+        if (Auth.getActualUser() == null) renderAuthMenu(true);
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Gestionar Productos"         , Main::renderAdminProductMenu),
+                MenuOption.of("Gestionar Colores"           , Main::renderProductMenu),
+                MenuOption.of("Gestionar Talles"            , Main::renderProductCartMenu),
+                MenuOption.of("Gestionar Ventas Activas"    , Main::renderProductCartMenu),
+                MenuOption.of("Ver Historial de Ventas"     , Main::renderProductCartMenu),
+                MenuOption.of("Crear Usuario Administrador" , Main::renderProductCartMenu)
+        );
+
+        MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
     }
 
-    private static void renderAdminMenu() {
-        // Tengo que tener una List con los administradores para poder matchear que el usuario y contraseña que se ingresen sean válidos
-        System.out.println("Este es el menú del administrador");
+    private static void renderAdminProductMenu() {
+        List<Integer> allowedOptions = toListProducts(true);
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Cambiar Categoría de un Producto"        , () -> Main.renderProductVariantMenu(allowedOptions)),
+                MenuOption.of("Cambiar Nombre de un Producto"           , () -> Main.renderProductVariantMenu(allowedOptions)),
+                MenuOption.of("Cambiar Descripción Corta de un Producto", () -> Main.renderProductVariantMenu(allowedOptions)),
+                MenuOption.of("Cambiar Descripción Larga de un Producto", () -> Main.renderProductVariantMenu(allowedOptions)),
+                MenuOption.of("Cambiar Estado de un Producto"           , () -> Main.renderProductVariantMenu(allowedOptions)),
+                MenuOption.of("Ver Variantes de un Producto"            , () -> Main.renderProductVariantMenu(allowedOptions))
+        );
+
+        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
     private static void renderCustomerMenu() {
-//        System.out.println("Este es el menú del Cliente");
-        /*
-            1. Iniciar sesión
-            2. Crear una cuenta
-         */
+        if (Auth.getActualUser() == null) renderAuthMenu(false);
+
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver productos"   , Main::renderProductMenu),
                 MenuOption.of("Ver carrito"     , Main::renderProductCartMenu)
@@ -127,8 +83,64 @@ public class Main {
         MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
     }
 
+    private static void renderAuthMenu(boolean isAdmin) {
+        List<MenuOption> options = new ArrayList<>();
+
+        options.add(MenuOption.of("Iniciar Sesión", () -> Main.logIn(isAdmin)));
+        // La opción de Crear Cuenta solo se le muestra a los Clientes.
+        if (!isAdmin)
+            options.add(MenuOption.of("Crear Cuenta", Main::signUp));
+
+        MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
+    }
+
+    private static void logIn(boolean isAdmin) {
+        MenuHelper.printMenuTitle("FORMULARIO INICIO DE SESIÓN");
+
+        String eMail    = AuxiliarFuncs.readString("Ingrese su e-mail: ");
+        String password = AuxiliarFuncs.readString("Ingrese su contraseña: ");
+
+        try {
+            Auth.userLogin(eMail, password, isAdmin);
+        } catch (Exception e) {
+            System.err.println("Error al iniciar sesión: " + e.getMessage());
+        }
+
+        if (isAdmin) {
+            renderAdminMenu();
+        } else {
+            renderCustomerMenu();
+        }
+    }
+
+    // Esta función solo crea funciones para los usuarios normales
+    private static void signUp() {
+        MenuHelper.printMenuTitle("FORMULARIO CREACIÓN DE CUENTA");
+
+        String userName     = AuxiliarFuncs.readString("Ingrese su nombre: ");
+        String usereMail    = AuxiliarFuncs.readString("Ingrese su e-mail: ");
+        String userPassword = AuxiliarFuncs.readString("Ingrese su contraseña: ");
+
+        try {
+            Auth.createUser(
+                    null,
+                    UserRole.CUSTOMER,
+                    userPassword,
+                    userName,
+                    usereMail,
+                    null,
+                    null
+            );
+        } catch (Exception e) {
+            System.err.println("Error al crear usuario: " + e.getMessage());
+            renderCustomerMenu();
+        }
+        System.out.println("Creación de cuenta exitosa!");
+        logIn(false);
+    }
+
     private static void renderProductMenu() {
-        List<Integer> allowedOptions = toListProducts();
+        List<Integer> allowedOptions = toListProducts(false);
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver variantes de un producto", () -> Main.renderProductVariantMenu(allowedOptions))
@@ -230,6 +242,8 @@ public class Main {
     }
 
     private static void renderProductCartStartBuying(List<CartItem> userCart) {
+        System.out.println("LA FUNCIÓN DE INICIAR COMPRA AÚN SE ENCUENTRA EN DESARROLLO");
+        renderProductCartMenu();
 //        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
     }
 
@@ -255,7 +269,7 @@ public class Main {
         }
     }
 
-    public static List<Integer> toListProducts() {
+    public static List<Integer> toListProducts(boolean isAdminPage) {
         List<Integer> displayedIndexes = new ArrayList<>();
 
         MenuHelper.printMenuTitle("LISTADO DE PRODUCTOS");
@@ -263,7 +277,7 @@ public class Main {
             Product product = products.get(i);
             int idx = i + 1;
 
-            if (!Auth.getActualUser().isAdmin() && product.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!isAdminPage && product.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Producto %d. %s%n", idx, product );
 
@@ -363,7 +377,7 @@ public class Main {
                 null
         );
 
-        Auth.userLogin("admin@admin.com", "admin");
+        Auth.userLogin("admin@admin.com", "admin", true);
 
         /*
             Creación de objetos de la clase Color
@@ -417,6 +431,16 @@ public class Main {
                                 "Artículo_2",
                                 "Esta es la descripción corta del Artículo_2",
                                 "Esta es la descripción larga del Artículo_2"
+                        ),
+                        new Product(
+                                UUID.randomUUID(),
+                                Category.CALZADO,
+                                "Artículo_Inactivo",
+                                "Esta es la descripción corta del Artículo_Inactivo",
+                                "Esta es la descripción larga del Artículo_Inactivo",
+                                RowStatus.INACTIVE,
+                                LocalDateTime.now(),
+                                null
                         )
                 )
         );
@@ -477,5 +501,73 @@ public class Main {
         // Variante 4
         var4.addImage("https://www.prueba_imagen_7.com");
         var4.addImage("https://www.prueba_imagen_8.com");
+    }
+
+    private static void renderManual() {
+        MenuHelper.printMenuTitle("MANUAL DE SISTEMA");
+        System.out.format("""
+                -----------------------
+                About:
+                -----------------------
+                - Este sistema es para un e-commerce de venta de calzados.
+                - Contempla usuarios administradores y clientes.
+                - Permite CRUD de productos y paramétricas.
+                - Contempla un flujo de carrito de compras.
+                - Permite la compra de productos.
+                - Permite la gestión de las compras en curso.
+                - Permite ver estado actual de pedidos y ventas históricas.
+                - Cada clase posee un campo de estado, el cual puede tomar los valores 'ACTIVO', 'INACTIVO' o 'ELIMINADO'
+                    - Solo los Admins pueden modificar el estado de los registros.
+                    - No se realizan bajas lógicas a modo te tener una auditoría.
+                - La única clase que no sigue el punto anterior es la del carrito de compras. Esos sí se eliminan.
+                -----------------------
+                Inicio del sistema:
+                -----------------------
+                - Al iniciar la ejecución del sistema, se crean objetos por defecto para completar las listas de colores, talles, productos, usuarios, variantes e imágenes.
+                - Estos buscan emular haber sido precargados desde una base de datos y permiten una primer navegación más fluída.
+                -----------------------
+                Usuarios:
+                -----------------------
+                - En esta primera entrega se contemplan dos tipos de usuarios, Admins y Customers.
+                - Por defecto se brindan un usuario administrador { eMail: admin@admin.com, password: admin }, y un usuario cliente { eMail: cust@cust.com, password: cust }.
+                - El usuario ADMINISTRADOR:
+                    - Tiene permitido acceder al menú del CRUD de productos y gestión de ventas.
+                    - Crear otros usuarios administradores.
+                - El usuario CLIENTE:
+                    - Tiene permitido ver solo registros activos, agregar productos a su carrito, ver el estado de sus compras.
+                    - Puede crear su propio usuario (Customer por defecto).
+                -----------------------
+                Productos:
+                -----------------------
+                - Las reglas de negocio particulares de este sistema son:
+                - Los productos en sí son un pilar general, por ejemplo un producto 'Artículo_1' es dueño del nombre, descripción general, y de qué tipo es (actualmente solo existe el tipo 'calzado').
+                - Relacionado a estos pilares, tenemos las Variantes. Dónde un producto puede tener distintas variantes, las cuales poseen:
+                    - Color.
+                    - Talle.
+                    - Género objetivo (Verisón femenina o masculina de un mismo producto).
+                    - Descripción particular de la variante.
+                    - Precio.
+                    - Stock.
+                - El Main tiene una List<> de productos.
+                - Productos tiene una List<> de sus variantes.
+                - Cada variante tiene una List<> de sus imagenes.
+                -----------------------
+                Carrito de Compras:
+                -----------------------
+                - Cada variante puede ser agregada al carrito.
+                - Cada item del carrito es almacenado en una List<> en el Main.
+                - Cada item es asociado al usuario que se encuentra logeado.
+                - Cada usuario solo puede ver los items de su propio usuario.
+                - Cada usuario puede hacer una ABM de sus propios items.
+                -----------------------
+                Paramétricas:
+                -----------------------
+                - Hay dos tipos de paramétricas, algunas son fijas a través de enums y otras que son más versátiles tienene sus propias clases.
+                - Solo son modificables por los ADMIN.
+                - Los CLIENTE solo pueden ver los registros activos.
+                - Aquellos que tienen sus propias clases son COLORES y TALLES.
+                - Ambos se alojan en una List<> de cada uno en el Main.
+                """);
+        renderMainMenu();
     }
 }

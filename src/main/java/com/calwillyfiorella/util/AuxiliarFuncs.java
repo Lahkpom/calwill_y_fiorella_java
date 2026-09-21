@@ -1,10 +1,10 @@
 package com.calwillyfiorella.util;
 
-import com.calwillyfiorella.Main;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.calwillyfiorella.Main;
 
 public class AuxiliarFuncs {
     private AuxiliarFuncs() {}
@@ -43,14 +43,28 @@ public class AuxiliarFuncs {
 
     public static int readInt(String prompt) {
         while (true) {
-            System.out.print(prompt);
+            System.out.println(prompt);
             String input = Main.scanner.nextLine().trim();
 
             try {
                 return Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.err.println("Error: Debes ingresar un número entero válido.");
+                System.err.println("Debes ingresar un número entero válido.");
             }
+        }
+    }
+
+    public static String readString(String prompt) {
+        while (true) {
+            System.out.println(prompt);
+            String input = Main.scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+                System.err.println("No puede ingresar un texto vacío.");
+                continue;
+            }
+
+            return input;
         }
     }
 }

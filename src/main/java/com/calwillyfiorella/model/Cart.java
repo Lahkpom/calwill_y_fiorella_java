@@ -5,6 +5,7 @@ import com.calwillyfiorella.util.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Cart {
     private final List<CartItem> cartItems;
@@ -14,18 +15,36 @@ public class Cart {
     }
 
     public void addItem(Users user, ProductVariant variant, Integer quantity) {
-        this.cartItems.add(new CartItem(user, variant, quantity));
+        Objects.requireNonNull(user     , "User can't be null!");
+        Objects.requireNonNull(variant  , "Variante can't be null!");
+        Objects.requireNonNull(quantity , "Quantity can't be null!");
+
+        if (variant.getRowStatus() != RowStatus.ACTIVE) throw new IllegalArgumentException("No puede ingresar una variante que no está ACTIVE al carrito de compras!");
+
+        checkStock(variant.getVariantStock(),  quantity);
+
+        this.cartItems.add(
+                new CartItem(
+                        user,
+                        variant,
+                        quantity
+                )
+        );
     }
 
     public void removeItem(Users user, ProductVariant variant) {
         this.cartItems.removeIf(item -> item.getUser().equals(user) && item.getVariant().equals(variant));
     }
 
+    private void checkStock(Integer stock, Integer quantity) {
+        if (quantity > stock)
+            throw new IllegalArgumentException("La cantidad ingresada supera el stock disponible de esta variante.");
+    }
+
     public void updateQuantity(Users user, ProductVariant variant, Integer quantity) {
         CartItem cartItem = this.getCartItem(user, variant);
 
-        if (quantity > cartItem.getVariant().getVariantStock())
-            throw new IllegalArgumentException("La cantidad ingresada supera el stock disponible de esta variante.");
+        checkStock(cartItem.getVariant().getVariantStock(), quantity);
 
         cartItem.setQuantity(quantity);
     }

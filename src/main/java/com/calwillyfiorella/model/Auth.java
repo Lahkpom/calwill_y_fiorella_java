@@ -14,10 +14,6 @@ public final class Auth {
 
     private Auth() {}
 
-    public static void userLogin(String eMail, String password) {
-        userLogin(eMail, password, false);
-    }
-
     public static void userLogin(String eMail, String password, boolean isAdmin) {
         actualUser = users.stream()
                 .filter(u ->
@@ -30,13 +26,13 @@ public final class Auth {
     }
 
     public static void createUser(
-            Users requestingUser,
-            UserRole userRole,
-            String userPassword,
-            String userName,
-            String usereMail,
-            String userPhone,
-            String companyName
+            Users       requestingUser,
+            UserRole    userRole,
+            String      userPassword,
+            String      userName,
+            String      usereMail,
+            String      userPhone,
+            String      companyName
     ) {
         if (userRole == UserRole.SUPER_ADMIN)
             throw new IllegalArgumentException("No se puede crear SUPER_ADMINs con este método!");

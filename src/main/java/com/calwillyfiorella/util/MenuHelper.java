@@ -32,10 +32,8 @@ public final class MenuHelper {
         for (int i = 0; i < fullOptions.size(); i++) {
             System.out.format("    %d. %s.%n", i + 1, fullOptions.get(i).label());
         }
-
         // Solicitar opción y ejecutar la acción asociada
         int selectedOption = AuxiliarFuncs.requireUserOption(fullOptions.size());
-
         fullOptions.get(selectedOption - 1).action().run();
     }
 
