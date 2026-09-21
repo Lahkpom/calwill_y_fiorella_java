@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.calwillyfiorella.Main;
 
-public class AuxiliarFuncs {
+public final class AuxiliarFuncs {
     private AuxiliarFuncs() {}
 
     public static int requireUserOption(Integer totalOptions) {

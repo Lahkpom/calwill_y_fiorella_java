@@ -1,6 +1,7 @@
 package com.calwillyfiorella.util;
 
 import com.calwillyfiorella.Main;
+import com.calwillyfiorella.model.Auth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,11 @@ public final class MenuHelper {
         // Opción 'Finalizar'
         fullOptions.add(MenuOption.of("Finalizar", () -> {
             System.out.format("Gracias por utilizar nuestro sistema!");
+            if (Auth.getActualUser() != null) {
+                // Armar función para cerrar sesión
+                System.out.println("### Sesión del usuario " + Auth.getActualUser().getUserName() + " cerrada ###");
+            }
+            Main.scanner.close();
             System.exit(0);
         }));
 

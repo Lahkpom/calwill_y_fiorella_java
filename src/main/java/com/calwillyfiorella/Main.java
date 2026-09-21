@@ -16,9 +16,9 @@ import java.util.*;
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    private static final Cart cart = new Cart();
-
     public static final Scanner scanner = new Scanner(System.in);
+
+    private static final Cart cart = new Cart();
 
     private static final List<Color>    colors      = new ArrayList<>();
     private static final List<Size>     sizes       = new ArrayList<>();
@@ -26,10 +26,7 @@ public class Main {
 
     public static void main(String[] args) {
         preChrageData();
-
         renderMainMenu();
-
-        scanner.close();
     }
 
     public static void renderMainMenu() {
@@ -66,21 +63,41 @@ public class Main {
                 MenuOption.of("Cambiar Descripción Corta de un Producto", () -> Main.renderProductVariantMenu(allowedOptions)),
                 MenuOption.of("Cambiar Descripción Larga de un Producto", () -> Main.renderProductVariantMenu(allowedOptions)),
                 MenuOption.of("Cambiar Estado de un Producto"           , () -> Main.renderProductVariantMenu(allowedOptions)),
-                MenuOption.of("Ver Variantes de un Producto"            , () -> Main.renderProductVariantMenu(allowedOptions))
+                MenuOption.of("Ver Variantes de un Producto"            , () -> Main.renderAdminProductVariantMenu(allowedOptions))
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
+    }
+
+    private static void renderAdminProductVariantMenu(List<Integer> allowedProductOptions) {
+        int productIdx = AuxiliarFuncs.requireUserOption(allowedProductOptions, "Ingresar el número del producto cuyas variantes quiere ver: ");
+
+        List<ProductVariant> variants = products.get(productIdx - 1).getVariants();
+
+        List<Integer> allowedVariantOptions = toListProductVariants(variants, true);
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Agregar una variante al carrito de compras", () -> Main.renderAddToCartMenu(variants, allowedVariantOptions))
+        );
+
+        MenuHelper.renderMenuOptions(options, Main::renderProductMenu);
     }
 
     private static void renderCustomerMenu() {
         if (Auth.getActualUser() == null) renderAuthMenu(false);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver productos"   , Main::renderProductMenu),
-                MenuOption.of("Ver carrito"     , Main::renderProductCartMenu)
+                MenuOption.of("Ver Productos"   , Main::renderProductMenu),
+                MenuOption.of("Ver mi Carrito"  , Main::renderProductCartMenu),
+                MenuOption.of("Ver mis Compras" , () -> Main.renderUserPurchaseMenu(Auth.getActualUser()))
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
+    }
+
+    private static void renderUserPurchaseMenu(Users user) {
+        System.out.println("LA FUNCIÓN VER COMPRAS AÚN SE ENCUENTRA EN DESARROLLO");
+        renderCustomerMenu();
     }
 
     private static void renderAuthMenu(boolean isAdmin) {
@@ -104,12 +121,21 @@ public class Main {
             Auth.userLogin(eMail, password, isAdmin);
         } catch (Exception e) {
             System.err.println("Error al iniciar sesión: " + e.getMessage());
-        }
+        } finally {
+            if (Auth.getActualUser() != null) System.out.format("""
+                    -------------------------
+                    Sesión iniciada con éxito.
+                    Bienvenido %s!!!
+                    -------------------------
+                    """,
+                    Auth.getActualUser().getUserName()
+            );
 
-        if (isAdmin) {
-            renderAdminMenu();
-        } else {
-            renderCustomerMenu();
+            if (isAdmin) {
+                renderAdminMenu();
+            } else {
+                renderCustomerMenu();
+            }
         }
     }
 
@@ -154,7 +180,7 @@ public class Main {
 
         List<ProductVariant> variants = products.get(productIdx - 1).getVariants();
 
-        List<Integer> allowedVariantOptions = toListProductVariants(variants);
+        List<Integer> allowedVariantOptions = toListProductVariants(variants, false);
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Agregar una variante al carrito de compras", () -> Main.renderAddToCartMenu(variants, allowedVariantOptions))
@@ -247,23 +273,23 @@ public class Main {
 //        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
     }
 
-    public static void toListColors() {
+    public static void toListColors(boolean isAdminPage) {
         MenuHelper.printMenuTitle("LISTADO DE COLORES");
         for (int i = 0; i < colors.size(); i++) {
             Color color = colors.get(i);
 
-            if (!Auth.getActualUser().isAdmin() && color.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!isAdminPage && color.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Nro %d. %s%n", i + 1, color);
         }
     }
 
-    public static void toListSizes() {
+    public static void toListSizes(boolean isAdminPage) {
         MenuHelper.printMenuTitle("LISTADO DE TALLES");
         for (int i = 0; i < sizes.size(); i++) {
             Size size = sizes.get(i);
 
-            if (!Auth.getActualUser().isAdmin() && size.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!isAdminPage && size.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Nro %d. %s%n", i + 1, size);
         }
@@ -287,7 +313,7 @@ public class Main {
         return displayedIndexes;
     }
 
-    public static List<Integer> toListProductVariants(List<ProductVariant> variants) {
+    public static List<Integer> toListProductVariants(List<ProductVariant> variants, boolean isAdminPage) {
         List<Integer> displayedIndexes = new ArrayList<>();
 
         MenuHelper.printMenuTitle("LISTADO DE VARIANTES");
@@ -295,7 +321,7 @@ public class Main {
             ProductVariant variant = variants.get(i);
             int idx = i + 1;
 
-            if (!Auth.getActualUser().isAdmin() && variant.getRowStatus() != RowStatus.ACTIVE) continue;
+            if (!isAdminPage && variant.getRowStatus() != RowStatus.ACTIVE) continue;
 
             System.out.format("Variante %d. %s%n", idx, variant);
 

@@ -4,10 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public final class ValidationUtils {
-    // Clase final para evitar herencia con extends. Constructor privado para bloquear new ValidationUtils()
-    private ValidationUtils() {
-        throw new UnsupportedOperationException("Utility class");
-    }
+    private ValidationUtils() {}
 
     public static String requireNonBlank(String value, String message) {
         if (value == null || value.isBlank())
