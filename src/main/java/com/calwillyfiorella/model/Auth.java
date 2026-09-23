@@ -57,6 +57,8 @@ public final class Auth {
         return users.stream().anyMatch(u -> u.getUsereMail().equals(usereMail));
     }
 
+    public static void logOut() { actualUser = null; }
+
     public static Users getActualUser() { return actualUser; }
     public static List<Users> getUsers() { return Collections.unmodifiableList(users); }
 }

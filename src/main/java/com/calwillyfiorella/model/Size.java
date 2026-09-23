@@ -5,7 +5,7 @@ import com.calwillyfiorella.util.ValidationUtils;
 
 import java.time.LocalDateTime;
 
-public class Size extends  BaseEntity{
+public class Size extends BaseEntity {
     private static Integer sizeIdSeq = 0;
 
     private final Integer sizeId;

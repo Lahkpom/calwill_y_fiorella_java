@@ -25,7 +25,7 @@ public class Main {
     private static final List<Product>  products    = new ArrayList<>();
 
     public static void main(String[] args) {
-        preChrageData();
+        preChargeData();
         renderMainMenu();
     }
 
@@ -43,59 +43,109 @@ public class Main {
         if (Auth.getActualUser() == null) renderAuthMenu(true);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Gestionar Productos"         , Main::renderAdminProductMenu),
-                MenuOption.of("Gestionar Colores"           , Main::renderProductMenu),
-                MenuOption.of("Gestionar Talles"            , Main::renderProductCartMenu),
-                MenuOption.of("Gestionar Ventas Activas"    , Main::renderProductCartMenu),
-                MenuOption.of("Ver Historial de Ventas"     , Main::renderProductCartMenu),
-                MenuOption.of("Crear Usuario Administrador" , Main::renderProductCartMenu)
+                MenuOption.of("Gestionar Productos"         , Main::renderAdminProducts),
+                MenuOption.of("Gestionar Colores"           , Main::renderAdminColors),
+                MenuOption.of("Gestionar Talles"            , Main::renderAdminSizes),
+                MenuOption.of("Gestionar Ventas"            , Main::renderAdminSales),
+                MenuOption.of("Crear Usuario Administrador" , Main::createAdminUser)
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
     }
 
-    private static void renderAdminProductMenu() {
-        List<Integer> allowedOptions = toListProducts(true);
+    private static void createAdminUser() {
+        createAccount(true);
+    }
+
+    private static void renderAdminSales() {
+        System.out.println("LA FUNCIÓN VER VENTAS AÚN SE ENCUENTRA EN DESARROLLO");
+        renderAdminMenu();
+    }
+
+    private static void renderAdminColors() {
+        List<Integer> allowedOptions = toListColors(true);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Cambiar Categoría de un Producto"        , () -> Main.renderProductVariantMenu(allowedOptions)),
-                MenuOption.of("Cambiar Nombre de un Producto"           , () -> Main.renderProductVariantMenu(allowedOptions)),
-                MenuOption.of("Cambiar Descripción Corta de un Producto", () -> Main.renderProductVariantMenu(allowedOptions)),
-                MenuOption.of("Cambiar Descripción Larga de un Producto", () -> Main.renderProductVariantMenu(allowedOptions)),
-                MenuOption.of("Cambiar Estado de un Producto"           , () -> Main.renderProductVariantMenu(allowedOptions)),
-                MenuOption.of("Ver Variantes de un Producto"            , () -> Main.renderAdminProductVariantMenu(allowedOptions))
+                MenuOption.of("Editar el Nombre de un Color"       , () -> Main.updateColorName(allowedOptions)),
+                MenuOption.of("Editar la Descripción de un Color"  , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar el Código de un Color"       , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar el Estado de un Color"       , () -> Main.renderCustProductVariants(allowedOptions))
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
-    private static void renderAdminProductVariantMenu(List<Integer> allowedProductOptions) {
+    private static void updateColorName(List<Integer> allowedOptions) {
+        int colorIdx = AuxiliarFuncs.requireUserOption(allowedOptions, "Ingresar el número del color cuyo nombre desea editar: ");
+        Color color = colors.get(colorIdx - 1);
+
+        String newName = AuxiliarFuncs.readString("Ingrese el nuevo nombre del color: ");
+
+        try {
+            color.setColorName(newName);
+        } catch (Exception e) {
+            System.err.format("Error al cambiar nombre del color: %s%n", e.getMessage());
+        }
+
+        renderAdminColors();
+    }
+
+    private static void renderAdminSizes() {
+        List<Integer> allowedOptions = toListSizes(true);
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Editar el Talle"                    , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar la Descripción de un Talle"  , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar el Órden de un Talle"        , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar el Estado de un Talle"       , () -> Main.renderCustProductVariants(allowedOptions))
+        );
+
+        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
+    }
+
+    private static void renderAdminProducts() {
+        List<Integer> allowedOptions = toListProducts(true);
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Editar Categoría de un Producto"        , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar Nombre de un Producto"           , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar Descripción Corta de un Producto", () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar Descripción Larga de un Producto", () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Editar Estado de un Producto"           , () -> Main.renderCustProductVariants(allowedOptions)),
+                MenuOption.of("Ver Variantes de un Producto"            , () -> Main.renderAdminProductVariants(allowedOptions))
+        );
+
+        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
+    }
+
+    private static void renderAdminProductVariants(List<Integer> allowedProductOptions) {
         int productIdx = AuxiliarFuncs.requireUserOption(allowedProductOptions, "Ingresar el número del producto cuyas variantes quiere ver: ");
 
         List<ProductVariant> variants = products.get(productIdx - 1).getVariants();
 
         List<Integer> allowedVariantOptions = toListProductVariants(variants, true);
 
+        // TODO: Modificar las opciones del menú
         List<MenuOption> options = List.of(
-                MenuOption.of("Agregar una variante al carrito de compras", () -> Main.renderAddToCartMenu(variants, allowedVariantOptions))
+                MenuOption.of("Agregar una variante al carrito de compras", () -> Main.addToCart(variants, allowedVariantOptions))
         );
 
-        MenuHelper.renderMenuOptions(options, Main::renderProductMenu);
+        MenuHelper.renderMenuOptions(options, Main::renderCustProducts);
     }
 
     private static void renderCustomerMenu() {
         if (Auth.getActualUser() == null) renderAuthMenu(false);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver Productos"   , Main::renderProductMenu),
-                MenuOption.of("Ver mi Carrito"  , Main::renderProductCartMenu),
-                MenuOption.of("Ver mis Compras" , () -> Main.renderUserPurchaseMenu(Auth.getActualUser()))
+                MenuOption.of("Ver Productos"   , Main::renderCustProducts),
+                MenuOption.of("Ver mi Carrito"  , Main::renderCartItems),
+                MenuOption.of("Ver mis Compras" , () -> Main.renderUserPurchase(Auth.getActualUser()))
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderMainMenu);
     }
 
-    private static void renderUserPurchaseMenu(Users user) {
+    private static void renderUserPurchase(Users user) {
         System.out.println("LA FUNCIÓN VER COMPRAS AÚN SE ENCUENTRA EN DESARROLLO");
         renderCustomerMenu();
     }
@@ -141,16 +191,20 @@ public class Main {
 
     // Esta función solo crea funciones para los usuarios normales
     private static void signUp() {
+        createAccount(false);
+    }
+
+    private static void createAccount(boolean isAdmin) {
         MenuHelper.printMenuTitle("FORMULARIO CREACIÓN DE CUENTA");
 
-        String userName     = AuxiliarFuncs.readString("Ingrese su nombre: ");
-        String usereMail    = AuxiliarFuncs.readString("Ingrese su e-mail: ");
-        String userPassword = AuxiliarFuncs.readString("Ingrese su contraseña: ");
+        String userName     = AuxiliarFuncs.readString("Ingrese el Nombre: ");
+        String usereMail    = AuxiliarFuncs.readString("Ingrese el e-Mail: ");
+        String userPassword = AuxiliarFuncs.readString("Ingrese la Contraseña: ");
 
         try {
             Auth.createUser(
-                    null,
-                    UserRole.CUSTOMER,
+                    isAdmin ? Auth.getActualUser() : null,
+                    isAdmin ? UserRole.ADMIN : UserRole.CUSTOMER,
                     userPassword,
                     userName,
                     usereMail,
@@ -162,20 +216,21 @@ public class Main {
             renderCustomerMenu();
         }
         System.out.println("Creación de cuenta exitosa!");
-        logIn(false);
+
+        logIn(isAdmin);
     }
 
-    private static void renderProductMenu() {
+    private static void renderCustProducts() {
         List<Integer> allowedOptions = toListProducts(false);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver variantes de un producto", () -> Main.renderProductVariantMenu(allowedOptions))
+                MenuOption.of("Ver variantes de un producto", () -> Main.renderCustProductVariants(allowedOptions))
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
-    private static void renderProductVariantMenu(List<Integer> allowedProductOptions) {
+    private static void renderCustProductVariants(List<Integer> allowedProductOptions) {
         int productIdx = AuxiliarFuncs.requireUserOption(allowedProductOptions, "Ingresar el número del producto cuyas variantes quiere ver: ");
 
         List<ProductVariant> variants = products.get(productIdx - 1).getVariants();
@@ -183,13 +238,13 @@ public class Main {
         List<Integer> allowedVariantOptions = toListProductVariants(variants, false);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Agregar una variante al carrito de compras", () -> Main.renderAddToCartMenu(variants, allowedVariantOptions))
+                MenuOption.of("Agregar una variante al carrito de compras", () -> Main.addToCart(variants, allowedVariantOptions))
         );
 
-        MenuHelper.renderMenuOptions(options, Main::renderProductMenu);
+        MenuHelper.renderMenuOptions(options, Main::renderCustProducts);
     }
 
-    private static void renderAddToCartMenu(List<ProductVariant> availableVariants, List<Integer> allowedVariantOptions) {
+    private static void addToCart(List<ProductVariant> availableVariants, List<Integer> allowedVariantOptions) {
         int variantIdx  = AuxiliarFuncs.requireUserOption(allowedVariantOptions, "Ingresar el número de la variante que quiere añadir al carrito: ");
         ProductVariant variant = availableVariants.get(variantIdx - 1);
 
@@ -209,24 +264,24 @@ public class Main {
         }
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Agregar otro producto al carrito de compras" , Main::renderProductMenu),
-                MenuOption.of("Ver carrito de compras"                      , Main::renderProductCartMenu)
+                MenuOption.of("Agregar otro producto al carrito de compras" , Main::renderCustProducts),
+                MenuOption.of("Ver carrito de compras"                      , Main::renderCartItems)
         );
 
         MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
-    private static void renderProductCartMenu() {
+    private static void renderCartItems() {
         List<CartItem> userCart = toListCartProducts();
 
         if (userCart.isEmpty()) renderCustomerMenu();
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Modificar la cantidad de un Item", () -> Main.renderProductCartModifiedQuantity(userCart)),
-                MenuOption.of("Eliminar un Item"                , () -> Main.renderProductCartMRemoveItem(userCart)),
+                MenuOption.of("Modificar la cantidad de un Item", () -> Main.updateCartQuantity(userCart)),
+                MenuOption.of("Eliminar un Item"                , () -> Main.removeCartItem(userCart)),
                 MenuOption.of("Vaciar carrito de compras"       , () -> {
                     cart.clearUserItems(Auth.getActualUser());
-                    Main.renderProductCartMenu();
+                    Main.renderCartItems();
                 }),
                 MenuOption.of("Iniciar proceso de compra"       , () -> Main.renderProductCartStartBuying(userCart))
         );
@@ -234,7 +289,7 @@ public class Main {
         MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
-    private static void renderProductCartModifiedQuantity(List<CartItem> userCart) {
+    private static void updateCartQuantity(List<CartItem> userCart) {
         int idx = AuxiliarFuncs.requireUserOption(userCart.size(), "Ingresar el número del item cuya cantidad desea modificar: ");
 
         CartItem cartItem = userCart.get(idx - 1);
@@ -255,44 +310,54 @@ public class Main {
 
             done = true;
         }
-        renderProductCartMenu();
+        renderCartItems();
     }
 
-    private static void renderProductCartMRemoveItem(List<CartItem> userCart) {
+    private static void removeCartItem(List<CartItem> userCart) {
         userCart.remove(
                 AuxiliarFuncs.requireUserOption(
                         userCart.size(), "Ingresar el número del item que desea eliminar del carrito: "
                 ) - 1
         );
-        renderProductCartMenu();
+        renderCartItems();
     }
 
     private static void renderProductCartStartBuying(List<CartItem> userCart) {
         System.out.println("LA FUNCIÓN DE INICIAR COMPRA AÚN SE ENCUENTRA EN DESARROLLO");
-        renderProductCartMenu();
-//        MenuHelper.renderMenuOptions(options, Main::renderProductCartMenu);
+        renderCartItems();
+//        MenuHelper.renderMenuOptions(options, Main::renderCartItems);
     }
 
-    public static void toListColors(boolean isAdminPage) {
+    public static List<Integer> toListColors(boolean isAdminPage) {
+        List<Integer> displayedIndexes = new ArrayList<>();
+
         MenuHelper.printMenuTitle("LISTADO DE COLORES");
         for (int i = 0; i < colors.size(); i++) {
             Color color = colors.get(i);
+            int idx = i + 1;
 
             if (!isAdminPage && color.getRowStatus() != RowStatus.ACTIVE) continue;
 
-            System.out.format("Nro %d. %s%n", i + 1, color);
+            System.out.format("Color %d. %s%n", idx, color);
+            displayedIndexes.add(idx);
         }
+        return displayedIndexes;
     }
 
-    public static void toListSizes(boolean isAdminPage) {
+    public static List<Integer> toListSizes(boolean isAdminPage) {
+        List<Integer> displayedIndexes = new ArrayList<>();
+
         MenuHelper.printMenuTitle("LISTADO DE TALLES");
         for (int i = 0; i < sizes.size(); i++) {
             Size size = sizes.get(i);
+            int idx = i + 1;
 
             if (!isAdminPage && size.getRowStatus() != RowStatus.ACTIVE) continue;
 
-            System.out.format("Nro %d. %s%n", i + 1, size);
+            System.out.format("Talle %d. %s%n", idx, size);
+            displayedIndexes.add(idx);
         }
+        return displayedIndexes;
     }
 
     public static List<Integer> toListProducts(boolean isAdminPage) {
@@ -372,7 +437,7 @@ public class Main {
         Esta función la cree para simular el inicio de la aplicación con una carga de datos que provendría desde la db
         Crea los objetos mínimos necesarios para una demostración de flujo del sistema y los almacena en una lista
      */
-    private static void preChrageData() {
+    private static void preChargeData() {
         /*
             Creación de usuarios
          */
@@ -403,7 +468,7 @@ public class Main {
                 null
         );
 
-        Auth.userLogin("admin@admin.com", "admin", true);
+//        Auth.userLogin("admin@admin.com", "admin", true);
 
         /*
             Creación de objetos de la clase Color

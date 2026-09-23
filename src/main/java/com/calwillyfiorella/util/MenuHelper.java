@@ -23,13 +23,24 @@ public final class MenuHelper {
         // Opción 'Volver' (si tiene menú padre)
         if (onBack != null) fullOptions.add(MenuOption.of("Volver al menú anterior", onBack));
 
+        // Opción 'Cerrar Sesión' (S detecta un usuario con sesión activa)
+        if (Auth.getActualUser() != null) fullOptions.add(MenuOption.of("Cerrar Sesión", () -> {
+            String userName = Auth.getActualUser().getUserName();
+            Auth.logOut();
+            System.out.format("""
+                    ##########################################################
+                    Sesión del usuario %s cerrada.
+                    ##########################################################
+                    """,
+                    userName
+            );
+            Main.renderMainMenu();
+        }));
+
         // Opción 'Finalizar'
         fullOptions.add(MenuOption.of("Finalizar", () -> {
-            System.out.format("Gracias por utilizar nuestro sistema!");
-            if (Auth.getActualUser() != null) {
-                // Armar función para cerrar sesión
-                System.out.println("### Sesión del usuario " + Auth.getActualUser().getUserName() + " cerrada ###");
-            }
+            System.out.println("Gracias por utilizar nuestro sistema!");
+            Auth.logOut();
             Main.scanner.close();
             System.exit(0);
         }));
