@@ -5,7 +5,6 @@ import com.calwillyfiorella.model.enums.UserRole;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public final class Auth {
     private static final List<Users> users = new ArrayList<>();

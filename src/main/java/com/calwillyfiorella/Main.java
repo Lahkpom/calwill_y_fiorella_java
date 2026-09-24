@@ -1,17 +1,27 @@
 package com.calwillyfiorella;
 
-import com.calwillyfiorella.model.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.UUID;
+
+import com.calwillyfiorella.model.Auth;
+import com.calwillyfiorella.model.Cart;
+import com.calwillyfiorella.model.CartItem;
+import com.calwillyfiorella.model.Color;
+import com.calwillyfiorella.model.Product;
+import com.calwillyfiorella.model.ProductVariant;
+import com.calwillyfiorella.model.Size;
+import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.model.enums.UserRole;
+import com.calwillyfiorella.ui.MenuHelper;
+import com.calwillyfiorella.ui.MenuOption;
 import com.calwillyfiorella.util.AuxiliarFuncs;
-import com.calwillyfiorella.util.MenuHelper;
-import com.calwillyfiorella.util.MenuOption;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
