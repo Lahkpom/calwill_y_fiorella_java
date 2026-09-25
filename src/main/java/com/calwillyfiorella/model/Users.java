@@ -1,6 +1,5 @@
 package com.calwillyfiorella.model;
 
-import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.UserRole;
 import com.calwillyfiorella.util.ValidationUtils;
@@ -79,6 +78,16 @@ public class Users extends BaseEntity {
         );
     }
 
+    public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
+    public void setUserRole(UserRole userRole) { this.userRole = userRole; }
+    public void setUserPassword(String userPassword) { this.userPassword = userPassword; }
+    public void setUserName(String userName) { this.userName = userName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
+    public void setIseMailVerified(boolean iseMailVerified) { this.iseMailVerified = iseMailVerified; }
+    public void setFailedLoginsAttempt(Integer failedLoginsAttempt) { this.failedLoginsAttempt = failedLoginsAttempt; }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+    public void setLockedUntil(LocalDateTime lockedUntil) { this.lockedUntil = lockedUntil; }
+
     private UserRole validateUserRole(UserRole userRole) {
         return Objects.requireNonNull(userRole, "User role cannot be null");
     }
@@ -111,44 +120,36 @@ public class Users extends BaseEntity {
     public UUID getUserId() {
         return userId;
     }
-
     public UserRole getUserRole() {
         return userRole;
     }
-
     public String getUserPassword() {
         return userPassword;
     }
-
     public String getUserName() {
         return userName;
     }
-
     public String getUsereMail() {
         return usereMail;
     }
-
     public String getUserPhone() {
         return userPhone;
     }
-
     public String getCompanyName() {
         return companyName;
     }
-
     public boolean isIseMailVerified() {
         return iseMailVerified;
     }
-
     public Integer getFailedLoginsAttempt() {
         return failedLoginsAttempt;
     }
-
     public LocalDateTime getLockedUntil() {
         return lockedUntil;
     }
-
     public LocalDateTime getLastLoginAt() {
         return lastLoginAt;
     }
+
+
 }

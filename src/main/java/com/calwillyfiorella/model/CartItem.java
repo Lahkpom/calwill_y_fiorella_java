@@ -1,5 +1,6 @@
 package com.calwillyfiorella.model;
 
+import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.util.ValidationUtils;
 
 import java.util.Objects;
@@ -15,8 +16,14 @@ public class CartItem {
             ProductVariant  variant,
             Integer         quantity
     ) {
-        this.user       = Objects.requireNonNull(user);
-        this.variant    = Objects.requireNonNull(variant);
+        Objects.requireNonNull(user);
+        Objects.requireNonNull(variant);
+
+        if (variant.getRowStatus() != RowStatus.ACTIVE)
+            throw new IllegalArgumentException("No puede ingresar una variante que no está ACTIVE al carrito de compras!");
+
+        this.user       = user;
+        this.variant    = variant;
         this.quantity   = this.validateQuantity(quantity);
     }
 

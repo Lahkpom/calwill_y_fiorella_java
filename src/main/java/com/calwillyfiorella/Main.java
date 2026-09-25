@@ -19,8 +19,8 @@ import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.model.enums.UserRole;
-import com.calwillyfiorella.ui.MenuHelper;
-import com.calwillyfiorella.ui.MenuOption;
+import com.calwillyfiorella.ui.menuUtils.MenuHelper;
+import com.calwillyfiorella.ui.menuUtils.MenuOption;
 import com.calwillyfiorella.util.AuxiliarFuncs;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or

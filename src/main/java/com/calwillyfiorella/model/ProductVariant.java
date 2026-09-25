@@ -1,5 +1,6 @@
 package com.calwillyfiorella.model;
 
+import com.calwillyfiorella.model.enums.NumberSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.util.ValidationUtils;
@@ -14,7 +15,7 @@ public class ProductVariant extends BaseEntity {
     private final List<VariantImage>  images = new ArrayList<>();
 
     private Color           color;
-    private Size            size;
+    private NumberSize      size;
     private TargetGender    targetGender;
     private String          variantDesc;
     private String          variantSku;
@@ -22,14 +23,14 @@ public class ProductVariant extends BaseEntity {
     private Integer         variantStock;
 
     public ProductVariant(
-            Product             product,
-            Color               color,
-            Size                size,
-            TargetGender        targetGender,
-            String              variantDesc,
-            String              variantSku,
-            BigDecimal          variantPrice,
-            Integer             variantStock
+            Product         product,
+            Color           color,
+            NumberSize      size,
+            TargetGender    targetGender,
+            String          variantDesc,
+            String          variantSku,
+            BigDecimal      variantPrice,
+            Integer         variantStock
     ) {
         this(
                 UUID.randomUUID(),
@@ -51,7 +52,7 @@ public class ProductVariant extends BaseEntity {
             UUID            variantId,
             Product         product,
             Color           color,
-            Size            size,
+            NumberSize      size,
             TargetGender    targetGender,
             String          variantDesc,
             String          variantSku,
@@ -184,7 +185,7 @@ public class ProductVariant extends BaseEntity {
         this.afterUpdate();
     }
 
-    public void setSize(Size size) {
+    public void setSize(NumberSize size) {
         this.size = this.validateSize(size);
         this.afterUpdate();
     }
@@ -223,7 +224,7 @@ public class ProductVariant extends BaseEntity {
         return Objects.requireNonNull(color, "color cannot be null");
     }
 
-    private Size validateSize(Size size) {
+    private NumberSize validateSize(NumberSize size) {
         return Objects.requireNonNull(size, "size cannot be null");
     }
 
@@ -245,7 +246,7 @@ public class ProductVariant extends BaseEntity {
     public Product              getProduct          () { return this.product; }
     public List<VariantImage>   getImages           () { return Collections.unmodifiableList(this.images); }
     public Color                getColor            () { return this.color; }
-    public Size                 getSize             () { return this.size; }
+    public NumberSize           getSize             () { return this.size; }
     public TargetGender         getTargetGender     () { return this.targetGender; }
     public String               getVariantDesc      () { return this.variantDesc; }
     public String               getVariantSku       () { return this.variantSku; }

@@ -1,5 +1,7 @@
 package com.calwillyfiorella.util;
 
+import com.calwillyfiorella.exception.IsNotPositiveException;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -18,7 +20,7 @@ public final class ValidationUtils {
 
     public static Integer requireNonNegative(Integer value, String message, boolean strict) {
         if (value == null || value < 0 || (strict && value <= 0))
-            throw new IllegalArgumentException(message);
+            throw new IsNotPositiveException(message);
         return value;
     }
 

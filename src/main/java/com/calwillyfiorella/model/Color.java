@@ -1,11 +1,14 @@
 package com.calwillyfiorella.model;
 
+import com.calwillyfiorella.exception.InvalidHexColorCodeException;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.util.ValidationUtils;
 
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 
 public class Color extends BaseEntity {
+    private static final Pattern HEX_PATTERN = Pattern.compile("^#[a-zA-Z0-9]{6}$");
     private static Integer colorIdSeq = 0;
 
     private final Integer   colorId;
@@ -58,7 +61,12 @@ public class Color extends BaseEntity {
     }
 
     private String validateColorCode(String colorCode) {
-        return ValidationUtils.requireNonBlank(colorCode, "El código del color no puede ser nulo");
+        ValidationUtils.requireNonBlank(colorCode, "El código del color no puede ser nulo o vacío");
+
+        if (!HEX_PATTERN.matcher(colorCode).matches())
+            throw new InvalidHexColorCodeException();
+
+        return colorCode;
     }
 
     @Override
