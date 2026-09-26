@@ -15,10 +15,7 @@ import com.calwillyfiorella.model.Product;
 import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.model.Size;
 import com.calwillyfiorella.model.Users;
-import com.calwillyfiorella.model.enums.Category;
-import com.calwillyfiorella.model.enums.RowStatus;
-import com.calwillyfiorella.model.enums.TargetGender;
-import com.calwillyfiorella.model.enums.UserRole;
+import com.calwillyfiorella.model.enums.*;
 import com.calwillyfiorella.ui.menuUtils.MenuHelper;
 import com.calwillyfiorella.ui.menuUtils.MenuOption;
 import com.calwillyfiorella.util.AuxiliarFuncs;
@@ -55,7 +52,6 @@ public class Main {
         List<MenuOption> options = List.of(
                 MenuOption.of("Gestionar Productos"         , Main::renderAdminProducts),
                 MenuOption.of("Gestionar Colores"           , Main::renderAdminColors),
-                MenuOption.of("Gestionar Talles"            , Main::renderAdminSizes),
                 MenuOption.of("Gestionar Ventas"            , Main::renderAdminSales),
                 MenuOption.of("Crear Usuario Administrador" , Main::createAdminUser)
         );
@@ -98,19 +94,6 @@ public class Main {
         }
 
         renderAdminColors();
-    }
-
-    private static void renderAdminSizes() {
-        List<Integer> allowedOptions = toListSizes(true);
-
-        List<MenuOption> options = List.of(
-                MenuOption.of("Editar el Talle"                    , () -> Main.renderCustProductVariants(allowedOptions)),
-                MenuOption.of("Editar la Descripción de un Talle"  , () -> Main.renderCustProductVariants(allowedOptions)),
-                MenuOption.of("Editar el Órden de un Talle"        , () -> Main.renderCustProductVariants(allowedOptions)),
-                MenuOption.of("Editar el Estado de un Talle"       , () -> Main.renderCustProductVariants(allowedOptions))
-        );
-
-        MenuHelper.renderMenuOptions(options, Main::renderCustomerMenu);
     }
 
     private static void renderAdminProducts() {
@@ -354,22 +337,6 @@ public class Main {
         return displayedIndexes;
     }
 
-    public static List<Integer> toListSizes(boolean isAdminPage) {
-        List<Integer> displayedIndexes = new ArrayList<>();
-
-        MenuHelper.printMenuTitle("LISTADO DE TALLES");
-        for (int i = 0; i < sizes.size(); i++) {
-            Size size = sizes.get(i);
-            int idx = i + 1;
-
-            if (!isAdminPage && size.getRowStatus() != RowStatus.ACTIVE) continue;
-
-            System.out.format("Talle %d. %s%n", idx, size);
-            displayedIndexes.add(idx);
-        }
-        return displayedIndexes;
-    }
-
     public static List<Integer> toListProducts(boolean isAdminPage) {
         List<Integer> displayedIndexes = new ArrayList<>();
 
@@ -551,7 +518,7 @@ public class Main {
          */
         ProductVariant var1 = products.getFirst().addVariant(
                 colors.getFirst(),
-                sizes.getFirst(),
+                NumberSize.T_18,
                 TargetGender.NINIOS,
                 "Descripción de la variante var1 del Artículo_1",
                 "SKU-ART-1-VAR-1",
@@ -561,7 +528,7 @@ public class Main {
 
         ProductVariant var2 = products.getFirst().addVariant(
                 colors.get(1),
-                sizes.get(1),
+                NumberSize.T_19,
                 TargetGender.NINIAS,
                 "Descripción de la variante var2 del Artículo_1",
                 "SKU-ART-1-VAR-2",
@@ -570,7 +537,7 @@ public class Main {
         );
         ProductVariant var3 = products.get(1).addVariant(
                 colors.getFirst(),
-                sizes.getFirst(),
+                NumberSize.T_18,
                 TargetGender.HOMBRES,
                 "Descripción de la variante var3 del Artículo_2",
                 "SKU-ART-2-VAR-3",
@@ -579,7 +546,7 @@ public class Main {
         );
         ProductVariant var4 = products.get(1).addVariant(
                 colors.get(1),
-                sizes.get(1),
+                NumberSize.T_19,
                 TargetGender.MUJERES,
                 "Descripción de la variante var4 del Artículo_2",
                 "SKU-ART-2-VAR-4",
