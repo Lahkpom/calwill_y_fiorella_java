@@ -15,21 +15,22 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class CustomerMenu {
-    private final AuthService authService;
     private final ProductService productService;
     private final CartService cartService;
     private final AuthMenu authMenu;
+    private final MenuHelper menuHelper;
 
     public CustomerMenu(
             AuthService     authService,
             ProductService  productService,
             CartService     cartService,
-            AuthMenu        authMenu
+            AuthMenu        authMenu,
+            MenuHelper      menuHelper
     ) {
-        this.authService    = authService;
         this.productService = productService;
         this.cartService    = cartService;
         this.authMenu       = authMenu;
+        this.menuHelper     = menuHelper;
     }
 
     public void render(Runnable onBack) {
@@ -44,7 +45,7 @@ public class CustomerMenu {
                 MenuOption.of("Ver mis Compras", () -> System.out.println("FUNCIÓN EN DESARROLLO"))
         );
 
-        MenuHelper.renderMenuOptions(options, onBack);
+        menuHelper.renderMenuOptions(options, onBack);
     }
 
     private void renderProducts() {
@@ -55,7 +56,7 @@ public class CustomerMenu {
                 MenuOption.of("Ver variantes de un producto", () -> renderProductVariants(products, allowed))
         );
 
-        MenuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
 
     private void renderProductVariants(List<Product> products, List<Integer> allowed) {
@@ -69,7 +70,7 @@ public class CustomerMenu {
                 MenuOption.of("Agregar una variante al carrito", () -> addToCart(variants, allowedVariants))
         );
 
-        MenuHelper.renderMenuOptions(options, this::renderProducts);
+        menuHelper.renderMenuOptions(options, this::renderProducts);
     }
 
     private void addToCart(List<ProductVariant> variants, List<Integer> allowedVariants) {
@@ -111,6 +112,6 @@ public class CustomerMenu {
                     renderCartItems();
                 })
         );
-        MenuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
 }

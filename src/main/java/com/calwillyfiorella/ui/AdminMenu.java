@@ -14,21 +14,22 @@ import com.calwillyfiorella.util.InputUtils;
 import java.util.List;
 
 public class AdminMenu {
-    private final AuthService authService;
     private final ProductService productService;
     private final ColorService colorService;
     private final AuthMenu authMenu;
+    private final MenuHelper menuHelper;
 
     public AdminMenu(
             AuthService     authService,
             ProductService  productService,
             ColorService    colorService,
-            AuthMenu        authMenu
+            AuthMenu        authMenu,
+            MenuHelper      menuHelper
     ) {
-        this.authService    = authService;
         this.productService = productService;
         this.colorService   = colorService;
         this.authMenu       = authMenu;
+        this.menuHelper     = menuHelper;
     }
 
     public void render(Runnable onBack) {
@@ -44,7 +45,7 @@ public class AdminMenu {
                 MenuOption.of("Crear Usuario Administrador" , () -> authMenu.signUp(true))
         );
 
-        MenuHelper.renderMenuOptions(options, onBack);
+        menuHelper.renderMenuOptions(options, onBack);
     }
 
     private void renderAdminColors() {
@@ -55,7 +56,7 @@ public class AdminMenu {
                 MenuOption.of("Editar el Nombre de un Color", () -> updateColorName(colors, allowedOptions))
         );
 
-        MenuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
 
     private void updateColorName(List<Color> colors, List<Integer> allowedOptions) {
@@ -80,7 +81,7 @@ public class AdminMenu {
                 MenuOption.of("Ver Variantes de un Producto", () -> renderAdminVariants(products, allowedOptions))
         );
 
-        MenuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
 
     private void renderAdminVariants(List<Product> products, List<Integer> allowedOptions) {

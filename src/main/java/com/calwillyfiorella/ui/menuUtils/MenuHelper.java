@@ -3,15 +3,20 @@ package com.calwillyfiorella.ui.menuUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.calwillyfiorella.Main;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.util.AuxiliarFunction;
+import com.calwillyfiorella.util.InputUtils;
 
 public final class MenuHelper {
+    private final AuthService authService;
+    private final Runnable onLogout;
 
-    private MenuHelper() {}
+    public MenuHelper(AuthService authService, Runnable onLogout) {
+        this.authService = authService;
+        this.onLogout = onLogout;
+    }
 
-    public static void renderMenuOptions(List<MenuOption> options, Runnable onBack) {
+    public void renderMenuOptions(List<MenuOption> options, Runnable onBack) {
         System.out.format("""
                 ########################################################################
                 ########################################################################
@@ -27,7 +32,7 @@ public final class MenuHelper {
         // Opción 'Cerrar Sesión' (S detecta un usuario con sesión activa)
         if (AuthService.getActualUser() != null) fullOptions.add(MenuOption.of("Cerrar Sesión", () -> {
             String userName = AuthService.getActualUser().getUserName();
-            AuthService.logOut();
+            authService.logOut();
             System.out.format("""
                     ##########################################################
                     Sesión del usuario %s cerrada.
@@ -35,14 +40,14 @@ public final class MenuHelper {
                     """,
                     userName
             );
-            Main.renderMainMenu();
+            onLogout.run();
         }));
 
         // Opción 'Finalizar'
         fullOptions.add(MenuOption.of("Finalizar", () -> {
             System.out.println("Gracias por utilizar nuestro sistema!");
-            Auth.logOut();
-            Main.scanner.close();
+            authService.logOut();
+            InputUtils.closeScanner();
             System.exit(0);
         }));
 

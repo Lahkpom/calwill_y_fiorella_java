@@ -1,11 +1,10 @@
 package com.calwillyfiorella.model;
 
-import com.calwillyfiorella.model.enums.RowStatus;
-import com.calwillyfiorella.util.ValidationUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.calwillyfiorella.model.enums.RowStatus;
 
 public class Cart {
     private final List<CartItem> cartItems;

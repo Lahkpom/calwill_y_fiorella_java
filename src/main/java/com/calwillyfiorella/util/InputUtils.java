@@ -1,13 +1,15 @@
 package com.calwillyfiorella.util;
 
-import com.calwillyfiorella.Main;
-
 import java.util.Scanner;
 
 public final class InputUtils {
     private static final Scanner scanner = new Scanner(System.in);
 
     private InputUtils() {}
+
+    public static void closeScanner() {
+        scanner.close();
+    }
 
     public static int readInt(String prompt) {
         while (true) {

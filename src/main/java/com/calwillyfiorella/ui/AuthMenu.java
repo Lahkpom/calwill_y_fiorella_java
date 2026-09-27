@@ -4,7 +4,6 @@ import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.UserRole;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.UserService;
-import com.calwillyfiorella.util.AuxiliarFunction;
 import com.calwillyfiorella.ui.menuUtils.*;
 import com.calwillyfiorella.util.InputUtils;
 
@@ -14,10 +13,12 @@ import java.util.List;
 public class AuthMenu {
     private final AuthService authService;
     private final UserService userService;
+    private final MenuHelper menuHelper;
 
-    public AuthMenu(AuthService authService, UserService userService) {
+    public AuthMenu(AuthService authService, UserService userService, MenuHelper menuHelper) {
         this.authService = authService;
         this.userService = userService;
+        this.menuHelper = menuHelper;
     }
 
     public void render(boolean isAdmin, Runnable onCancel) {
@@ -27,7 +28,7 @@ public class AuthMenu {
         if (!isAdmin)
             options.add(MenuOption.of("Crear Cuenta", () -> signUp(false)));
 
-        MenuHelper.renderMenuOptions(options, onCancel);
+        menuHelper.renderMenuOptions(options, onCancel);
     }
 
     public void logIn(boolean isAdmin) {

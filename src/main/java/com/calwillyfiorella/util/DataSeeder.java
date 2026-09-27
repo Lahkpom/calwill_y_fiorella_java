@@ -1,13 +1,20 @@
 package com.calwillyfiorella.util;
 
-import com.calwillyfiorella.model.*;
-import com.calwillyfiorella.model.enums.*;
-import com.calwillyfiorella.repository.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
+
+import com.calwillyfiorella.model.Color;
+import com.calwillyfiorella.model.Product;
+import com.calwillyfiorella.model.Users;
+import com.calwillyfiorella.model.enums.Category;
+import com.calwillyfiorella.model.enums.NumberSize;
+import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.model.enums.UserRole;
+import com.calwillyfiorella.repository.ColorRepository;
+import com.calwillyfiorella.repository.ProductRepository;
+import com.calwillyfiorella.repository.UserRepository;
 
 public final class DataSeeder {
 
