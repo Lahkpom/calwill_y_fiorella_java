@@ -26,7 +26,7 @@ public class AuthService {
 
     public static Users getActualUser() { return AuthRepository.getActualUser(); }
 
-    public static boolean actualUserIsAdmin() { return AuthRepository.getActualUser().isAdmin(); }
+    public static boolean actualUserIsAdmin() { return AuthRepository.getActualUser() != null && AuthRepository.getActualUser().isAdmin(); }
 
     public static void checkActualUserIsAdmin() {
         if (!actualUserIsAdmin()) throw new IsNotAnAdminException();

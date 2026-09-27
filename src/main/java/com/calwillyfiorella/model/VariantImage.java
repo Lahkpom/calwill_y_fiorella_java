@@ -58,7 +58,7 @@ public class VariantImage extends BaseEntity{
                 this.variant.getProduct().getProductCategory(),
                 ProductVariant.targetGenderDecode(this.variant.getTargetGender()),
                 this.variant.getColor().getColorName(),
-                this.variant.getSize().getSize(),
+                this.variant.getSize(),
                 this.variant.getVariantPrice(),
                 this.imageUrl,
                 this.imageOrder,

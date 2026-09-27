@@ -42,7 +42,7 @@ public class ProductService {
         return this.productRepository.findByName(productName).orElseThrow(ProductDoesNotExistException::new);
     }
 
-    public List<Product> getAllProducts() { return this.productRepository.findAll(); }
+    public List<Product> getAll() { return this.productRepository.findAll(); }
 
     public void updateCategory(Product product, Category category) {
         product.setProductCategory(category);

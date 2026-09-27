@@ -4,10 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.calwillyfiorella.Main;
-
-public final class AuxiliarFuncs {
-    private AuxiliarFuncs() {}
+public final class AuxiliarFunction {
+    private AuxiliarFunction() {}
 
     public static int requireUserOption(Integer totalOptions) {
         return requireUserOption(totalOptions, "Ingresar opción: ");
@@ -15,7 +13,7 @@ public final class AuxiliarFuncs {
 
     public static int requireUserOption(Integer totalOptions, String prompt) {
         while (true) {
-            int option = readInt(prompt);
+            int option = InputUtils.readInt(prompt);
             if (option < 1 || option > totalOptions) {
                 System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
                 continue;
@@ -32,39 +30,12 @@ public final class AuxiliarFuncs {
         Set<Integer> validOptions = new HashSet<>(allowedOptions);
 
         while (true) {
-            int option = readInt(prompt);
+            int option = InputUtils.readInt(prompt);
             if (!validOptions.contains(option)) {
                 System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
                 continue;
             }
             return option;
-        }
-    }
-
-    public static int readInt(String prompt) {
-        while (true) {
-            System.out.println(prompt);
-            String input = Main.scanner.nextLine().trim();
-
-            try {
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.err.println("Debes ingresar un número entero válido.");
-            }
-        }
-    }
-
-    public static String readString(String prompt) {
-        while (true) {
-            System.out.println(prompt);
-            String input = Main.scanner.nextLine().trim();
-
-            if (input.isEmpty()) {
-                System.err.println("No puede ingresar un texto vacío.");
-                continue;
-            }
-
-            return input;
         }
     }
 }

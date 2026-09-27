@@ -142,11 +142,7 @@ public class ProductVariant extends BaseEntity {
 
         if (image.getRowStatus() == newStatus) return;
 
-        switch (newStatus) {
-            case ACTIVE     -> image.activate();
-            case INACTIVE   -> image.deactive();
-            case DELETED    -> image.delete();
-        }
+        image.setRowStatus(newStatus);
     }
 
     public void incrementStock (Integer stock) {

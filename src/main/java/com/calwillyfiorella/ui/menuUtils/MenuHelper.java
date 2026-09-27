@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.calwillyfiorella.Main;
-import com.calwillyfiorella.model.Auth;
-import com.calwillyfiorella.util.AuxiliarFuncs;
+import com.calwillyfiorella.service.AuthService;
+import com.calwillyfiorella.util.AuxiliarFunction;
 
 public final class MenuHelper {
 
@@ -25,9 +25,9 @@ public final class MenuHelper {
         if (onBack != null) fullOptions.add(MenuOption.of("Volver al menú anterior", onBack));
 
         // Opción 'Cerrar Sesión' (S detecta un usuario con sesión activa)
-        if (Auth.getActualUser() != null) fullOptions.add(MenuOption.of("Cerrar Sesión", () -> {
-            String userName = Auth.getActualUser().getUserName();
-            Auth.logOut();
+        if (AuthService.getActualUser() != null) fullOptions.add(MenuOption.of("Cerrar Sesión", () -> {
+            String userName = AuthService.getActualUser().getUserName();
+            AuthService.logOut();
             System.out.format("""
                     ##########################################################
                     Sesión del usuario %s cerrada.
@@ -51,7 +51,7 @@ public final class MenuHelper {
             System.out.format("    %d. %s.%n", i + 1, fullOptions.get(i).label());
         }
         // Solicitar opción y ejecutar la acción asociada
-        int selectedOption = AuxiliarFuncs.requireUserOption(fullOptions.size());
+        int selectedOption = AuxiliarFunction.requireUserOption(fullOptions.size());
         fullOptions.get(selectedOption - 1).action().run();
     }
 
