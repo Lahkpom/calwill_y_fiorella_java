@@ -24,6 +24,19 @@ public final class InputUtils {
         }
     }
 
+    public static double readDouble(String prompt) {
+        while (true) {
+            System.out.println(prompt);
+            String input = scanner.nextLine().trim();
+
+            try {
+                return Double.parseDouble(input);
+            } catch (NumberFormatException e) {
+                System.err.println("Debes ingresar un número con decimales válido (Pruebe con punto o con coma para separar decimales).");
+            }
+        }
+    }
+
     public static String readString(String prompt) {
         while (true) {
             System.out.println(prompt);

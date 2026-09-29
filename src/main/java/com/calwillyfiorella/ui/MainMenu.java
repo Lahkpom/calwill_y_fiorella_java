@@ -6,21 +6,21 @@ import com.calwillyfiorella.ui.menuUtils.*;
 import java.util.List;
 
 public class MainMenu {
-    private final MenuHelper menuHelper;
-    private final AdminMenu adminMenu;
-    private final CustomerMenu customerMenu;
+    private final MenuHelper    menuHelper;
+    private final AdminMenu     adminMenu;
+    private final CustomerMenu  customerMenu;
 
     public MainMenu(
-            AuthService authService,
-            UserService userService,
-            ProductService productService,
-            ColorService colorService,
-            CartService cartService
+            AuthService     authService,
+            UserService     userService,
+            ProductService  productService,
+            ColorService    colorService,
+            CartService     cartService
     ) {
-        this.menuHelper = new MenuHelper(authService, this::render);
-        AuthMenu authMenu = new AuthMenu(authService, userService, menuHelper);
-        this.adminMenu = new AdminMenu(authService, productService, colorService, authMenu, menuHelper);
-        this.customerMenu = new CustomerMenu(authService, productService, cartService, authMenu, menuHelper);
+        this.menuHelper     = new MenuHelper(authService, this::render);
+        AuthMenu authMenu   = new AuthMenu(authService, userService, menuHelper);
+        this.adminMenu      = new AdminMenu(productService, colorService, authMenu, menuHelper);
+        this.customerMenu   = new CustomerMenu(productService, cartService, authMenu, menuHelper);
     }
 
     public void render() {

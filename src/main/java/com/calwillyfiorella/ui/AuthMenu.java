@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuthMenu {
-    private final AuthService authService;
-    private final UserService userService;
-    private final MenuHelper menuHelper;
+    private final AuthService   authService;
+    private final UserService   userService;
+    private final MenuHelper    menuHelper;
 
     public AuthMenu(AuthService authService, UserService userService, MenuHelper menuHelper) {
-        this.authService = authService;
-        this.userService = userService;
-        this.menuHelper = menuHelper;
+        this.authService    = authService;
+        this.userService    = userService;
+        this.menuHelper     = menuHelper;
     }
 
     public void render(boolean isAdmin, Runnable onCancel) {
@@ -33,7 +33,7 @@ public class AuthMenu {
 
     public void logIn(boolean isAdmin) {
         MenuHelper.printMenuTitle("FORMULARIO INICIO DE SESIÓN");
-        String email = InputUtils.readString("Ingrese su e-mail: ");
+        String email    = InputUtils.readString("Ingrese su e-mail: ");
         String password = InputUtils.readString("Ingrese su contraseña: ");
 
         try {

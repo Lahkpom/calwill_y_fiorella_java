@@ -6,7 +6,7 @@ import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.CartService;
 import com.calwillyfiorella.service.ProductService;
-import com.calwillyfiorella.ui.viewUtils.ConsolePrinter;
+import com.calwillyfiorella.ui.viewUtils.ListPrinter;
 import com.calwillyfiorella.util.AuxiliarFunction;
 import com.calwillyfiorella.ui.menuUtils.*;
 import com.calwillyfiorella.util.InputUtils;
@@ -15,13 +15,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class CustomerMenu {
-    private final ProductService productService;
-    private final CartService cartService;
-    private final AuthMenu authMenu;
-    private final MenuHelper menuHelper;
+    private final ProductService    productService;
+    private final CartService       cartService;
+    private final AuthMenu          authMenu;
+    private final MenuHelper        menuHelper;
 
     public CustomerMenu(
-            AuthService     authService,
             ProductService  productService,
             CartService     cartService,
             AuthMenu        authMenu,
@@ -40,9 +39,9 @@ public class CustomerMenu {
         }
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver Productos", this::renderProducts),
-                MenuOption.of("Ver mi Carrito", this::renderCartItems),
-                MenuOption.of("Ver mis Compras", () -> System.out.println("FUNCIÓN EN DESARROLLO"))
+                MenuOption.of("Ver Productos"   , this::renderProducts),
+                MenuOption.of("Ver mi Carrito"  , this::renderCartItems),
+                MenuOption.of("Ver mis Compras" , () -> System.out.println("FUNCIÓN EN DESARROLLO"))
         );
 
         menuHelper.renderMenuOptions(options, onBack);
@@ -50,21 +49,24 @@ public class CustomerMenu {
 
     private void renderProducts() {
         List<Product> products = productService.getAll();
-        List<Integer> allowed = ConsolePrinter.renderEntityList("CATÁLOGO DE PRODUCTOS", "Producto", products, false);
+
+        List<Integer> allowed = ListPrinter.renderList("CATÁLOGO DE PRODUCTOS", products, false);
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver variantes de un producto", () -> renderProductVariants(products, allowed))
         );
 
-        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, () -> render(null));
+//        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
 
     private void renderProductVariants(List<Product> products, List<Integer> allowed) {
         int idx = AuxiliarFunction.requireUserOption(allowed, "Número del producto: ");
+
         Product product = products.get(idx - 1);
 
         List<ProductVariant> variants = product.getVariants();
-        List<Integer> allowedVariants = ConsolePrinter.renderEntityList("VARIANTES DISPONIBLES", "Variante", variants, false);
+        List<Integer> allowedVariants = ListPrinter.renderList("VARIANTES DISPONIBLES", variants, false);
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Agregar una variante al carrito", () -> addToCart(variants, allowedVariants))
@@ -75,7 +77,9 @@ public class CustomerMenu {
 
     private void addToCart(List<ProductVariant> variants, List<Integer> allowedVariants) {
         int variantIdx = AuxiliarFunction.requireUserOption(allowedVariants, "Número de la variante: ");
+
         ProductVariant variant = variants.get(variantIdx - 1);
+
         int qty = InputUtils.readInt("Cantidad: ");
 
         try {

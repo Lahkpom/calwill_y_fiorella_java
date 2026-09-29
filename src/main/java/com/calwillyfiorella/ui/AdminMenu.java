@@ -6,7 +6,7 @@ import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.ColorService;
 import com.calwillyfiorella.service.ProductService;
-import com.calwillyfiorella.ui.viewUtils.ConsolePrinter;
+import com.calwillyfiorella.ui.viewUtils.ListPrinter;
 import com.calwillyfiorella.util.AuxiliarFunction;
 import com.calwillyfiorella.ui.menuUtils.*;
 import com.calwillyfiorella.util.InputUtils;
@@ -14,13 +14,12 @@ import com.calwillyfiorella.util.InputUtils;
 import java.util.List;
 
 public class AdminMenu {
-    private final ProductService productService;
-    private final ColorService colorService;
-    private final AuthMenu authMenu;
-    private final MenuHelper menuHelper;
+    private final ProductService    productService;
+    private final ColorService      colorService;
+    private final AuthMenu          authMenu;
+    private final MenuHelper        menuHelper;
 
     public AdminMenu(
-            AuthService     authService,
             ProductService  productService,
             ColorService    colorService,
             AuthMenu        authMenu,
@@ -50,7 +49,7 @@ public class AdminMenu {
 
     private void renderAdminColors() {
         List<Color> colors = colorService.getAll();
-        List<Integer> allowedOptions = ConsolePrinter.renderEntityList("LISTADO DE COLORES", "Color", colors, true);
+        List<Integer> allowedOptions = ListPrinter.renderList("LISTADO DE COLORES", colors, true);
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Editar el Nombre de un Color", () -> updateColorName(colors, allowedOptions))
@@ -60,13 +59,13 @@ public class AdminMenu {
     }
 
     private void updateColorName(List<Color> colors, List<Integer> allowedOptions) {
-        int colorIdx = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color a editar: ");
-        Color color = colors.get(colorIdx - 1);
-        String newName = InputUtils.readString("Nuevo nombre: ");
+        int     colorIdx    = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color a editar: ");
+        Color   color       = colors.get(colorIdx - 1);
+        String  newName     = InputUtils.readString("Nuevo nombre: ");
 
         try {
             colorService.updateColorName(color, newName);
-            System.out.println("Color actualizado con éxito.");
+            System.out.println("Nombre del color actualizado con éxito.");
         } catch (Exception e) {
             System.err.println("Error al actualizar el nombre del color: " + e.getMessage());
         }
@@ -75,7 +74,7 @@ public class AdminMenu {
 
     private void renderAdminProducts() {
         List<Product> products = productService.getAll();
-        List<Integer> allowedOptions = ConsolePrinter.renderEntityList("LISTADO DE PRODUCTOS", "Producto", products, true);
+        List<Integer> allowedOptions = ListPrinter.renderList("LISTADO DE PRODUCTOS", products, true);
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver Variantes de un Producto", () -> renderAdminVariants(products, allowedOptions))
@@ -89,6 +88,6 @@ public class AdminMenu {
         Product product = products.get(productIdx - 1);
 
         List<ProductVariant> variants = product.getVariants();
-        ConsolePrinter.renderEntityList("VARIANTES DE " + product.getProductName(), "Variante", variants, true);
+        ListPrinter.renderList("VARIANTES DE " + product.getProductName(), variants, true);
     }
 }

@@ -25,7 +25,6 @@ public class Main {
                 colorRepository
         );
 
-        // 4. Inicialización y arranque de la interfaz de usuario
         MainMenu mainMenu = new MainMenu(
                 authService,
                 userService,
