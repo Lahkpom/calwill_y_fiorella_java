@@ -3,10 +3,17 @@ package com.calwillyfiorella.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.calwillyfiorella.model.enums.RowStatus;
 
 public class Cart {
+
+    /**
+     * DEJO ESTO ACÁ PERO LO REEMPLACÉ CON CARTREPOSITORY Y CARTSERVICE
+     */
+
+
     private final List<CartItem> cartItems;
 
     public Cart() {

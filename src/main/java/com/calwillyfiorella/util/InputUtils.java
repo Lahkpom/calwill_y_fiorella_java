@@ -1,5 +1,11 @@
 package com.calwillyfiorella.util;
 
+import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.ui.menuUtils.MenuHelper;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public final class InputUtils {
@@ -49,5 +55,29 @@ public final class InputUtils {
 
             return input;
         }
+    }
+
+    /**
+     * Hace que el usuario seleccione por consola la opción de una RowStatus y la devuelve.
+     *
+     * @return RowStatus seleccionado por el usuario o un IllegalStateException
+     */
+    public static RowStatus readRowStatus() {
+        MenuHelper.printMenuTitle("OPCIONES DISPONIBLES:");
+        // Lo hago hardcode porque esto no cambia
+        System.out.format("""
+                Opción 1. Activo.
+                Opción 2. Inactivo.
+                Opción 3. Eliminado.
+                """);
+
+        int newStatus = AuxiliarFunction.requireUserOption(List.of(1, 2, 3));
+
+        return switch (newStatus) {
+            case 1 -> RowStatus.ACTIVE;
+            case 2 -> RowStatus.INACTIVE;
+            case 3 -> RowStatus.DELETED;
+            default -> throw new IllegalStateException("Unexpected value: " + newStatus);
+        };
     }
 }

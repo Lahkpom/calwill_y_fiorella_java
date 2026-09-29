@@ -1,6 +1,7 @@
 package com.calwillyfiorella.service;
 
 import com.calwillyfiorella.exception.IsNotAnAdminException;
+import com.calwillyfiorella.exception.UserDoesNotExistException;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.UserRole;
 import com.calwillyfiorella.repository.UserRepository;
@@ -28,7 +29,7 @@ public class UserService {
         if (userRole == UserRole.ADMIN && (requestingUser == null || !requestingUser.isAdmin()))
             throw new IsNotAnAdminException();
 
-        if (getUser(usereMail).isPresent())
+        if (getUser(usereMail) != null)
             throw new IllegalArgumentException("El eMail que intenta ingresar ya corresponde a un usuario registrado!");
 
         this.userRepository.save(
@@ -43,8 +44,8 @@ public class UserService {
         );
     }
 
-    public Optional<Users> getUser(String usereMail) {
-        return this.userRepository.findByeMail(usereMail);
+    public Users getUser(String usereMail) {
+        return this.userRepository.findByeMail(usereMail).orElseThrow(UserDoesNotExistException::new);
     }
 
     public List<Users> getAllUsers() { return this.userRepository.findAll(); }

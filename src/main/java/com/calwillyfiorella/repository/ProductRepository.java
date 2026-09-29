@@ -13,8 +13,16 @@ public class ProductRepository {
 
     public List<Product> findAll() { return Collections.unmodifiableList(products); }
 
-    public Optional<Product> findByName(String name) {
-        return this.products.stream().filter(p -> p.getProductName().equals(name)).findFirst();
+    public Optional<Product> findProduct(String name) {
+        return this.products.stream()
+                .filter(p -> p.getProductName().equals(name))
+                .findFirst();
+    }
+
+    public Optional<Product> findProduct(UUID productId) {
+        return this.products.stream()
+                .filter(p -> p.getProductId().equals(productId))
+                .findFirst();
     }
 
     public void delete(Product product) { products.remove(product); }

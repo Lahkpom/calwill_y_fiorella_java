@@ -2,10 +2,7 @@ package com.calwillyfiorella.repository;
 
 import com.calwillyfiorella.model.Color;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ColorRepository {
     private final List<Color> colors;
@@ -19,6 +16,12 @@ public class ColorRepository {
     public Optional<Color> findByName(String colorName) {
         return this.colors.stream().filter(
                 c -> c.getColorName().equals(colorName)
+        ).findFirst();
+    }
+
+    public Optional<Color> findById(Integer colorId) {
+        return this.colors.stream().filter(
+                c -> Objects.equals(c.getColorId(), colorId)
         ).findFirst();
     }
 

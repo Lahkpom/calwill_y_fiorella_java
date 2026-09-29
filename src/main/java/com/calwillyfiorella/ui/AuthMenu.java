@@ -50,6 +50,8 @@ public class AuthMenu {
         } catch (Exception e) {
             System.err.println("Error al iniciar sesión: " + e.getMessage());
         }
+
+
     }
 
     public void signUp(boolean isAdmin) {

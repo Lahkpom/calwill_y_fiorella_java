@@ -11,7 +11,7 @@ public class Color extends BaseEntity {
     private static final Pattern HEX_PATTERN = Pattern.compile("^#[a-zA-Z0-9]{6}$");
     private static Integer colorIdSeq = 0;
 
-    private final Integer   colorId;
+    private final Integer colorId;
 
     private String colorName;
     private String colorDesc;

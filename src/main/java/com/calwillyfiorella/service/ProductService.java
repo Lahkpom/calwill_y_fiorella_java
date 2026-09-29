@@ -1,5 +1,6 @@
 package com.calwillyfiorella.service;
 
+import com.calwillyfiorella.exception.ProductAlreadyExistException;
 import com.calwillyfiorella.exception.ProductDoesNotExistException;
 import com.calwillyfiorella.model.Product;
 import com.calwillyfiorella.model.enums.Category;
@@ -7,6 +8,9 @@ import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.repository.ProductRepository;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ProductService {
     private final ProductRepository productRepository;
@@ -34,12 +38,20 @@ public class ProductService {
     }
 
     private void validateProductName(String productName) {
-        if (this.productRepository.findByName(productName).isPresent())
-            throw new IllegalArgumentException("Product already exists!");
+        if (this.productRepository.findProduct(productName).isPresent())
+            throw new ProductAlreadyExistException("El nombre del producto ya existe!");
     }
 
-    public Product getProductByName(String productName) {
-        return this.productRepository.findByName(productName).orElseThrow(ProductDoesNotExistException::new);
+    public Product getProduct(String productName) {
+        return ifProductExists(this.productRepository.findProduct(productName));
+    }
+
+    public Product getProduct(UUID productId) {
+        return ifProductExists(this.productRepository.findProduct(productId));
+    }
+
+    private Product ifProductExists(Optional<Product> productOptional) {
+        return productOptional.orElseThrow(ProductDoesNotExistException::new);
     }
 
     public List<Product> getAll() { return this.productRepository.findAll(); }
@@ -47,17 +59,28 @@ public class ProductService {
     public void updateCategory(Product product, Category category) {
         product.setProductCategory(category);
     }
-    public void updateName(Product product, String productName) {
-        product.setProductName(productName);
-    }
-    public void updateShortDesc(Product product, String productShortDesc) {
-        product.setProductShortDesc(productShortDesc);
-    }
-    public void updateLongDesc(Product product, String productLongDesc) {
-        product.setProductLongDesc(productLongDesc);
-    }
-    public void updateStatus(Product product, RowStatus rowStatus) {
-        product.setRowStatus(rowStatus);
-    }
+    public void updateName(UUID productId, String productName) {
+        validateProductName(productName);
 
+        ifProductExists(productRepository.findProduct(productId))
+                .setProductName(productName);
+    }
+    public void updateShortDesc(UUID productId, String productShortDesc) {
+        Objects.requireNonNull(productShortDesc, "La nueva descripción no puede ser nula.");
+
+        ifProductExists(productRepository.findProduct(productId))
+                .setProductShortDesc(productShortDesc);
+    }
+    public void updateLongDesc(UUID productId, String productLongDesc) {
+        Objects.requireNonNull(productLongDesc, "La nueva descripción no puede ser nula.");
+
+        ifProductExists(productRepository.findProduct(productId))
+                .setProductLongDesc(productLongDesc);
+    }
+    public void updateStatus(UUID productId, RowStatus rowStatus) {
+        Objects.requireNonNull(rowStatus, "El nuevo estado no puede ser nulo.");
+
+        ifProductExists(productRepository.findProduct(productId))
+                .setRowStatus(rowStatus);
+    }
 }

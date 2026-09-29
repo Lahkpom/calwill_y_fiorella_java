@@ -1,10 +1,14 @@
 package com.calwillyfiorella.service;
 
+import com.calwillyfiorella.exception.ColorAlreadyExistException;
+import com.calwillyfiorella.exception.ColorDoesNotExistException;
 import com.calwillyfiorella.model.Color;
+import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.repository.ColorRepository;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ColorService {
     private final ColorRepository colorRepository;
@@ -34,33 +38,57 @@ public class ColorService {
 
     private void validateColorName(String colorName) {
         if (this.colorRepository.findByName(colorName).isPresent())
-            throw new IllegalStateException("Color with name " + colorName + " already exists.");
+            throw new ColorAlreadyExistException("Color with name " + colorName + " already exists.");
     }
 
     private void validateColorCode(String colorCode) {
         if (this.colorRepository.findByHexCod(colorCode).isPresent())
-            throw new IllegalStateException("Color with code " + colorCode + " already exists.");
+            throw new ColorAlreadyExistException("Color with code " + colorCode + " already exists.");
     }
 
-    public void removeColor(Color color) {
+    public void updateColorStatus(Integer colorId, RowStatus newStatus) {
         AuthService.checkActualUserIsAdmin();
+
+        ifColorExits(colorRepository.findById(colorId))
+                .setRowStatus(
+                        Objects.requireNonNull(newStatus)
+                );
+    }
+
+    public void removeColor(Integer colorId) {
+        AuthService.checkActualUserIsAdmin();
+
         colorRepository.delete(
-                Objects.requireNonNull(color,  "color must not be null")
+                ifColorExits(
+                        colorRepository.findById(colorId)
+                )
         );
     }
 
-    public void updateColorName(Color color, String colorName) {
-        AuthService.checkActualUserIsAdmin();
-        color.setColorName(colorName);
+    private Color ifColorExits(Optional<Color> colorOptional) {
+        return colorOptional.orElseThrow(ColorDoesNotExistException::new);
     }
 
-    public void updateColorDesc(Color color, String colorDesc) {
+    public void updateColorName(Integer colorId, String colorName) {
         AuthService.checkActualUserIsAdmin();
-        color.setColorDesc(colorDesc);
+
+        validateColorName(colorName);
+
+        ifColorExits(colorRepository.findById(colorId))
+                .setColorName(colorName);
     }
 
-    public void updateColorCode(Color color, String colorCode) {
+    public void updateColorDesc(Integer colorId, String colorDesc) {
         AuthService.checkActualUserIsAdmin();
-        color.setColorCode(colorCode);
+
+        ifColorExits(colorRepository.findById(colorId))
+                .setColorDesc(colorDesc);
+    }
+
+    public void updateColorCode(Integer colorId, String colorCode) {
+        AuthService.checkActualUserIsAdmin();
+
+        ifColorExits(colorRepository.findById(colorId))
+                .setColorCode(colorCode);
     }
 }

@@ -13,6 +13,7 @@ import com.calwillyfiorella.util.InputUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 public class CustomerMenu {
     private final ProductService    productService;
@@ -26,10 +27,10 @@ public class CustomerMenu {
             AuthMenu        authMenu,
             MenuHelper      menuHelper
     ) {
-        this.productService = productService;
-        this.cartService    = cartService;
-        this.authMenu       = authMenu;
-        this.menuHelper     = menuHelper;
+        this.productService = Objects.requireNonNull(productService);
+        this.cartService    = Objects.requireNonNull(cartService);
+        this.authMenu       = Objects.requireNonNull(authMenu);
+        this.menuHelper     = Objects.requireNonNull(menuHelper);
     }
 
     public void render(Runnable onBack) {
@@ -50,46 +51,51 @@ public class CustomerMenu {
     private void renderProducts() {
         List<Product> products = productService.getAll();
 
-        List<Integer> allowed = ListPrinter.renderList("CATÁLOGO DE PRODUCTOS", products, false);
+        List<Integer> allowedProductOptions = ListPrinter.renderList("CATÁLOGO DE PRODUCTOS", products, false);
+
+        if (allowedProductOptions.isEmpty()) render(() -> {});
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver variantes de un producto", () -> renderProductVariants(products, allowed))
+                MenuOption.of("Ver variantes de un producto", () -> renderProductVariants(products, allowedProductOptions))
         );
 
-        menuHelper.renderMenuOptions(options, () -> render(null));
-//        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
 
-    private void renderProductVariants(List<Product> products, List<Integer> allowed) {
-        int idx = AuxiliarFunction.requireUserOption(allowed, "Número del producto: ");
+    private void renderProductVariants(List<Product> products, List<Integer> allowedProductOptions) {
+        int idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ");
 
-        Product product = products.get(idx - 1);
+        try {
+            List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getProductId()).getVariants();
 
-        List<ProductVariant> variants = product.getVariants();
-        List<Integer> allowedVariants = ListPrinter.renderList("VARIANTES DISPONIBLES", variants, false);
+            List<Integer> allowedVariantsOptions = ListPrinter.renderList("VARIANTES DISPONIBLES", variants, false);
 
-        List<MenuOption> options = List.of(
-                MenuOption.of("Agregar una variante al carrito", () -> addToCart(variants, allowedVariants))
-        );
+            if (allowedVariantsOptions.isEmpty()) renderProducts();
 
-        menuHelper.renderMenuOptions(options, this::renderProducts);
+            List<MenuOption> options = List.of(
+                    MenuOption.of("Agregar una variante al carrito", () -> addToCart(variants, allowedVariantsOptions))
+            );
+
+            menuHelper.renderMenuOptions(options, this::renderProducts);
+        } catch (Exception e) {
+            System.out.println("Error al obtener la lista de variantes del producto: " + e.getMessage());
+            renderProducts();
+        }
     }
 
-    private void addToCart(List<ProductVariant> variants, List<Integer> allowedVariants) {
-        int variantIdx = AuxiliarFunction.requireUserOption(allowedVariants, "Número de la variante: ");
-
-        ProductVariant variant = variants.get(variantIdx - 1);
+    private void addToCart(List<ProductVariant> variants, List<Integer> allowedVariantsOptions) {
+        int variantIdx = AuxiliarFunction.requireUserOption(allowedVariantsOptions, "Número de la variante: ");
 
         int qty = InputUtils.readInt("Cantidad: ");
 
         try {
-            cartService.addItem(AuthService.getActualUser(), variant, qty);
+            cartService.addItem(AuthService.getActualUser(), variants.get(variantIdx - 1), qty);
             System.out.println("¡Variante añadida al carrito!");
         } catch (Exception e) {
             System.err.println("Error al añadir item al carrito: " + e.getMessage());
         }
 
-        renderCartItems();
+        renderProducts();
     }
 
     private void renderCartItems() {
@@ -99,7 +105,6 @@ public class CustomerMenu {
         if (userCart.isEmpty()) {
             System.out.println("El carrito está vacío.");
             render(() -> {});
-            return;
         }
 
         BigDecimal total = BigDecimal.ZERO;
@@ -111,11 +116,45 @@ public class CustomerMenu {
         System.out.printf("Total: $%.2f%n", total);
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Vaciar carrito", () -> {
-                    cartService.clearUserItems(AuthService.getActualUser());
-                    renderCartItems();
-                })
+                MenuOption.of("Modificar la cantidad de un Item", () -> this.updateQuantity(userCart)),
+                MenuOption.of("Eliminar un Item"                , () -> this.removeCartItem(userCart)),
+                MenuOption.of("Vaciar carrito"                  , this::clearCart),
+                MenuOption.of("Iniciar compra"                  , () -> this.renderProductCartStartBuying(userCart))
         );
         menuHelper.renderMenuOptions(options, () -> render(() -> {}));
+    }
+    private void updateQuantity(List<CartItem> userCart) {
+        int idx         = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item cuya cantidad desea modificar: ");
+        int quantity    = InputUtils.readInt("Ingrese la nueva cantidad que desa asignar: ");
+
+        try {
+            cartService.updateQuantity(userCart.get(idx - 1).getItemId(), quantity);
+            System.out.println("La cantidad fue modificada con éxito!");
+        } catch (Exception e) {
+            System.err.println("Error al modificar la cantidad del Item: " + e.getMessage());
+        }
+
+        renderCartItems();
+    }
+    private void removeCartItem(List<CartItem> userCart) {
+        int idx = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item que desea eliminar del carrito: ");
+
+        try {
+            cartService.removeItem(userCart.get(idx - 1).getItemId());
+        } catch (Exception e) {
+            System.err.println("Error al eliminar Item del carrito: " + e.getMessage());
+        }
+
+        renderCartItems();
+    }
+    private void clearCart() {
+        cartService.clearUserItems(AuthService.getActualUser());
+        renderCartItems();
+    }
+
+    private void renderProductCartStartBuying(List<CartItem> userCart) {
+        System.out.println("LA FUNCIÓN DE INICIAR COMPRA AÚN SE ENCUENTRA EN DESARROLLO");
+        renderCartItems();
+//        MenuHelper.renderMenuOptions(options, Main::renderCartItems);
     }
 }

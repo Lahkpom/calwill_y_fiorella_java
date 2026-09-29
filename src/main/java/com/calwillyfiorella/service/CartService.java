@@ -1,5 +1,6 @@
 package com.calwillyfiorella.service;
 
+import com.calwillyfiorella.exception.CartItemDoesNotExistException;
 import com.calwillyfiorella.exception.InsufficientStockException;
 import com.calwillyfiorella.model.CartItem;
 import com.calwillyfiorella.model.ProductVariant;
@@ -7,9 +8,7 @@ import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.repository.CartRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class CartService {
     private final CartRepository cartRepository;
@@ -53,16 +52,38 @@ public class CartService {
     }
 
     public void updateQuantity(Users user, ProductVariant variant, Integer quantity) {
-        CartItem cartItem = cartRepository.findItem(user, variant)
-                .orElseThrow(() -> new IllegalArgumentException("El ítem no existe en el carrito."));
+        this.updateQuantity(cartRepository.findItem(user, variant), quantity);
+    }
+
+    public void updateQuantity(UUID itemId, Integer quantity) {
+        this.updateQuantity(cartRepository.findItem(itemId), quantity);
+    }
+
+    private void updateQuantity(Optional<CartItem> itemOptional, Integer quantity) {
+        CartItem cartItem = ifItemExists(itemOptional);
 
         checkStock(cartItem.getVariant().getVariantStock(), quantity);
-
         cartItem.setQuantity(quantity);
     }
 
     public void removeItem(Users user, ProductVariant variant) {
         cartRepository.findItem(user, variant).ifPresent(cartRepository::delete);
+    }
+
+    public void removeItem(UUID itemId) {
+        cartRepository.findItem(itemId).ifPresent(cartRepository::delete);
+    }
+
+    private CartItem getItem(UUID itemId) {
+        return ifItemExists(cartRepository.findItem(itemId));
+    }
+
+    private CartItem getItem(Users user, ProductVariant variant) {
+        return ifItemExists(cartRepository.findItem(user, variant));
+    }
+
+    private CartItem ifItemExists(Optional<CartItem> itemOptional) {
+        return itemOptional.orElseThrow(CartItemDoesNotExistException::new);
     }
 
     public void clearUserItems(Users user) {

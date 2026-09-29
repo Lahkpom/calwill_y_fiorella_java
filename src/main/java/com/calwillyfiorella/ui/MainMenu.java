@@ -19,16 +19,16 @@ public class MainMenu {
     ) {
         this.menuHelper     = new MenuHelper(authService, this::render);
         AuthMenu authMenu   = new AuthMenu(authService, userService, menuHelper);
-        this.adminMenu      = new AdminMenu(productService, colorService, authMenu, menuHelper);
+        this.adminMenu      = new AdminMenu(productService, colorService, authMenu, menuHelper, this::render);
         this.customerMenu   = new CustomerMenu(productService, cartService, authMenu, menuHelper);
     }
 
     public void render() {
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver Manual"      , this::renderManual),
-                MenuOption.of("Administrador"   , () -> adminMenu.render(this::render)),
-                MenuOption.of("Cliente"         , () -> customerMenu.render(this::render))
-        );
+                MenuOption.of("Administrador"   , adminMenu::render),
+                MenuOption.of("Cliente"         , () -> customerMenu.render(this::render)),
+                MenuOption.of("Ver Manual"      , this::renderManual)
+                );
 
         menuHelper.renderMenuOptions(options, null);
     }
