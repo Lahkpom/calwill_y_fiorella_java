@@ -83,8 +83,8 @@ public class ProductVariant extends BaseEntity {
     public String toString() {
         return String.format(
                 "{ Producto: %s, Categoría: %s, Para: %s, Color: %s, Talle: %s, Precio: %.2f, Stock: %d, Imágenes: %d, Estado: %s }",
-                this.product.getProductName(),
-                this.product.getProductCategory(),
+                this.product.getName(),
+                this.product.getCategory(),
                 targetGenderDecode(this.targetGender),
                 this.color,
                 this.size,

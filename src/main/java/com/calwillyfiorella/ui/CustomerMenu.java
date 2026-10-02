@@ -66,7 +66,7 @@ public class CustomerMenu {
         int idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ");
 
         try {
-            List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getProductId()).getVariants();
+            List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getId()).getVariants();
 
             List<Integer> allowedVariantsOptions = ListPrinter.renderList("VARIANTES DISPONIBLES", variants, false);
 

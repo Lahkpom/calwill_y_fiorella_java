@@ -15,13 +15,13 @@ public class ProductRepository {
 
     public Optional<Product> findProduct(String name) {
         return this.products.stream()
-                .filter(p -> p.getProductName().equals(name))
+                .filter(p -> p.getName().equals(name))
                 .findFirst();
     }
 
     public Optional<Product> findProduct(UUID productId) {
         return this.products.stream()
-                .filter(p -> p.getProductId().equals(productId))
+                .filter(p -> p.getId().equals(productId))
                 .findFirst();
     }
 

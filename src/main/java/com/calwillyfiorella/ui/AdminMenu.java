@@ -3,7 +3,6 @@ package com.calwillyfiorella.ui;
 import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.Product;
 import com.calwillyfiorella.model.ProductVariant;
-import com.calwillyfiorella.model.VariantImage;
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
@@ -16,9 +15,7 @@ import com.calwillyfiorella.util.AuxiliarFunction;
 import com.calwillyfiorella.ui.menuUtils.*;
 import com.calwillyfiorella.util.InputUtils;
 
-import java.awt.datatransfer.SystemFlavorMap;
 import java.math.BigDecimal;
-import java.net.ProtocolFamily;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +57,7 @@ public class AdminMenu {
 
     private void renderAdminColors() {
         List<Color> colors = colorService.getAll();
-        List<Integer> allowedOptions = toListColors(colors);
+        List<Integer> allowedOptions = AuxiliarFunction.toListColors(colors, true);
 
         if (allowedOptions.isEmpty()) render();
 
@@ -150,93 +147,144 @@ public class AdminMenu {
         if (allowedOptions.isEmpty()) render();
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Editar la Categoría de un Producto"          , this::updateProductCategory),
-                MenuOption.of("Editar el Nombre de un Producto"             , () -> updateProductName(products, allowedOptions)),
-                MenuOption.of("Editar la Descripción Corta de un Producto"  , () -> updateProductShortDesc(products, allowedOptions)),
-                MenuOption.of("Editar la Descripción Larga de un Producto"  , () -> updateProductLongDesc(products, allowedOptions)),
-                MenuOption.of("Cambiar el Estado de un Producto"            , () -> updateProductStatus(products, allowedOptions)),
+                MenuOption.of("Editar  un Producto"                         , () -> updateProduct(products, allowedOptions)),
                 MenuOption.of("Gestionar Variantes de un Producto"          , () -> renderAdminVariants(products, allowedOptions)),
-                MenuOption.of("Crear un nuevo Producto"                     , this::addNewProduct)
+                MenuOption.of("Crear un nuevo Producto"                     , this::createProduct)
         );
 
         menuHelper.renderMenuOptions(options, this::render);
     }
-    private void updateProductCategory(){
-        System.err.println("FUNCIONALIDAD PARA EDITAR CATEGORÍA NO DISPONIBLE");
+    private void updateProduct(List<Product> products, List<Integer> allowedOptions) {
+        Integer productIdx = AuxiliarFunction.requireUserOption(allowedOptions, "Número del producto: ", false);
+        Product currentProductData = products.get(productIdx - 1);
+
+        try {
+            Product newProductData = createOrUpdateProductForm(true, currentProductData);
+
+            if (newProductData == null)
+                throw new IllegalStateException("El producto devuelto por el formulario de actualización de productos es un objeto nulo.");
+
+            newProductData.setCategory(Category.CALZADO);
+            if (newProductData.getName() == null) newProductData.setName(currentProductData.getName());
+            if (newProductData.getShortDesc() == null) newProductData.setShortDesc(currentProductData.getShortDesc());
+            if (newProductData.getLongDesc() == null) newProductData.setLongDesc(currentProductData.getLongDesc());
+            if (newProductData.getRowStatus() == null) newProductData.setRowStatus(currentProductData.getRowStatus());
+
+            productService.updateProduct(currentProductData.getId(), newProductData);
+
+            System.out.println("El producto fue actualizado con éxito.");
+        } catch (Exception e) {
+            System.err.println("Error al actualizar el producto: " + e.getMessage());
+        }
+
         renderAdminProducts();
     }
-    private void updateProductName(List<Product> products, List<Integer> allowedOptions) {
-        int     idx     = AuxiliarFunction.requireUserOption(allowedOptions, "Número del Producto a editar: ");
-        String  newName = InputUtils.readString("Nuevo nombre: ");
-
+    private void createProduct() {
         try {
-            productService.updateName(products.get(idx - 1).getProductId(), newName);
-            System.out.println("Nombre del producto actualizado con éxito.");
+            Product newProductData = createOrUpdateProductForm(false, null);
+
+            if (newProductData == null)
+                throw new IllegalStateException("El producto devuelto por el formulario de creación de productos es un objeto nulo.");
+
+            productService.createProduct(newProductData);
+
+            System.out.println("el Producto fue creado con éxito.");
         } catch (Exception e) {
-            System.err.println("Error al actualizar el nombre del producto: " + e.getMessage());
+            System.err.println("Error al crear el producto: " + e.getMessage());
         }
 
-        renderAdminColors();
+        renderAdminProducts();
     }
-    private void updateProductShortDesc(List<Product> products, List<Integer> allowedOptions) {
-        int     idx     = AuxiliarFunction.requireUserOption(allowedOptions, "Número del producto a editar: ");
-        String  newDesc = InputUtils.readString("Nueva Descripción Corta: ");
+    private Product createOrUpdateProductForm(boolean isUpdate, Product currentProductData) {
+        if (isUpdate && currentProductData == null)
+            throw new IllegalArgumentException("Se indicó que es un update pero no se entregó el producto actual.");
+
+        boolean isStrict    = !isUpdate;
+        String  action      = (isUpdate) ? "actualizar" : "crear";
+
+        MenuHelper.printMenuTitle(
+                String.format(
+                        "FORMULARIO PARA %s PRODUCTO: ",
+                        action
+                )
+        );
+
+        if (isUpdate)
+            System.out.format("""
+                    ¡¡¡ Para mantener el valor anterior en cada opción solo presione enter !!!
+                    -----------------------------------------------------------
+                    """);
 
         try {
-            productService.updateShortDesc(products.get(idx - 1).getProductId(), newDesc);
-            System.out.println("Descripción Corta del producto actualizado con éxito.");
-        } catch (Exception e) {
-            System.err.println("Error al actualizar la Descripción Corta del producto: " + e.getMessage());
-        }
+            // CATEGORY (POR EL MOMENTO SOLO TENEMOS CATEGORÍA CALZADO)
 
-        renderAdminColors();
-    }
-    private void updateProductLongDesc(List<Product> products, List<Integer> allowedOptions) {
-        int     idx     = AuxiliarFunction.requireUserOption(allowedOptions, "Número del producto a editar: ");
-        String  newDesc = InputUtils.readString("Nueva Descripción Larga: ");
-
-        try {
-            productService.updateLongDesc(products.get(idx - 1).getProductId(), newDesc);
-            System.out.println("Descripción Larga del producto actualizado con éxito.");
-        } catch (Exception e) {
-            System.err.println("Error al actualizar la Descripción Larga del producto: " + e.getMessage());
-        }
-
-        renderAdminColors();
-    }
-    private void updateProductStatus(List<Product> products, List<Integer> allowedOptions) {
-        int idx = AuxiliarFunction.requireUserOption(allowedOptions, "Número del producto a editar: ");
-
-        try {
-            productService.updateStatus(
-                    products.get(idx - 1).getProductId(),
-                    InputUtils.readRowStatus()
+            // NAME
+            String newName = InputUtils.readString(
+                    isUpdate
+                            ? String.format("""
+                                    Nombre actual: %s.
+                                    Si desea modificarlo ingrese el nuevo Nombre:
+                                    """,
+                            currentProductData.getName()
+                    )
+                            : "Ingrese el Nombre:",
+                    isStrict
             );
-            System.out.println("Estado del producto actualizado con éxito.");
-        } catch (Exception e) {
-            System.err.println("Error al actualizar el Estado del producto: " + e.getMessage());
-        }
 
-        renderAdminColors();
-    }
-    private void addNewProduct() {
-        MenuHelper.printMenuTitle("FORMULARIO INICIO DE CREACIÓN DE PRODUCTO:");
-        String productName      = InputUtils.readString("Nombre del producto: ");
-        String productShortDesc = InputUtils.readString("Descripción Corta del producto: ");
-        String productLongDesc  = InputUtils.readString("Descripción Larga del producto: ");
-
-        try {
-            productService.createProduct(
-                    Category.CALZADO,
-                    productName,
-                    productShortDesc,
-                    productLongDesc
+            // SHORT DESC
+            String newShortDesc = InputUtils.readString(
+                    isUpdate
+                            ? String.format("""
+                                    Descripción Corta actual: %s.
+                                    Si desea modificarlo ingrese la nueva Descripción Corta:
+                                    """,
+                            currentProductData.getName()
+                    )
+                            : "Ingrese la Descripción Corta:",
+                    isStrict
             );
-        } catch (Exception e) {
-            System.err.println("Error al crear un nuevo producto: " + e.getMessage());
-        }
 
-        renderAdminColors();
+            // LONG DESC
+            String newLongDesc = InputUtils.readString(
+                    isUpdate
+                            ? String.format("""
+                                    Descripción Larga actual: %s.
+                                    Si desea modificarlo ingrese la nueva Descripción Larga:
+                                    """,
+                            currentProductData.getName()
+                    )
+                            : "Ingrese la Descripción Larga:",
+                    isStrict
+            );
+
+            // ROW STATUS
+            RowStatus newRowStatus = null;
+            if (isUpdate)
+                newRowStatus = AuxiliarFunction.requireRowStatus(
+                        String.format("""
+                                    Estado actual: %s.
+                                    Si desea modificarlo ingrese el número del nuevo Estado:
+                                    """,
+                                currentProductData.getRowStatus()
+                        ),
+                        isStrict
+                );
+
+            Product newProductData = new Product();
+            newProductData.setName(newName);
+            newProductData.setShortDesc(newShortDesc);
+            newProductData.setLongDesc(newLongDesc);
+            newProductData.setRowStatus(newRowStatus);
+
+            return newProductData;
+        } catch (Exception e) {
+            System.err.format(
+                    "Error al %s el producto: %s",
+                    action,
+                    e.getMessage()
+            );
+            return null;
+        }
     }
 
     private void renderAdminVariants(List<Product> products, List<Integer> allowedProductOptions) {
@@ -245,142 +293,188 @@ public class AdminMenu {
 
         List<ProductVariant> variants = product.getVariants();
 
-        List<Integer> allowedVariantOptions = ListPrinter.renderList("VARIANTES DE " + product.getProductName(), variants, true);
+        List<Integer> allowedVariantOptions = ListPrinter.renderList("VARIANTES DE " + product.getName(), variants, true);
 
         if (allowedVariantOptions.isEmpty()) renderAdminProducts();
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Editar una Variante"                     , () -> updateVariant(product, variants, allowedVariantOptions, false)),
-                MenuOption.of("Gestionar las Imágenes de una Variante"  , () -> updateVariantColor(product, variants, allowedVariantOptions)),
-                MenuOption.of("Crear una nueva Variante"                , () -> updateVariantColor(product, variants, allowedVariantOptions))
+                MenuOption.of("Editar una Variante"                     , () -> updateVariant(product, variants, allowedVariantOptions)),
+                MenuOption.of("Gestionar las Imágenes de una Variante"  , null),
+                MenuOption.of("Crear una nueva Variante"                , () -> createVariant(product))
         );
 
         menuHelper.renderMenuOptions(options, this::renderAdminProducts);
     }
-
-    private void updateVariant(Product product, List<ProductVariant> variants, List<Integer> allowedVariantOptions, boolean isStrict) {
-        Integer variantIdx = AuxiliarFunction.requireUserOption(allowedVariantOptions, "Número de la variante: ", isStrict);
+    private void updateVariant(Product product, List<ProductVariant> variants, List<Integer> allowedVariantOptions) {
+        Integer variantIdx = AuxiliarFunction.requireUserOption(allowedVariantOptions, "Número de la variante: ", true);
         ProductVariant currentVariantData = variants.get(variantIdx - 1);
 
-        MenuHelper.printMenuTitle("FORMULARIO PARA MODIFICACIÓN DE VARIANTE: ");
+        try {
+            ProductVariant newVariantData = createOrUpdateVariantForm(true, currentVariantData);
 
-        System.out.format("""
-                ¡¡¡ Para mantener el valor anterior en cada opción solo presione enter !!!
-                -----------------------------------------------------------
-                """);
+            if (newVariantData == null)
+                throw new IllegalStateException("La variante devuelta por el formulario de actualización de variantes es un objeto nulo.");
+
+            if (newVariantData.getColor() == null) newVariantData.setColor(currentVariantData.getColor());
+            if (newVariantData.getSize() == null) newVariantData.setSize(currentVariantData.getSize());
+            if (newVariantData.getTargetGender() == null) newVariantData.setTargetGender(currentVariantData.getTargetGender());
+            if (newVariantData.getVariantDesc() == null) newVariantData.setVariantDesc(currentVariantData.getVariantDesc());
+            if (newVariantData.getVariantSku() == null) newVariantData.setVariantSku(currentVariantData.getVariantSku());
+            if (newVariantData.getVariantPrice() == null) newVariantData.setVariantPrice(currentVariantData.getVariantPrice());
+            if (newVariantData.getVariantStock() == null) newVariantData.setVariantStock(currentVariantData.getVariantStock());
+            if (newVariantData.getRowStatus() == null) newVariantData.setRowStatus(currentVariantData.getRowStatus());
+
+            product.updateVariant(currentVariantData.getVariantId(), newVariantData);
+
+            System.out.println("La variante fue actualizada con éxito.");
+        } catch (Exception e) {
+            System.err.println("Error al actualizar la variante: " + e.getMessage());
+        }
+
+        renderAdminProducts();
+    }
+    private void createVariant(Product product) {
+        try {
+            ProductVariant newVariantData = createOrUpdateVariantForm(false, null);
+
+            if (newVariantData == null)
+                throw new IllegalStateException("La variante devuelta por el formulario de creación de variantes es un objeto nulo.");
+
+            product.addVariant(newVariantData);
+
+            System.out.println("La variante fue creada con éxito.");
+        } catch (Exception e) {
+            System.err.println("Error al crear la variante: " + e.getMessage());
+        }
+
+        renderAdminProducts();
+    }
+    private ProductVariant createOrUpdateVariantForm(boolean isUpdate, ProductVariant currentVariantData) {
+        if (isUpdate && currentVariantData == null)
+            throw new IllegalArgumentException("Se indicó que es un update pero no se entregó la variante actual.");
+
+        boolean isStrict    = !isUpdate;
+        String  action      = (isUpdate) ? "actualizar" : "crear";
+
+        MenuHelper.printMenuTitle(
+                String.format(
+                        "FORMULARIO PARA %s VARIANTE: ",
+                        action
+                )
+        );
+
+        if (isUpdate)
+            System.out.format("""
+                    ¡¡¡ Para mantener el valor anterior en cada opción solo presione enter !!!
+                    -----------------------------------------------------------
+                    """);
 
         try {
             // COLOR
-            Integer colorIdx = 0;
-            Color   newColor = null;
-
-            List<Color>     colors              = colorService.getAll();
-            List<Integer>   allowedColorOptions = toListColors(colors);
-
-            if (!allowedColorOptions.isEmpty())
-                colorIdx = AuxiliarFunction.requireUserOption(
-                        allowedColorOptions,
-                        String.format("""
-                            Color actual: %s.
-                            Si desea modificarlo ingrese el número del nuevo color:
-                            """,
-                                currentVariantData.getColor()
-                        ),
-                        isStrict
-                );
-
-            newColor = (colorIdx == null) ? currentVariantData.getColor() : colors.get(colorIdx);
+            Color newColor = AuxiliarFunction.requireColor(
+                    colorService.getAll(),
+                    isUpdate
+                            ? String.format("""
+                                    Color actual: %s.
+                                    Si desea modificarlo ingrese el número del nuevo color:
+                                    """,
+                                    currentVariantData.getColor()
+                            )
+                            : "Ingrese el número del color:",
+                    true,
+                    isStrict
+            );
 
             // SIZE
-            NumericSize newSize = InputUtils.readNumericSize(
-                    String.format("""
-                            Talle actual: %s.
-                            Si desea modificarlo ingrese el número del nuevo Talle:
-                            """,
-                            currentVariantData.getSize()
-                    ),
+            NumericSize newSize = AuxiliarFunction.requireNumericSize(
+                    isUpdate
+                            ? String.format("""
+                                    Talle actual: %s.
+                                    Si desea modificarlo ingrese el número de la opción de nuevo Talle:
+                                    """,
+                                    currentVariantData.getSize()
+                            )
+                            : "Ingrese el número de la opción del Talle:",
                     isStrict
             );
-
-            newSize = (newSize == null) ? currentVariantData.getSize() : newSize;
 
             // TARGET GENDER
-            TargetGender newTargetGender = InputUtils.readTargetGender(
-                    String.format("""
-                            Género actual: %s.
-                            Si desea modificarlo ingrese el número del nuevo Género:
-                            """,
-                            currentVariantData.getTargetGender()
-                    ),
+            TargetGender newTargetGender = AuxiliarFunction.requireTargetGender(
+                    isUpdate
+                            ? String.format("""
+                                    Género actual: %s.
+                                    Si desea modificarlo ingrese el número del nuevo Género:
+                                    """,
+                                    currentVariantData.getTargetGender()
+                            )
+                            : "Ingrese el número del Género:",
                     isStrict
             );
-
-            newTargetGender = (newTargetGender == null) ? currentVariantData.getTargetGender() : newTargetGender;
 
             // DESCRIPTION
             String newDesc = InputUtils.readString(
-                    String.format("""
-                            Descripción actual: %s.
-                            Si desea modificarlo ingrese la nueva descripción:
-                            """,
-                            currentVariantData.getVariantDesc()
-                    ),
+                    isUpdate
+                            ? String.format("""
+                                    Descripción actual: %s.
+                                    Si desea modificarlo ingrese la nueva descripción:
+                                    """,
+                                    currentVariantData.getVariantDesc()
+                            )
+                            : "Ingrese la Descripción:",
                     isStrict
             );
-
-            newDesc = (newDesc == null) ? currentVariantData.getVariantDesc() : newDesc;
 
             // SKU
             String newSKU = InputUtils.readString(
-                    String.format("""
-                            SKU actual: %s.
-                            Si desea modificarlo ingrese el nuevo SKU:
-                            """,
-                            currentVariantData.getVariantSku()
-                    ),
+                    isUpdate
+                            ? String.format("""
+                                    SKU actual: %s.
+                                    Si desea modificarlo ingrese el nuevo SKU:
+                                    """,
+                                    currentVariantData.getVariantSku()
+                            )
+                            : "Ingrese el SKU:",
                     isStrict
             );
-
-            newSKU = (newSKU == null) ? currentVariantData.getVariantDesc() : newSKU;
 
             // PRICE
             BigDecimal newPrice = InputUtils.readPrice(
-                    String.format("""
-                            Precio actual: %s.
-                            Si desea modificarlo ingrese el nuevo Precio:
-                            """,
-                            currentVariantData.getVariantPrice()
-                    ),
+                    isUpdate
+                            ? String.format("""
+                                    Precio actual: %s.
+                                    Si desea modificarlo ingrese el nuevo Precio:
+                                    """,
+                                    currentVariantData.getVariantPrice()
+                            )
+                            : "Ingrese el Precio:",
                     isStrict
             );
-
-            newPrice = (newPrice == null) ? currentVariantData.getVariantPrice() : newPrice;
 
             // STOCK
             Integer newStock = InputUtils.readInt(
-                    String.format("""
-                            Stock actual: %d.
-                            Si desea modificarlo ingrese la nueva cantidad de stock:
-                            """,
-                            currentVariantData.getVariantStock()
-                    ),
+                    isUpdate
+                            ? String.format("""
+                                    Stock actual: %d.
+                                    Si desea modificarlo ingrese la nueva cantidad de stock:
+                                    """,
+                                    currentVariantData.getVariantStock()
+                            )
+                            : "Ingrese el Stock:",
                     isStrict
             );
-
-            newStock = (newStock == null) ? currentVariantData.getVariantStock() : newStock;
 
             // ROW STATUS
-            RowStatus newRowStatus = InputUtils.readRowStatus(
-                    String.format("""
-                            Estado actual: %s.
-                            Si desea modificarlo ingrese el número del nuevo Estado:
-                            """,
-                            currentVariantData.getRowStatus()
-                    ),
-                    isStrict
-            );
-
-            newRowStatus = (newRowStatus == null) ? currentVariantData.getRowStatus() : newRowStatus;
+            RowStatus newRowStatus = null;
+            if (isUpdate)
+                newRowStatus = AuxiliarFunction.requireRowStatus(
+                        String.format("""
+                                    Estado actual: %s.
+                                    Si desea modificarlo ingrese el número del nuevo Estado:
+                                    """,
+                                    currentVariantData.getRowStatus()
+                        ),
+                        isStrict
+                );
 
             ProductVariant newVariantData = new ProductVariant();
             newVariantData.setColor(newColor);
@@ -392,14 +486,15 @@ public class AdminMenu {
             newVariantData.setVariantStock(newStock);
             newVariantData.setRowStatus(newRowStatus);
 
-            product.updateVariant(currentVariantData.getVariantId(), newVariantData);
-
-            System.out.println("La variante fue actualizada con éxito.");
+            return newVariantData;
         } catch (Exception e) {
-            System.err.println("Error al actualizar la variante: " + e.getMessage());
+            System.err.format(
+                    "Error al %s la variante: %s",
+                    action,
+                    e.getMessage()
+            );
+            return null;
         }
-
-        renderAdminColors();
     }
 
 
@@ -407,8 +502,9 @@ public class AdminMenu {
 
 
 
-    // Auxiliar Functions
-    private List<Integer> toListColors(List<Color> colors) {
-        return ListPrinter.renderList("LISTADO DE COLORES", colors, true);
-    }
+
+
+
+
+
 }

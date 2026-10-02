@@ -54,8 +54,8 @@ public class VariantImage extends BaseEntity{
     public String toString() {
         return String.format(
                 "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - URL Imagen: %s - Orden Imagen: %d - Estado: %s",
-                this.variant.getProduct().getProductName(),
-                this.variant.getProduct().getProductCategory(),
+                this.variant.getProduct().getName(),
+                this.variant.getProduct().getCategory(),
                 ProductVariant.targetGenderDecode(this.variant.getTargetGender()),
                 this.variant.getColor().getColorName(),
                 this.variant.getSize(),

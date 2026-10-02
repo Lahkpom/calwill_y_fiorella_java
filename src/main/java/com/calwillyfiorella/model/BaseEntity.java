@@ -28,8 +28,25 @@ public abstract class BaseEntity {
         this.rowStatus = rowStatus;
         afterUpdate();
     }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
     public RowStatus getRowStatus() { return rowStatus; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+
+    public static void validateRowStatus(RowStatus rowStatus) {
+        if (rowStatus == null) {
+            throw new NullPointerException("rowStatus cannot be null");
+        }
+    }
+    public static void validateCreatedAt(LocalDateTime createdAt) {
+        if (createdAt == null) {
+            throw new NullPointerException("createdAt cannot be null");
+        }
+    }
 }
