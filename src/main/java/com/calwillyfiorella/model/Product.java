@@ -1,7 +1,7 @@
 package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.Category;
-import com.calwillyfiorella.model.enums.NumberSize;
+import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.util.ValidationUtils;
@@ -90,7 +90,7 @@ public class Product extends BaseEntity{
 
     public ProductVariant addVariant(
             Color           color,
-            NumberSize      size,
+            NumericSize size,
             TargetGender    targetGender,
             String          variantDesc,
             String          variantSku,
@@ -104,6 +104,21 @@ public class Product extends BaseEntity{
         this.variants.add(pv);
 
         return pv;
+    }
+
+    public ProductVariant updateVariant(UUID variantId, ProductVariant newVariant) {
+        ProductVariant currentVariant = this.variants.stream().filter(v -> v.getVariantId().equals(variantId)).findFirst().orElseThrow(() -> new IllegalStateException("Variante no encontrado"));
+
+        currentVariant.setColor(newVariant.getColor());
+        currentVariant.setSize(newVariant.getSize());
+        currentVariant.setTargetGender(newVariant.getTargetGender());
+        currentVariant.setVariantDesc(newVariant.getVariantDesc());
+        currentVariant.setVariantSku(newVariant.getVariantSku());
+        currentVariant.setVariantPrice(newVariant.getVariantPrice());
+        currentVariant.setVariantStock(newVariant.getVariantStock());
+        currentVariant.setRowStatus(newVariant.getRowStatus());
+
+        return currentVariant;
     }
 
     public void setProductCategory(Category productCategory) {

@@ -1,6 +1,6 @@
 package com.calwillyfiorella.model;
 
-import com.calwillyfiorella.model.enums.NumberSize;
+import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.util.ValidationUtils;
@@ -10,22 +10,27 @@ import java.util.*;
 import java.math.BigDecimal;
 
 public class ProductVariant extends BaseEntity {
-    private final UUID                variantId;
-    private final Product             product;
+    private UUID                variantId;
+    private Product             product;
+
     private final List<VariantImage>  images = new ArrayList<>();
 
     private Color           color;
-    private NumberSize      size;
+    private NumericSize     size;
     private TargetGender    targetGender;
     private String          variantDesc;
     private String          variantSku;
     private BigDecimal      variantPrice;
     private Integer         variantStock;
 
+    public ProductVariant() {
+        super();
+    }
+
     public ProductVariant(
             Product         product,
             Color           color,
-            NumberSize      size,
+            NumericSize size,
             TargetGender    targetGender,
             String          variantDesc,
             String          variantSku,
@@ -52,7 +57,7 @@ public class ProductVariant extends BaseEntity {
             UUID            variantId,
             Product         product,
             Color           color,
-            NumberSize      size,
+            NumericSize size,
             TargetGender    targetGender,
             String          variantDesc,
             String          variantSku,
@@ -181,7 +186,7 @@ public class ProductVariant extends BaseEntity {
         this.afterUpdate();
     }
 
-    public void setSize(NumberSize size) {
+    public void setSize(NumericSize size) {
         this.size = this.validateSize(size);
         this.afterUpdate();
     }
@@ -205,6 +210,11 @@ public class ProductVariant extends BaseEntity {
         this.variantPrice = this.validateAmountPrice(variantPrice);
         this.afterUpdate();
     }
+
+    public void setVariantStock(Integer variantStock) {
+        this.variantStock = this.validateStock(variantStock);
+        this.afterUpdate();
+    }
 //    SETTERS
 
 //    VALIDACIONES
@@ -220,7 +230,7 @@ public class ProductVariant extends BaseEntity {
         return Objects.requireNonNull(color, "color cannot be null");
     }
 
-    private NumberSize validateSize(NumberSize size) {
+    private NumericSize validateSize(NumericSize size) {
         return Objects.requireNonNull(size, "size cannot be null");
     }
 
@@ -242,7 +252,7 @@ public class ProductVariant extends BaseEntity {
     public Product              getProduct          () { return this.product; }
     public List<VariantImage>   getImages           () { return Collections.unmodifiableList(this.images); }
     public Color                getColor            () { return this.color; }
-    public NumberSize           getSize             () { return this.size; }
+    public NumericSize getSize             () { return this.size; }
     public TargetGender         getTargetGender     () { return this.targetGender; }
     public String               getVariantDesc      () { return this.variantDesc; }
     public String               getVariantSku       () { return this.variantSku; }

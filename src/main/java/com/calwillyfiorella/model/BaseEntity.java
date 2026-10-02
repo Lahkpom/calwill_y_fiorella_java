@@ -8,6 +8,8 @@ public abstract class BaseEntity {
     protected LocalDateTime createdAt;
     protected LocalDateTime updatedAt;
 
+    protected BaseEntity() {}
+
     protected BaseEntity(
             RowStatus       rowStatus,
             LocalDateTime   createdAt,

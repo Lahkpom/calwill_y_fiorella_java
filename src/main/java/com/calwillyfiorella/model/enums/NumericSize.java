@@ -1,6 +1,6 @@
 package com.calwillyfiorella.model.enums;
 
-public enum NumberSize {
+public enum NumericSize {
     T_18,
     T_19,
     T_20,

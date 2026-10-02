@@ -8,7 +8,7 @@ import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.Product;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.Category;
-import com.calwillyfiorella.model.enums.NumberSize;
+import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.model.enums.UserRole;
@@ -75,7 +75,7 @@ public final class DataSeeder {
         );
         art1.addVariant(
                 white,
-                NumberSize.T_18,
+                NumericSize.T_18,
                 TargetGender.NINIOS,
                 "Var 1",
                 "SKU-1",
@@ -84,7 +84,7 @@ public final class DataSeeder {
         );
         art1.addVariant(
                 black,
-                NumberSize.T_19,
+                NumericSize.T_19,
                 TargetGender.NINIAS,
                 "Var 2",
                 "SKU-2",
@@ -100,7 +100,7 @@ public final class DataSeeder {
         );
         art2.addVariant(
                 white,
-                NumberSize.T_18,
+                NumericSize.T_18,
                 TargetGender.HOMBRES,
                 "Var 3",
                 "SKU-3",
@@ -109,7 +109,7 @@ public final class DataSeeder {
         );
         art2.addVariant(
                 black,
-                NumberSize.T_19,
+                NumericSize.T_19,
                 TargetGender.MUJERES,
                 "Var 4",
                 "SKU-4",

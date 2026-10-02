@@ -7,14 +7,17 @@ import java.util.Set;
 public final class AuxiliarFunction {
     private AuxiliarFunction() {}
 
-    public static int requireUserOption(Integer totalOptions) {
-        return requireUserOption(totalOptions, "Ingresar opción: ");
+    public static Integer requireUserOption(Integer totalOptions, boolean isStrict) {
+        return requireUserOption(totalOptions, "Ingresar opción: ",  isStrict);
     }
 
-    public static int requireUserOption(Integer totalOptions, String prompt) {
+    public static Integer requireUserOption(Integer totalOptions, String prompt, boolean isStrict) {
         while (true) {
-            int option = InputUtils.readInt(prompt);
-            if (option < 1 || option > totalOptions) {
+            Integer option = InputUtils.readInt(prompt,  isStrict);
+
+            if (!isStrict && option == null) return null;
+
+            if (option == null || option < 1 || option > totalOptions) {
                 System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
                 continue;
             }
@@ -22,16 +25,19 @@ public final class AuxiliarFunction {
         }
     }
 
-    public static int requireUserOption(Collection<Integer> allowedOptions) {
-        return requireUserOption(allowedOptions, "Ingresar opción: ");
+    public static Integer requireUserOption(Collection<Integer> allowedOptions, boolean isStrict) {
+        return requireUserOption(allowedOptions, "Ingresar opción: ",  isStrict);
     }
 
-    public static int requireUserOption(Collection<Integer> allowedOptions, String prompt) {
+    public static Integer requireUserOption(Collection<Integer> allowedOptions, String prompt, boolean isStrict) {
         Set<Integer> validOptions = new HashSet<>(allowedOptions);
 
         while (true) {
-            int option = InputUtils.readInt(prompt);
-            if (!validOptions.contains(option)) {
+            Integer option = InputUtils.readInt(prompt, isStrict);
+
+            if (!isStrict && option == null) return null;
+
+            if (option == null || !validOptions.contains(option)) {
                 System.err.println("El valor ingresado no corresponde a ninguna de las opciones indicadas!");
                 continue;
             }
