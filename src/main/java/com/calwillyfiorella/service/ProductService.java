@@ -43,16 +43,14 @@ public class ProductService {
     }
 
     public void updateProduct(UUID productId, Product newProductData) {
-        validateProductId(newProductData.getId());
+        Product currentProductData = getProduct(productId);
+
         validateCategory(newProductData.getCategory());
-        validateProductName(newProductData.getName());
+        validateProductName(newProductData.getName(), productId);
         validateProductShortDesc(newProductData.getShortDesc());
         validateProductLongDesc(newProductData.getLongDesc());
         BaseEntity.validateRowStatus(newProductData.getRowStatus());
 
-        Product currentProductData = getProduct(productId);
-
-        currentProductData.setId(newProductData.getId());
         currentProductData.setCategory(newProductData.getCategory());
         currentProductData.setName(newProductData.getName());
         currentProductData.setShortDesc(newProductData.getShortDesc());
@@ -78,7 +76,7 @@ public class ProductService {
         Objects.requireNonNull(productId, "Product ID cannot be null");
 
         if (this.productRepository.findProduct(productId).isPresent())
-            throw new ProductAlreadyExistException("El nombre del producto ya existe!");
+            throw new ProductAlreadyExistException("El ID del producto ya existe en la lista!");
     }
 
     private void validateCategory(Category productCategory) {
@@ -86,9 +84,14 @@ public class ProductService {
     }
 
     private void validateProductName(String productName) {
+        validateProductName(productName, null);
+    }
+    private void validateProductName(String productName, UUID currentProductId) {
         ValidationUtils.requireNonBlank(productName, "Product name cannot be blank");
 
-        if (this.productRepository.findProduct(productName).isPresent())
+        Optional<Product> existingProduct = this.productRepository.findProduct(productName);
+
+        if (existingProduct.isPresent() && (currentProductId == null || !existingProduct.get().getId().equals(currentProductId)))
             throw new ProductAlreadyExistException("El nombre del producto ya existe!");
     }
 
