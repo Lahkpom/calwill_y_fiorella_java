@@ -43,6 +43,8 @@ public class ProductService {
     }
 
     public void updateProduct(UUID productId, Product newProductData) {
+        AuthService.checkActualUserIsAdmin();
+
         Product currentProductData = getProduct(productId);
 
         validateCategory(newProductData.getCategory());
@@ -62,9 +64,7 @@ public class ProductService {
         return ifProductExists(this.productRepository.findProduct(productName));
     }
 
-    public Product getProduct(UUID productId) {
-        return ifProductExists(this.productRepository.findProduct(productId));
-    }
+    public Product getProduct(UUID productId) { return ifProductExists(this.productRepository.findProduct(productId)); }
 
     private Product ifProductExists(Optional<Product> productOptional) {
         return productOptional.orElseThrow(ProductDoesNotExistException::new);

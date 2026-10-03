@@ -1,21 +1,16 @@
 package com.calwillyfiorella.model;
 
-import com.calwillyfiorella.exception.InvalidHexColorCodeException;
 import com.calwillyfiorella.model.enums.RowStatus;
-import com.calwillyfiorella.util.ValidationUtils;
 
 import java.time.LocalDateTime;
-import java.util.regex.Pattern;
 
 public class Color extends BaseEntity {
-    private static final Pattern HEX_PATTERN = Pattern.compile("^#[a-zA-Z0-9]{6}$");
-    private static Integer colorIdSeq = 0;
-
-    private final Integer colorId;
-
+    private Integer colorId;
     private String colorName;
     private String colorDesc;
     private String colorCode;
+
+    public Color() {}
 
     public Color(
             String  colorName,
@@ -23,7 +18,6 @@ public class Color extends BaseEntity {
             String  colorCode
     ) {
         this(
-                colorIdSeq + 1,
                 colorName,
                 colorDesc,
                 colorCode,
@@ -35,7 +29,6 @@ public class Color extends BaseEntity {
 
     /* Este constructor solo debe ser llamado para cargar desde registros provenientes de la DB */
     public Color (
-            Integer         colorId,
             String          colorName,
             String          colorDesc,
             String          colorCode,
@@ -44,29 +37,9 @@ public class Color extends BaseEntity {
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.colorId    = ValidationUtils.requireValidIntegerIdBySeq(colorIdSeq, colorId);
-        this.colorName  = this.validateColorName(colorName);
-        this.colorDesc  = this.validateColorDesc(colorDesc);
-        this.colorCode  = this.validateColorCode(colorCode);
-
-        colorIdSeq++;
-    }
-
-    private String validateColorName(String colorName) {
-        return ValidationUtils.requireNonBlank(colorName, "El nombre del color no puede ser nulo");
-    }
-
-    private String validateColorDesc(String colorDesc) {
-        return ValidationUtils.requireNonBlank(colorDesc, "La descripción del color no puede ser nulo");
-    }
-
-    private String validateColorCode(String colorCode) {
-        ValidationUtils.requireNonBlank(colorCode, "El código del color no puede ser nulo o vacío");
-
-        if (!HEX_PATTERN.matcher(colorCode).matches())
-            throw new InvalidHexColorCodeException();
-
-        return colorCode;
+        this.colorName  = colorName;
+        this.colorDesc  = colorDesc;
+        this.colorCode  = colorCode;
     }
 
     @Override
@@ -74,29 +47,24 @@ public class Color extends BaseEntity {
         return String.format("{ Color: %s, Cod Hex: %s, Status: %s }", this.colorName, this.colorCode, this.rowStatus);
     }
 
-    public void setColorName(String colorName) {
-        this.colorName  = this.validateColorName(colorName);
+    public void setId(Integer id) {
+        this.colorId = id;
+    }
+    public void setName(String colorName) {
+        this.colorName  = colorName;
         this.afterUpdate();
     }
-    public void setColorDesc(String colorDesc) {
-        this.colorDesc  = this.validateColorDesc(colorDesc);
+    public void setDesc(String colorDesc) {
+        this.colorDesc  = colorDesc;
         this.afterUpdate();
     }
-    public void setColorCode(String colorCode) {
-        this.colorCode  = this.validateColorCode(colorCode);
+    public void setCode(String colorCode) {
+        this.colorCode  = colorCode;
         this.afterUpdate();
     }
 
-    public Integer  getColorId  () {
-        return this.colorId;
-    }
-    public String   getColorName() {
-        return this.colorName;
-    }
-    public String   getColorDesc() {
-        return this.colorDesc;
-    }
-    public String   getColorCode() {
-        return this.colorCode;
-    }
+    public Integer getId() { return this.colorId; }
+    public String getName() { return this.colorName; }
+    public String getDesc() { return this.colorDesc; }
+    public String getCode() { return this.colorCode; }
 }

@@ -62,82 +62,140 @@ public class AdminMenu {
         if (allowedOptions.isEmpty()) render();
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Editar el Nombre de un Color"        , () -> updateColorName(colors, allowedOptions)),
-                MenuOption.of("Editar la Descripción de un Color"   , () -> updateColorDesc(colors, allowedOptions)),
-                MenuOption.of("Editar el Código de un Color"        , () -> updateColorCode(colors, allowedOptions)),
-                MenuOption.of("Cambiar el Estado de un Color"       , () -> updateColorStatus(colors, allowedOptions)),
-                MenuOption.of("Crear un nuevo Color"                , this::addNewColor)
+                MenuOption.of("Editar un Color"     , () -> updateColor(colors, allowedOptions)),
+                MenuOption.of("Crear un nuevo Color", this::createColor)
         );
 
         menuHelper.renderMenuOptions(options, this::render);
     }
-    private void updateColorName(List<Color> colors, List<Integer> allowedOptions) {
-        int     colorIdx    = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color a editar: ");
-        String  newName     = InputUtils.readString("Nuevo nombre: ");
+    private void updateColor(List<Color> colors, List<Integer> allowedOptions) {
+        Integer colorIdx = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color: ", false);
+        Color currentColorData = colors.get(colorIdx - 1);
 
         try {
-            colorService.updateColorName(colors.get(colorIdx - 1).getColorId(), newName);
-            System.out.println("Nombre del color actualizado con éxito.");
+            Color newColorData = createOrUpdateColorForm(true, currentColorData);
+
+            if (newColorData == null)
+                throw new IllegalStateException("El producto devuelto por el formulario de actualización de productos es un objeto nulo.");
+
+            if (newColorData.getName() == null) newColorData.setName(currentColorData.getName());
+            if (newColorData.getDesc() == null) newColorData.setDesc(currentColorData.getDesc());
+            if (newColorData.getCode() == null) newColorData.setCode(currentColorData.getCode());
+            if (newColorData.getRowStatus() == null) newColorData.setRowStatus(currentColorData.getRowStatus());
+
+            colorService.updateColor(currentColorData.getId(), newColorData);
+
+            System.out.println("El color fue actualizado con éxito.");
         } catch (Exception e) {
-            System.err.println("Error al actualizar el nombre del color: " + e.getMessage());
+            System.err.println("Error al actualizar el color: " + e.getMessage());
         }
 
         renderAdminColors();
     }
-    private void updateColorDesc(List<Color> colors, List<Integer> allowedOptions) {
-        int     colorIdx    = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color a editar: ");
-        String  newDesc     = InputUtils.readString("Nueva Descripción: ");
-
+    private void createColor() {
         try {
-            colorService.updateColorDesc(colors.get(colorIdx - 1).getColorId(), newDesc);
-            System.out.println("Descripción del color actualizado con éxito.");
+            Color newColorData = createOrUpdateColorForm(false, null);
+
+            if (newColorData == null)
+                throw new IllegalStateException("El Color devuelto por el formulario de creación de Colores es un objeto nulo.");
+
+            colorService.createColor(newColorData);
+
+            System.out.println("el Color fue creado con éxito.");
         } catch (Exception e) {
-            System.err.println("Error al actualizar la Descripción del color: " + e.getMessage());
+            System.err.println("Error al crear el Color: " + e.getMessage());
         }
 
         renderAdminColors();
     }
-    private void updateColorCode(List<Color> colors, List<Integer> allowedOptions) {
-        int     colorIdx    = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color a editar: ");
-        String  newCode     = InputUtils.readString("Nuevo Código: ");
+    private Color createOrUpdateColorForm(boolean isUpdate, Color currentColorData) {
+        if (isUpdate && currentColorData == null)
+            throw new IllegalArgumentException("Se indicó que es un update pero no se entregó el color actual.");
+
+        boolean isStrict    = !isUpdate;
+        String  action      = (isUpdate) ? "actualizar" : "crear";
+
+        MenuHelper.printMenuTitle(
+                String.format(
+                        "FORMULARIO PARA %s COLOR: ",
+                        action
+                )
+        );
+
+        if (isUpdate)
+            System.out.format("""
+                    ¡¡¡ Para mantener el valor anterior en cada opción solo presione enter !!!
+                    -----------------------------------------------------------
+                    """);
 
         try {
-            colorService.updateColorCode(colors.get(colorIdx - 1).getColorId(), newCode);
-            System.out.println("Código del color actualizado con éxito.");
-        } catch (Exception e) {
-            System.err.println("Error al actualizar el Código del color: " + e.getMessage());
-        }
-
-        renderAdminColors();
-    }
-    private void updateColorStatus(List<Color> colors, List<Integer> allowedOptions) {
-        int colorIdx = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color a editar: ");
-
-        try {
-            colorService.updateColorStatus(
-                    colors.get(colorIdx - 1).getColorId(),
-                    InputUtils.readRowStatus()
+            // NAME
+            String newName = InputUtils.readString(
+                    isUpdate
+                            ? String.format("""
+                                    Nombre actual: %s.
+                                    Si desea modificarlo ingrese el nuevo Nombre:
+                                    """,
+                            currentColorData.getName()
+                    )
+                            : "Ingrese el Nombre:",
+                    isStrict
             );
-            System.out.println("Estado del color actualizado con éxito.");
+
+            // DESC
+            String newDesc = InputUtils.readString(
+                    isUpdate
+                            ? String.format("""
+                                    Descripción actual: %s.
+                                    Si desea modificarlo ingrese la nueva Descripción:
+                                    """,
+                            currentColorData.getName()
+                    )
+                            : "Ingrese la Descripción:",
+                    isStrict
+            );
+
+            // LONG DESC
+            String newCode = InputUtils.readString(
+                    isUpdate
+                            ? String.format("""
+                                    Descripción Larga actual: %s.
+                                    Si desea modificarlo ingrese el nuevo código:
+                                    """,
+                                    currentColorData.getCode()
+                    )
+                            : "Ingrese el código:",
+                    isStrict
+            );
+
+            // ROW STATUS
+            RowStatus newRowStatus = null;
+            if (isUpdate)
+                newRowStatus = AuxiliarFunction.requireRowStatus(
+                        String.format("""
+                                    Estado actual: %s.
+                                    Si desea modificarlo ingrese el número del nuevo Estado:
+                                    """,
+                                currentColorData.getRowStatus()
+                        ),
+                        isStrict
+                );
+
+            Color newColorData = new Color();
+            newColorData.setName(newName);
+            newColorData.setDesc(newDesc);
+            newColorData.setCode(newCode);
+            newColorData.setRowStatus(newRowStatus);
+
+            return newColorData;
         } catch (Exception e) {
-            System.err.println("Error al actualizar el Estado del color: " + e.getMessage());
+            System.err.format(
+                    "Error al %s el color: %s",
+                    action,
+                    e.getMessage()
+            );
+            return null;
         }
-
-        renderAdminColors();
-    }
-    private void addNewColor() {
-        MenuHelper.printMenuTitle("FORMULARIO INICIO DE CREACIÓN DE COLOR:");
-        String colorName = InputUtils.readString("Nombre del color: ");
-        String colorDesc = InputUtils.readString("Descripción del color: ");
-        String colorCode = InputUtils.readString("Código del color: ");
-
-        try {
-            colorService.createColor(colorName, colorDesc, colorCode);
-        } catch (Exception e) {
-            System.err.println("Error al crear nuevo color: " + e.getMessage());
-        }
-
-        renderAdminColors();
     }
 
     private void renderAdminProducts() {
@@ -225,7 +283,7 @@ public class AdminMenu {
                                     Nombre actual: %s.
                                     Si desea modificarlo ingrese el nuevo Nombre:
                                     """,
-                            currentProductData.getName()
+                                    currentProductData.getName()
                     )
                             : "Ingrese el Nombre:",
                     isStrict
@@ -238,7 +296,7 @@ public class AdminMenu {
                                     Descripción Corta actual: %s.
                                     Si desea modificarlo ingrese la nueva Descripción Corta:
                                     """,
-                            currentProductData.getName()
+                                    currentProductData.getShortDesc()
                     )
                             : "Ingrese la Descripción Corta:",
                     isStrict
@@ -251,7 +309,7 @@ public class AdminMenu {
                                     Descripción Larga actual: %s.
                                     Si desea modificarlo ingrese la nueva Descripción Larga:
                                     """,
-                            currentProductData.getName()
+                                    currentProductData.getLongDesc()
                     )
                             : "Ingrese la Descripción Larga:",
                     isStrict
@@ -265,7 +323,7 @@ public class AdminMenu {
                                     Estado actual: %s.
                                     Si desea modificarlo ingrese el número del nuevo Estado:
                                     """,
-                                currentProductData.getRowStatus()
+                                    currentProductData.getRowStatus()
                         ),
                         isStrict
                 );

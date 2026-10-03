@@ -63,7 +63,7 @@ public class CustomerMenu {
     }
 
     private void renderProductVariants(List<Product> products, List<Integer> allowedProductOptions) {
-        int idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ");
+        int idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ", true);
 
         try {
             List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getId()).getVariants();
@@ -84,9 +84,9 @@ public class CustomerMenu {
     }
 
     private void addToCart(List<ProductVariant> variants, List<Integer> allowedVariantsOptions) {
-        int variantIdx = AuxiliarFunction.requireUserOption(allowedVariantsOptions, "Número de la variante: ");
+        int variantIdx = AuxiliarFunction.requireUserOption(allowedVariantsOptions, "Número de la variante: ", true);
 
-        int qty = InputUtils.readInt("Cantidad: ");
+        int qty = InputUtils.readInt("Cantidad: ", true);
 
         try {
             cartService.addItem(AuthService.getActualUser(), variants.get(variantIdx - 1), qty);
@@ -124,8 +124,8 @@ public class CustomerMenu {
         menuHelper.renderMenuOptions(options, () -> render(() -> {}));
     }
     private void updateQuantity(List<CartItem> userCart) {
-        int idx         = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item cuya cantidad desea modificar: ");
-        int quantity    = InputUtils.readInt("Ingrese la nueva cantidad que desa asignar: ");
+        int idx         = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item cuya cantidad desea modificar: ", true);
+        int quantity    = InputUtils.readInt("Ingrese la nueva cantidad que desa asignar: ", true);
 
         try {
             cartService.updateQuantity(userCart.get(idx - 1).getItemId(), quantity);
@@ -137,7 +137,7 @@ public class CustomerMenu {
         renderCartItems();
     }
     private void removeCartItem(List<CartItem> userCart) {
-        int idx = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item que desea eliminar del carrito: ");
+        int idx = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item que desea eliminar del carrito: ", true);
 
         try {
             cartService.removeItem(userCart.get(idx - 1).getItemId());

@@ -66,7 +66,7 @@ public final class MenuHelper {
         }
 
         // Solicitar al usuario que ingrese la opción que desea
-        int selectedOption = AuxiliarFunction.requireUserOption(fullOptions.size());
+        int selectedOption = AuxiliarFunction.requireUserOption(fullOptions.size(), true);
 
         // Ejecutar la acción asociada
         fullOptions.get(selectedOption - 1).action().run();

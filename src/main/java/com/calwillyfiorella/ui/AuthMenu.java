@@ -33,8 +33,8 @@ public class AuthMenu {
 
     public void logIn(boolean isAdmin) {
         MenuHelper.printMenuTitle("FORMULARIO INICIO DE SESIÓN");
-        String email    = InputUtils.readString("Ingrese su e-mail: ");
-        String password = InputUtils.readString("Ingrese su contraseña: ");
+        String email    = InputUtils.readString("Ingrese su e-mail: ", true);
+        String password = InputUtils.readString("Ingrese su contraseña: ", true);
 
         try {
             authService.userLogin(email, password, isAdmin);
@@ -56,9 +56,9 @@ public class AuthMenu {
 
     public void signUp(boolean isAdmin) {
         MenuHelper.printMenuTitle("FORMULARIO CREACIÓN DE CUENTA");
-        String name     = InputUtils.readString("Ingrese el Nombre: ");
-        String email    = InputUtils.readString("Ingrese el e-Mail: ");
-        String password = InputUtils.readString("Ingrese la Contraseña: ");
+        String name     = InputUtils.readString("Ingrese el Nombre: ", true);
+        String email    = InputUtils.readString("Ingrese el e-Mail: ", true);
+        String password = InputUtils.readString("Ingrese la Contraseña: ", true);
 
         try {
             userService.createUser(
