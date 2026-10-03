@@ -205,9 +205,9 @@ public class AdminMenu {
         if (allowedOptions.isEmpty()) render();
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Editar  un Producto"                         , () -> updateProduct(products, allowedOptions)),
-                MenuOption.of("Gestionar Variantes de un Producto"          , () -> renderAdminVariants(products, allowedOptions)),
-                MenuOption.of("Crear un nuevo Producto"                     , this::createProduct)
+                MenuOption.of("Editar un Producto"                  , () -> updateProduct(products, allowedOptions)),
+                MenuOption.of("Gestionar Variantes de un Producto"  , () -> renderAdminVariants(products, allowedOptions)),
+                MenuOption.of("Crear un nuevo Producto"             , this::createProduct)
         );
 
         menuHelper.renderMenuOptions(options, this::render);
@@ -275,6 +275,7 @@ public class AdminMenu {
 
         try {
             // CATEGORY (POR EL MOMENTO SOLO TENEMOS CATEGORÍA CALZADO)
+            Category newCategory = Category.CALZADO;
 
             // NAME
             String newName = InputUtils.readString(
@@ -329,6 +330,7 @@ public class AdminMenu {
                 );
 
             Product newProductData = new Product();
+            newProductData.setCategory(newCategory);
             newProductData.setName(newName);
             newProductData.setShortDesc(newShortDesc);
             newProductData.setLongDesc(newLongDesc);

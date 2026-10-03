@@ -34,7 +34,7 @@ public final class MenuHelper {
 
         // Opción 'Cerrar Sesión' (Solo si detecta un usuario con sesión activa)
         if (AuthService.getActualUser() != null) fullOptions.add(MenuOption.of("Cerrar Sesión", () -> {
-            String userName = AuthService.getActualUser().getUserName();
+            String userName = AuthService.getActualUser().getName();
             authService.logOut();
             System.out.format("""
                     ##########################################################

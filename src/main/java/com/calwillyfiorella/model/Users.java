@@ -2,15 +2,12 @@ package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.UserRole;
-import com.calwillyfiorella.util.ValidationUtils;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 public class Users extends BaseEntity {
-    private final UUID userId;
-
+    private UUID            userId;
     private UserRole        userRole;
     private String          userPassword;
     private String          userName;
@@ -21,6 +18,8 @@ public class Users extends BaseEntity {
     private Integer         failedLoginsAttempt;
     private LocalDateTime   lockedUntil;
     private LocalDateTime   lastLoginAt;
+
+    public Users() {}
 
     public Users(
             UUID            userId,
@@ -39,15 +38,15 @@ public class Users extends BaseEntity {
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.userId                 = Objects.requireNonNull(userId, "User id cannot be null");
-        this.userRole               = this.validateUserRole(userRole);
-        this.userPassword           = this.validateUserPassword(userPassword);
-        this.userName               = this.validateUserName(userName);
-        this.usereMail              = this.validateUsereMail(usereMail);
-        this.userPhone              = this.validateUserPhone(userPhone);
+        this.userId                 = userId;
+        this.userRole               = userRole;
+        this.userPassword           = userPassword;
+        this.userName               = userName;
+        this.usereMail              = usereMail;
+        this.userPhone              = userPhone;
         this.companyName            = companyName;
         this.iseMailVerified        = iseMailVerified;
-        this.failedLoginsAttempt    = this.validateFiledLoginAttempt(failedLoginsAttempt);
+        this.failedLoginsAttempt    = failedLoginsAttempt;
         this.lockedUntil            = lockedUntil;
         this.lastLoginAt            = lastLoginAt;
     }
@@ -78,61 +77,36 @@ public class Users extends BaseEntity {
         );
     }
 
-    public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
-    public void setUserRole(UserRole userRole) { this.userRole = userRole; }
-    public void setUserPassword(String userPassword) { this.userPassword = userPassword; }
-    public void setUserName(String userName) { this.userName = userName; }
+    public void setId(UUID userId) { this.userId = userId; }
+    public void setPhone(String userPhone) { this.userPhone = userPhone; }
+    public void setRole(UserRole userRole) { this.userRole = userRole; }
+    public void setEmail(String usereMail) { this.usereMail = usereMail; }
+    public void setPassword(String userPassword) { this.userPassword = userPassword; }
+    public void setName(String userName) { this.userName = userName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
     public void setIseMailVerified(boolean iseMailVerified) { this.iseMailVerified = iseMailVerified; }
     public void setFailedLoginsAttempt(Integer failedLoginsAttempt) { this.failedLoginsAttempt = failedLoginsAttempt; }
     public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
     public void setLockedUntil(LocalDateTime lockedUntil) { this.lockedUntil = lockedUntil; }
 
-    private UserRole validateUserRole(UserRole userRole) {
-        return Objects.requireNonNull(userRole, "User role cannot be null");
-    }
-
-    private String validateUserPassword(String userPassword) {
-        return ValidationUtils.requireNonBlank(userPassword, "User password cannot be null");
-    }
-
-    private String validateUserName(String userName) {
-        return ValidationUtils.requireNonBlank(userName, "Username cannot be null");
-    }
-
-    private String validateUsereMail(String usereMail) {
-        // Hay que ver cómo verificar el formato
-        return ValidationUtils.requireNonBlank(usereMail, "Usere mail cannot be null");
-    }
-
-    private String validateUserPhone(String userPhone) {
-        // Modificar esto, phone si puede ser null, solo verificar formato
-//        return ValidationUtils.requireNonBlank(userPhone, "User phone cannot be null");
-        return userPhone;
-    }
-
-    private Integer validateFiledLoginAttempt(Integer filedLoginAttempt) {
-        return ValidationUtils.requireNonNegative(filedLoginAttempt, "Filed login attempt cannot be negative");
-    }
-
     public boolean isAdmin() { return this.userRole.equals(UserRole.ADMIN) || this.userRole.equals(UserRole.SUPER_ADMIN); }
 
-    public UUID getUserId() {
+    public UUID getId() {
         return userId;
     }
-    public UserRole getUserRole() {
+    public UserRole getRole() {
         return userRole;
     }
-    public String getUserPassword() {
+    public String getPassword() {
         return userPassword;
     }
-    public String getUserName() {
+    public String getName() {
         return userName;
     }
-    public String getUsereMail() {
+    public String geteMail() {
         return usereMail;
     }
-    public String getUserPhone() {
+    public String getPhone() {
         return userPhone;
     }
     public String getCompanyName() {
@@ -150,6 +124,4 @@ public class Users extends BaseEntity {
     public LocalDateTime getLastLoginAt() {
         return lastLoginAt;
     }
-
-
 }

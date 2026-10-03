@@ -45,7 +45,7 @@ public class AuthMenu {
                     Bienvenido %s!
                     -------------------------
                     """,
-                    current.getUserName()
+                    current.getName()
             );
         } catch (Exception e) {
             System.err.println("Error al iniciar sesión: " + e.getMessage());
@@ -60,16 +60,14 @@ public class AuthMenu {
         String email    = InputUtils.readString("Ingrese el e-Mail: ", true);
         String password = InputUtils.readString("Ingrese la Contraseña: ", true);
 
+        Users newUser = new Users();
+        newUser.setRole(isAdmin ? UserRole.ADMIN : UserRole.CUSTOMER);
+        newUser.setName(name);
+        newUser.setPassword(password);
+        newUser.setEmail(email);
+
         try {
-            userService.createUser(
-                    isAdmin ? AuthService.getActualUser() : null,
-                    isAdmin ? UserRole.ADMIN : UserRole.CUSTOMER,
-                    password,
-                    name,
-                    email,
-                    null,
-                    null
-            );
+            userService.createUser(newUser);
             System.out.println("Creación de cuenta exitosa!");
             logIn(isAdmin);
         } catch (Exception e) {

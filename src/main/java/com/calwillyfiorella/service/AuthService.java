@@ -12,7 +12,7 @@ public class AuthService {
     public void userLogin(String eMail, String password, boolean isAdmin) {
         Users user = this.userService.getUser(eMail);
 
-        if (!user.getUserPassword().equals(password))
+        if (!user.getPassword().equals(password))
             throw new IllegalArgumentException("La contraseña ingresada no es válida.");
 
         if (isAdmin && !user.isAdmin())

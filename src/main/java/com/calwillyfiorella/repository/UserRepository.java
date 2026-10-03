@@ -2,10 +2,7 @@ package com.calwillyfiorella.repository;
 
 import com.calwillyfiorella.model.Users;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class UserRepository {
     private final List<Users> users;
@@ -18,7 +15,17 @@ public class UserRepository {
 
     public Optional<Users> findByeMail(String usereMail) {
         return this.users.stream()
-                .filter(u -> u.getUsereMail().equals(usereMail))
+                .filter(u -> u.geteMail().equalsIgnoreCase(usereMail))
+                .findFirst();
+    }
+    public Optional<Users> findById(UUID userId) {
+        return this.users.stream()
+                .filter(u -> u.getId().equals(userId))
+                .findFirst();
+    }
+    public Optional<Users> findByPhone(String userPhone) {
+        return this.users.stream()
+                .filter(u -> u.getPhone().equals(userPhone))
                 .findFirst();
     }
 

@@ -3,7 +3,6 @@ package com.calwillyfiorella.service;
 import com.calwillyfiorella.exception.ColorAlreadyExistException;
 import com.calwillyfiorella.exception.ColorDoesNotExistException;
 import com.calwillyfiorella.exception.InvalidHexColorCodeException;
-import com.calwillyfiorella.exception.ProductAlreadyExistException;
 import com.calwillyfiorella.model.BaseEntity;
 import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.enums.RowStatus;
@@ -25,7 +24,9 @@ public class ColorService {
 
     public List<Color> getAll() { return colorRepository.findAll(); }
 
-    public Color getColor(Integer colorId) { return ifColorExits(this.colorRepository.findById(colorId)); }
+    public Color getColorById(Integer colorId) { return ifColorExits(this.colorRepository.findById(colorId)); }
+    public Color getColorByName(String colorName) { return ifColorExits(this.colorRepository.findByName(colorName)); }
+    public Color getColorByHexCode(String colorCode) { return ifColorExits(this.colorRepository.findByHexCod(colorCode)); }
 
     public void createColor(Color color) {
         AuthService.checkActualUserIsAdmin();
@@ -51,7 +52,7 @@ public class ColorService {
     public void updateColor(Integer colorId, Color newColorData) {
         AuthService.checkActualUserIsAdmin();
 
-        Color currentColorData = getColor(colorId);
+        Color currentColorData = getColorById(colorId);
 
         validateColorName(newColorData.getName(), colorId);
         validateColorDesc(newColorData.getDesc());
@@ -81,8 +82,8 @@ public class ColorService {
     private void validateColorId(Integer colorId) {
         Objects.requireNonNull(colorId, "Color ID cannot be null.");
 
-        if (this.colorRepository.findById(colorId).isPresent())
-            throw new ProductAlreadyExistException("El ID del color ya existe en la lista!");
+        if (getColorById(colorId) != null)
+            throw new ColorAlreadyExistException("El ID del color ya existe en la lista!");
     }
     private void validateColorName(String colorName) {
         validateColorName(colorName, null);

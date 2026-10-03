@@ -15,7 +15,7 @@ public class ProductRepository {
 
     public Optional<Product> findProduct(String name) {
         return this.products.stream()
-                .filter(p -> p.getName().equals(name))
+                .filter(p -> p.getName().equalsIgnoreCase(name))
                 .findFirst();
     }
 

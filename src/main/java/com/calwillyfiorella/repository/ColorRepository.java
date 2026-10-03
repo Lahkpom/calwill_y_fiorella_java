@@ -25,7 +25,7 @@ public class ColorRepository {
 
     public Optional<Color> findByName(String colorName) {
         return this.colors.stream()
-                .filter(c -> c.getName().equals(colorName))
+                .filter(c -> c.getName().equalsIgnoreCase(colorName))
                 .findFirst();
     }
 
@@ -37,7 +37,7 @@ public class ColorRepository {
 
     public Optional<Color> findByHexCod(String colorCode) {
         return this.colors.stream().filter(
-                c -> c.getCode().equals(colorCode)
+                c -> c.getCode().equalsIgnoreCase(colorCode)
         ).findFirst();
     }
 

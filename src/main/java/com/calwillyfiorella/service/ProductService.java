@@ -87,7 +87,7 @@ public class ProductService {
         validateProductName(productName, null);
     }
     private void validateProductName(String productName, UUID currentProductId) {
-        ValidationUtils.requireNonBlank(productName, "Product name cannot be blank");
+        ValidationUtils.requireNonBlank(productName, "Product name cannot be blank.");
 
         Optional<Product> existingProduct = this.productRepository.findProduct(productName);
 
@@ -96,10 +96,10 @@ public class ProductService {
     }
 
     private void validateProductShortDesc(String productShortDesc) {
-        ValidationUtils.requireNonBlank(productShortDesc, "Product short desc cannot be blank");
+        ValidationUtils.requireNonBlank(productShortDesc, "Product short desc cannot be blank.");
     }
 
     private void validateProductLongDesc(String productLongDesc) {
-        ValidationUtils.requireNonBlank(productLongDesc, "Product long desc cannot be blank");
+        ValidationUtils.requireNonBlank(productLongDesc, "Product long desc cannot be blank.");
     }
 }
