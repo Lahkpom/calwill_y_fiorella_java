@@ -181,6 +181,13 @@ public class ProductVariant extends BaseEntity {
 //    UTIL FUNCTIONS
 
 //    SETTERS
+    public void setId(UUID variantId) {
+        this.variantId = variantId;
+    }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
     public void setColor(Color color) {
         this.color = this.validateColor(color);
         this.afterUpdate();

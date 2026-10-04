@@ -103,10 +103,12 @@ public class Product extends BaseEntity{
     public void addVariant(ProductVariant variant) {
         if (variant == null) throw new NullPointerException("Variant cannot be null");
 
-        // Cuando se de este caso hay que ver de preguntarle al usuario si es que quiere cambiarle el Producto a la Variante
-        if (!variant.getProduct().getId().equals(this.productId)) throw new IllegalArgumentException("La producVariant ingresada no corresponde a una variante de este producto");
+        if (variant.getVariantId() == null) variant.setId(UUID.randomUUID());
 
-        if (this.variants.stream().anyMatch(v -> variant.getVariantId().equals(v.getVariantId()))) throw new IllegalArgumentException("La vairante ya se encuentra ingresada en la lista de variantes de este producto");
+        // Cuando se de este caso hay que ver de preguntarle al usuario si es que quiere cambiarle el Producto a la Variante
+        if (!variant.getProduct().getId().equals(this.productId)) throw new IllegalArgumentException("La productVariant ingresada no corresponde a una variante de este producto");
+
+        if (this.variants.stream().anyMatch(v -> v.getVariantId().equals(variant.getVariantId()))) throw new IllegalArgumentException("La vairante ya se encuentra ingresada en la lista de variantes de este producto");
 
         this.variants.add(variant);
     }

@@ -1,7 +1,7 @@
 package com.calwillyfiorella.ui;
 
 import com.calwillyfiorella.service.*;
-import com.calwillyfiorella.ui.menuUtils.*;
+import com.calwillyfiorella.ui.utils.*;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class MainMenu {
     }
 
     private void renderManual() {
-        com.calwillyfiorella.ui.menuUtils.MenuHelper.printMenuTitle("MANUAL DEL SISTEMA");
+        com.calwillyfiorella.ui.utils.MenuHelper.printMenuTitle("MANUAL DEL SISTEMA");
         System.out.format("""
                 -----------------------
                 About:

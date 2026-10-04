@@ -1,13 +1,6 @@
 package com.calwillyfiorella.util;
 
-import com.calwillyfiorella.model.ProductVariant;
-import com.calwillyfiorella.model.enums.NumericSize;
-import com.calwillyfiorella.model.enums.RowStatus;
-import com.calwillyfiorella.model.enums.TargetGender;
-import com.calwillyfiorella.ui.menuUtils.MenuHelper;
-
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Scanner;
 
 public final class InputUtils {
@@ -21,7 +14,7 @@ public final class InputUtils {
 
     public static Integer readInt(String prompt, boolean isStrict) {
         while (true) {
-            System.out.println(prompt);
+            System.out.print(prompt);
             String input = scanner.nextLine().trim();
 
             if (!isStrict && input.isBlank()) return null;
@@ -36,7 +29,7 @@ public final class InputUtils {
 
     public static double readDouble(String prompt) {
         while (true) {
-            System.out.println(prompt);
+            System.out.print(prompt);
             String input = scanner.nextLine().trim();
 
             try {
@@ -78,13 +71,13 @@ public final class InputUtils {
 
     public static String readString(String prompt, boolean isStrict) {
         while (true) {
-            System.out.println(prompt);
+            System.out.print(prompt);
             String input = scanner.nextLine().trim();
 
             if (!isStrict && input.isBlank()) return null;
 
             if (input.isBlank()) {
-                System.err.println("No puede ingresar un texto vacío.");
+                System.err.format("%nNo puede ingresar un texto vacío.%n");
                 continue;
             }
 

@@ -6,9 +6,9 @@ import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.CartService;
 import com.calwillyfiorella.service.ProductService;
-import com.calwillyfiorella.ui.viewUtils.ListPrinter;
+import com.calwillyfiorella.ui.utils.ListPrinter;
 import com.calwillyfiorella.util.AuxiliarFunction;
-import com.calwillyfiorella.ui.menuUtils.*;
+import com.calwillyfiorella.ui.utils.*;
 import com.calwillyfiorella.util.InputUtils;
 
 import java.math.BigDecimal;
@@ -40,9 +40,10 @@ public class CustomerMenu {
         }
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver Productos"   , this::renderProducts),
-                MenuOption.of("Ver mi Carrito"  , this::renderCartItems),
-                MenuOption.of("Ver mis Compras" , () -> System.out.println("FUNCIÓN EN DESARROLLO"))
+                MenuOption.of("Ver mi información"  , () -> authMenu.renderUserInfo(() -> render(onBack))),
+                MenuOption.of("Ver Productos"       , this::renderProducts),
+                MenuOption.of("Ver mi Carrito"      , this::renderCartItems),
+                MenuOption.of("Ver mis Compras"     , () -> System.out.println("FUNCIÓN EN DESARROLLO"))
         );
 
         menuHelper.renderMenuOptions(options, onBack);

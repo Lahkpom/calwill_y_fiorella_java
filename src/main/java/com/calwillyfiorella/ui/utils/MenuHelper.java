@@ -1,4 +1,4 @@
-package com.calwillyfiorella.ui.menuUtils;
+package com.calwillyfiorella.ui.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +73,9 @@ public final class MenuHelper {
     }
 
     /**
-     * Genera un formato de título.
+     * Genera un formato de título al que se le aplica toUpperCase().
      *
-     * @param title El nombre que debe tener el título (Se le aplicará .toUpperCas())
+     * @param title El nombre que debe tener el título
      */
     public static void printMenuTitle(String title) {
         System.out.format("""

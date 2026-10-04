@@ -1,4 +1,4 @@
-package com.calwillyfiorella.ui.menuUtils;
+package com.calwillyfiorella.ui.utils;
 
 import com.calwillyfiorella.util.ValidationUtils;
 

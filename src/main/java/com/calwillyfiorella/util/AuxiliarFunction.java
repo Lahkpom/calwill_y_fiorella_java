@@ -5,8 +5,8 @@ import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
-import com.calwillyfiorella.ui.menuUtils.MenuHelper;
-import com.calwillyfiorella.ui.viewUtils.ListPrinter;
+import com.calwillyfiorella.ui.utils.MenuHelper;
+import com.calwillyfiorella.ui.utils.ListPrinter;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -65,7 +65,7 @@ public final class AuxiliarFunction {
                 isStrict
         );
 
-        return (colorIdx == null) ? null : colors.get(colorIdx);
+        return (colorIdx == null) ? null : colors.get(colorIdx - 1);
     }
 
     public static List<Integer> toListColors(List<Color> colors,  boolean isAdmin) {

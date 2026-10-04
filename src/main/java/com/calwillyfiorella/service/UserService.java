@@ -48,7 +48,7 @@ public class UserService {
         validateUserPassword(newUserData.getPassword());
         validateUserName(newUserData.getName());
         newUserData.setPhone(validateUserPhone(newUserData.getPhone()));
-        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
+//        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
 
         this.userRepository.save(newUserData);
     }
@@ -56,20 +56,18 @@ public class UserService {
     public void updateUser(UUID userId, Users newUserData) {
         Users currentUserData = getUser(userId);
 
-        validateUserId(newUserData.getId());
         validateUserRole(newUserData.getRole());
         validateUserPassword(newUserData.getPassword());
         validateUserName(newUserData.getName());
-        newUserData.setPhone(validateUserPhone(newUserData.getPhone()));
-        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
+        newUserData.setPhone(validateUserPhone(newUserData.getPhone(), userId));
+//        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
         BaseEntity.validateRowStatus(newUserData.getRowStatus());
 
-        currentUserData.setId(newUserData.getId());
         currentUserData.setRole(newUserData.getRole());
         currentUserData.setPassword(newUserData.getPassword());
         currentUserData.setName(newUserData.getName());
         currentUserData.setPhone(newUserData.getPhone());
-        currentUserData.setFailedLoginsAttempt(newUserData.getFailedLoginsAttempt());
+//        currentUserData.setFailedLoginsAttempt(newUserData.getFailedLoginsAttempt());
         currentUserData.setRowStatus(newUserData.getRowStatus());
     }
 
@@ -90,7 +88,7 @@ public class UserService {
         Objects.requireNonNull(userId, "User id cannot not be null!");
 
         if (getUser(userId) != null)
-            throw new UserAlreadyExistException("El ID del color ya existe en la lista!");
+            throw new UserAlreadyExistException("El ID del Usuario ya existe en la lista!");
     }
     private void validateUserRole(UserRole userRole) {
         Objects.requireNonNull(userRole, "User role cannot be null");
@@ -131,7 +129,7 @@ public class UserService {
 
         return validPhone;
     }
-    private void validateFiledLoginAttempt(Integer filedLoginAttempt) {
-        ValidationUtils.requireNonNegative(filedLoginAttempt, "Filed login attempt cannot be negative");
-    }
+//    private void validateFiledLoginAttempt(Integer filedLoginAttempt) {
+//        ValidationUtils.requireNonNegative(filedLoginAttempt, "Filed login attempt cannot be negative");
+//    }
 }

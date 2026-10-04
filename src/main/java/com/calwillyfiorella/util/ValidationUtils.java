@@ -71,9 +71,8 @@ public final class ValidationUtils {
      * @throws IllegalArgumentException si es nulo o si no tiene exactamente 10 dígitos.
      */
     public static String validateAndGetPhone(String rawPhone) {
-        if (rawPhone == null) {
+        if (rawPhone == null)
             throw new IllegalArgumentException("El número de teléfono no puede ser nulo.");
-        }
 
         // Remueve lo que NO sea un dígito numérico (0-9)
         String digitsOnly = rawPhone.replaceAll("[^0-9]", "");

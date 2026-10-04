@@ -78,16 +78,46 @@ public class Users extends BaseEntity {
     }
 
     public void setId(UUID userId) { this.userId = userId; }
-    public void setPhone(String userPhone) { this.userPhone = userPhone; }
-    public void setRole(UserRole userRole) { this.userRole = userRole; }
-    public void setEmail(String usereMail) { this.usereMail = usereMail; }
-    public void setPassword(String userPassword) { this.userPassword = userPassword; }
-    public void setName(String userName) { this.userName = userName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-    public void setIseMailVerified(boolean iseMailVerified) { this.iseMailVerified = iseMailVerified; }
-    public void setFailedLoginsAttempt(Integer failedLoginsAttempt) { this.failedLoginsAttempt = failedLoginsAttempt; }
-    public void setLastLoginAt(LocalDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
-    public void setLockedUntil(LocalDateTime lockedUntil) { this.lockedUntil = lockedUntil; }
+    public void setPhone(String userPhone) {
+        this.userPhone = userPhone;
+        super.afterUpdate();
+    }
+    public void setRole(UserRole userRole) {
+        this.userRole = userRole;
+        super.afterUpdate();
+    }
+    public void setEmail(String usereMail) {
+        this.usereMail = usereMail;
+        super.afterUpdate();
+    }
+    public void setPassword(String userPassword) {
+        this.userPassword = userPassword;
+        super.afterUpdate();
+    }
+    public void setName(String userName) {
+        this.userName = userName;
+        super.afterUpdate();
+    }
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+        super.afterUpdate();
+    }
+    public void setIseMailVerified(boolean iseMailVerified) {
+        this.iseMailVerified = iseMailVerified;
+        super.afterUpdate();
+    }
+    public void setFailedLoginsAttempt(Integer failedLoginsAttempt) {
+        this.failedLoginsAttempt = failedLoginsAttempt;
+        super.afterUpdate();
+    }
+    public void setLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+        super.afterUpdate();
+    }
+    public void setLockedUntil(LocalDateTime lockedUntil) {
+        this.lockedUntil = lockedUntil;
+        super.afterUpdate();
+    }
 
     public boolean isAdmin() { return this.userRole.equals(UserRole.ADMIN) || this.userRole.equals(UserRole.SUPER_ADMIN); }
 

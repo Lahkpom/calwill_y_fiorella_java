@@ -25,7 +25,7 @@ public class UserRepository {
     }
     public Optional<Users> findByPhone(String userPhone) {
         return this.users.stream()
-                .filter(u -> u.getPhone().equals(userPhone))
+                .filter(u -> u.getPhone() != null && u.getPhone().equals(userPhone))
                 .findFirst();
     }
 

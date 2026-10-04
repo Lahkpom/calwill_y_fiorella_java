@@ -1,8 +1,7 @@
-package com.calwillyfiorella.ui.viewUtils;
+package com.calwillyfiorella.ui.utils;
 
 import com.calwillyfiorella.model.BaseEntity;
 import com.calwillyfiorella.model.enums.RowStatus;
-import com.calwillyfiorella.ui.menuUtils.MenuHelper;
 
 import java.util.ArrayList;
 import java.util.List;
