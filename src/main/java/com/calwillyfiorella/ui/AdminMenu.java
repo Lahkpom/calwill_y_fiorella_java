@@ -1,6 +1,5 @@
 package com.calwillyfiorella.ui;
 
-import com.calwillyfiorella.Main;
 import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.Product;
 import com.calwillyfiorella.model.ProductVariant;
@@ -10,12 +9,12 @@ import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.ColorService;
 import com.calwillyfiorella.service.ProductService;
-import com.calwillyfiorella.ui.utils.ListPrinter;
 import com.calwillyfiorella.util.AuxiliarFunction;
-import com.calwillyfiorella.ui.utils.*;
 import com.calwillyfiorella.util.InputUtils;
+import com.calwillyfiorella.ui.utils.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,10 +45,11 @@ public class AdminMenu {
         }
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver mi información"  , () -> authMenu.renderUserInfo(this::render)),
+                MenuOption.of("Ver mi información"          , () -> authMenu.renderUserInfo(this::render)),
                 MenuOption.of("Gestionar Productos"         , this::renderAdminProducts),
                 MenuOption.of("Gestionar Colores"           , this::renderAdminColors),
-                MenuOption.of("Gestionar Ventas"            , () -> System.out.println("FUNCIÓN EN DESARROLLO")),
+                MenuOption.of("Gestionar Ventas"            , () -> { System.out.println("FUNCIÓN EN DESARROLLO"); this.render(); }),
+                MenuOption.of("Gestionar Usuarios"          , () -> { System.out.println("FUNCIÓN EN DESARROLLO"); this.render(); }),
                 MenuOption.of("Crear Usuario Administrador" , () -> authMenu.signUp(true))
         );
 
@@ -60,12 +60,16 @@ public class AdminMenu {
         List<Color> colors = colorService.getAll();
         List<Integer> allowedOptions = AuxiliarFunction.toListColors(colors, true);
 
-        if (allowedOptions.isEmpty()) render();
+        boolean thereAreColors = !allowedOptions.isEmpty();
 
-        List<MenuOption> options = List.of(
-                MenuOption.of("Editar un Color"     , () -> updateColor(colors, allowedOptions)),
-                MenuOption.of("Crear un nuevo Color", this::createColor)
-        );
+        List<MenuOption> options = new ArrayList<>();
+
+        // Estas opciones solo si muestran si hay colores
+        if (thereAreColors) {
+            options.add(MenuOption.of("Editar un ProColorducto", () -> updateColor(colors, allowedOptions)));
+        }
+
+        options.add(MenuOption.of("Crear un nuevo Color", this::createColor));
 
         menuHelper.renderMenuOptions(options, this::render);
     }
@@ -150,13 +154,17 @@ public class AdminMenu {
         List<Product> products = productService.getAll();
         List<Integer> allowedOptions = ListPrinter.renderList("LISTADO DE PRODUCTOS", products, true);
 
-        if (allowedOptions.isEmpty()) render();
+        boolean thereAreProducts = !allowedOptions.isEmpty();
 
-        List<MenuOption> options = List.of(
-                MenuOption.of("Editar un Producto"                  , () -> updateProduct(products, allowedOptions)),
-                MenuOption.of("Gestionar Variantes de un Producto"  , () -> renderAdminVariants(products, allowedOptions)),
-                MenuOption.of("Crear un nuevo Producto"             , this::createProduct)
-        );
+        List<MenuOption> options = new ArrayList<>();
+
+        // Estas opciones solo si muestran si hay productos
+        if (thereAreProducts) {
+            options.add(MenuOption.of("Editar un Producto", () -> updateProduct(products, allowedOptions)));
+            options.add(MenuOption.of("Gestionar Variantes de un Producto", () -> renderAdminVariants(products, allowedOptions)));
+        }
+
+        options.add(MenuOption.of("Crear un nuevo Producto", this::createProduct));
 
         menuHelper.renderMenuOptions(options, this::render);
     }
@@ -249,13 +257,17 @@ public class AdminMenu {
 
         List<Integer> allowedVariantOptions = ListPrinter.renderList("VARIANTES DE " + product.getName(), variants, true);
 
-        if (allowedVariantOptions.isEmpty()) renderAdminProducts();
+        boolean thereAreVariants = !allowedVariantOptions.isEmpty();
 
-        List<MenuOption> options = List.of(
-                MenuOption.of("Editar una Variante"                     , () -> updateVariant(product, variants, allowedVariantOptions)),
-                MenuOption.of("Gestionar las Imágenes de una Variante"  , null),
-                MenuOption.of("Crear una nueva Variante"                , () -> createVariant(product))
-        );
+        List<MenuOption> options = new ArrayList<>();
+
+        // Estas opciones solo si muestran si hay variantes dentro del producto
+        if (thereAreVariants) {
+            options.add(MenuOption.of("Editar una Variante", () -> updateVariant(product, variants, allowedVariantOptions)));
+            options.add(MenuOption.of("Gestionar las Imágenes de una Variante", null));
+        }
+
+        options.add(MenuOption.of("Crear una nueva Variante", () -> createVariant(product)));
 
         menuHelper.renderMenuOptions(options, this::renderAdminProducts);
     }
