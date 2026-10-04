@@ -4,7 +4,7 @@ import com.calwillyfiorella.util.ValidationUtils;
 
 public class ProductDoesNotExistException extends RuntimeException {
     public ProductDoesNotExistException() {
-        this("Prodcut does not exist or invalid credentials!");
+        this("Product does not exist or invalid credentials!");
     }
 
     public ProductDoesNotExistException(String message) {

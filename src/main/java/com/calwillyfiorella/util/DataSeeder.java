@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.Product;
+import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.NumericSize;
@@ -73,23 +74,29 @@ public final class DataSeeder {
                 "Desc corta 1",
                 "Desc larga 1"
         );
-        art1.addVariant(
-                white,
-                NumericSize.T_18,
-                TargetGender.NINIOS,
-                "Var 1",
-                "SKU-1",
-                new BigDecimal("10000"),
-                5
+        art1.saveVariant(
+                new ProductVariant(
+                        art1,
+                        white,
+                        NumericSize.T_18,
+                        TargetGender.NINIOS,
+                        "Var 1",
+                        "SKU-1",
+                        new BigDecimal("10000"),
+                        5
+                )
         );
-        art1.addVariant(
-                black,
-                NumericSize.T_19,
-                TargetGender.NINIAS,
-                "Var 2",
-                "SKU-2",
-                new BigDecimal("11000"),
-                5
+        art1.saveVariant(
+                new ProductVariant(
+                        art1,
+                        black,
+                        NumericSize.T_19,
+                        TargetGender.NINIAS,
+                        "Var 2",
+                        "SKU-2",
+                        new BigDecimal("11000"),
+                        5
+                )
         );
 
         Product art2 = new Product(
@@ -98,23 +105,29 @@ public final class DataSeeder {
                 "Desc corta 2",
                 "Desc larga 2"
         );
-        art2.addVariant(
-                white,
-                NumericSize.T_18,
-                TargetGender.HOMBRES,
-                "Var 3",
-                "SKU-3",
-                new BigDecimal("12000"),
-                5
+        art2.saveVariant(
+                new ProductVariant(
+                        art2,
+                        white,
+                        NumericSize.T_18,
+                        TargetGender.HOMBRES,
+                        "Var 3",
+                        "SKU-3",
+                        new BigDecimal("12000"),
+                        5
+                )
         );
-        art2.addVariant(
-                black,
-                NumericSize.T_19,
-                TargetGender.MUJERES,
-                "Var 4",
-                "SKU-4",
-                new BigDecimal("13000"),
-                5
+        art2.saveVariant(
+                new ProductVariant(
+                        art2,
+                        black,
+                        NumericSize.T_19,
+                        TargetGender.MUJERES,
+                        "Var 4",
+                        "SKU-4",
+                        new BigDecimal("13000"),
+                        5
+                )
         );
 
         productRepository.save(art1);

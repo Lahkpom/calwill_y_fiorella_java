@@ -9,6 +9,7 @@ import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.ColorService;
 import com.calwillyfiorella.service.ProductService;
+import com.calwillyfiorella.service.ProductVariantService;
 import com.calwillyfiorella.util.AuxiliarFunction;
 import com.calwillyfiorella.util.InputUtils;
 import com.calwillyfiorella.ui.utils.*;
@@ -19,24 +20,27 @@ import java.util.List;
 import java.util.Objects;
 
 public class AdminMenu {
-    private final ProductService    productService;
-    private final ColorService      colorService;
-    private final AuthMenu          authMenu;
-    private final MenuHelper        menuHelper;
-    private final Runnable          mainMenu;
+    private final ProductService        productService;
+    private final ColorService          colorService;
+    private final ProductVariantService productVariantService;
+    private final AuthMenu              authMenu;
+    private final MenuHelper            menuHelper;
+    private final Runnable              mainMenu;
 
     public AdminMenu(
-            ProductService  productService,
-            ColorService    colorService,
-            AuthMenu        authMenu,
-            MenuHelper      menuHelper,
-            Runnable        mainMenu
+            ProductService          productService,
+            ColorService            colorService,
+            ProductVariantService   productVariantService,
+            AuthMenu                authMenu,
+            MenuHelper              menuHelper,
+            Runnable                mainMenu
     ) {
-        this.productService = Objects.requireNonNull(productService);
-        this.colorService   = Objects.requireNonNull(colorService);
-        this.authMenu       = Objects.requireNonNull(authMenu);
-        this.menuHelper     = Objects.requireNonNull(menuHelper);
-        this.mainMenu       = Objects.requireNonNull(mainMenu);
+        this.productService         = Objects.requireNonNull(productService);
+        this.colorService           = Objects.requireNonNull(colorService);
+        this.productVariantService  = Objects.requireNonNull(productVariantService);
+        this.authMenu               = Objects.requireNonNull(authMenu);
+        this.menuHelper             = Objects.requireNonNull(menuHelper);
+        this.mainMenu               = Objects.requireNonNull(mainMenu);
     }
 
     public void render() {
@@ -253,7 +257,7 @@ public class AdminMenu {
         Integer idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ", true);
         Product product = products.get(idx - 1);
 
-        List<ProductVariant> variants = product.getVariants();
+        List<ProductVariant> variants = product.findAllVariants();
 
         List<Integer> allowedVariantOptions = ListPrinter.renderList("VARIANTES DE " + product.getName(), variants, true);
 
@@ -284,13 +288,13 @@ public class AdminMenu {
             if (newVariantData.getColor() == null) newVariantData.setColor(currentVariantData.getColor());
             if (newVariantData.getSize() == null) newVariantData.setSize(currentVariantData.getSize());
             if (newVariantData.getTargetGender() == null) newVariantData.setTargetGender(currentVariantData.getTargetGender());
-            if (newVariantData.getVariantDesc() == null) newVariantData.setVariantDesc(currentVariantData.getVariantDesc());
-            if (newVariantData.getVariantSku() == null) newVariantData.setVariantSku(currentVariantData.getVariantSku());
-            if (newVariantData.getVariantPrice() == null) newVariantData.setVariantPrice(currentVariantData.getVariantPrice());
-            if (newVariantData.getVariantStock() == null) newVariantData.setVariantStock(currentVariantData.getVariantStock());
+            if (newVariantData.getDesc() == null) newVariantData.setDesc(currentVariantData.getDesc());
+            if (newVariantData.getSku() == null) newVariantData.setSku(currentVariantData.getSku());
+            if (newVariantData.getPrice() == null) newVariantData.setPrice(currentVariantData.getPrice());
+            if (newVariantData.getStock() == null) newVariantData.setStock(currentVariantData.getStock());
             if (newVariantData.getRowStatus() == null) newVariantData.setRowStatus(currentVariantData.getRowStatus());
 
-            product.updateVariant(currentVariantData.getVariantId(), newVariantData);
+            productVariantService.updateVariant(product.getId(), currentVariantData.getId(), newVariantData);
 
             System.out.println("La variante fue actualizada con éxito.");
         } catch (Exception e) {
@@ -308,7 +312,7 @@ public class AdminMenu {
 
             newVariantData.setProduct(product);
 
-            product.addVariant(newVariantData);
+            productVariantService.addVariant(product.getId(), newVariantData);
 
             System.out.println("La variante fue creada con éxito.");
         } catch (Exception e) {
@@ -350,7 +354,7 @@ public class AdminMenu {
             String newDesc = InputUtils.readString(
                     FormHelper.buildPrompt(
                             "Descripción",
-                            isUpdate ? currentVariantData.getVariantDesc() : null,
+                            isUpdate ? currentVariantData.getDesc() : null,
                             isUpdate
                     ),
                     isStrict
@@ -358,7 +362,7 @@ public class AdminMenu {
             String newSKU = InputUtils.readString(
                     FormHelper.buildPrompt(
                             "SKU",
-                            isUpdate ? currentVariantData.getVariantSku() : null,
+                            isUpdate ? currentVariantData.getSku() : null,
                             isUpdate
                     ),
                     isStrict
@@ -366,7 +370,7 @@ public class AdminMenu {
             BigDecimal newPrice = InputUtils.readPrice(
                     FormHelper.buildPrompt(
                             "Precio",
-                            isUpdate ? currentVariantData.getVariantPrice() : null,
+                            isUpdate ? currentVariantData.getPrice() : null,
                             isUpdate
                     ),
                     isStrict
@@ -374,7 +378,7 @@ public class AdminMenu {
             Integer newStock = InputUtils.readInt(
                     FormHelper.buildPrompt(
                             "Stock",
-                            isUpdate ? currentVariantData.getVariantStock() : null,
+                            isUpdate ? currentVariantData.getStock() : null,
                             isUpdate
                     ),
                     isStrict
@@ -384,10 +388,10 @@ public class AdminMenu {
             variant.setColor(newColor);
             variant.setSize(newSize);
             variant.setTargetGender(newTargetGender);
-            variant.setVariantDesc(newDesc);
-            variant.setVariantSku(newSKU);
-            variant.setVariantPrice(newPrice);
-            variant.setVariantStock(newStock);
+            variant.setDesc(newDesc);
+            variant.setSku(newSKU);
+            variant.setPrice(newPrice);
+            variant.setStock(newStock);
             return variant;
         });
     }

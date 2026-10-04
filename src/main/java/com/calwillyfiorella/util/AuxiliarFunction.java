@@ -5,6 +5,7 @@ import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.service.ProductVariantService;
 import com.calwillyfiorella.ui.utils.MenuHelper;
 import com.calwillyfiorella.ui.utils.ListPrinter;
 
@@ -112,7 +113,7 @@ public final class AuxiliarFunction {
             System.out.format(
                     "Opción %d. %s%n",
                     i + 1,
-                    ProductVariant.targetGenderDecode(genders[i])
+                    ProductVariantService.targetGenderDecode(genders[i])
             );
         }
 

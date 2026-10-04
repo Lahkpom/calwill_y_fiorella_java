@@ -1,6 +1,7 @@
 package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
+import com.calwillyfiorella.service.ProductVariantService;
 import com.calwillyfiorella.util.ValidationUtils;
 
 import java.net.URI;
@@ -56,10 +57,10 @@ public class VariantImage extends BaseEntity{
                 "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - URL Imagen: %s - Orden Imagen: %d - Estado: %s",
                 this.variant.getProduct().getName(),
                 this.variant.getProduct().getCategory(),
-                ProductVariant.targetGenderDecode(this.variant.getTargetGender()),
+                ProductVariantService.targetGenderDecode(this.variant.getTargetGender()),
                 this.variant.getColor().getName(),
                 this.variant.getSize(),
-                this.variant.getVariantPrice(),
+                this.variant.getPrice(),
                 this.imageUrl,
                 this.imageOrder,
                 this.rowStatus

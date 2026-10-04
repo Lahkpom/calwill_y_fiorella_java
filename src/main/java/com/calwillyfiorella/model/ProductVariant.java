@@ -3,18 +3,17 @@ package com.calwillyfiorella.model;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
-import com.calwillyfiorella.util.ValidationUtils;
+import com.calwillyfiorella.service.ProductVariantService;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.math.BigDecimal;
 
 public class ProductVariant extends BaseEntity {
-    private UUID                variantId;
-    private Product             product;
-
     private final List<VariantImage>  images = new ArrayList<>();
 
+    private UUID            variantId;
+    private Product         product;
     private Color           color;
     private NumericSize     size;
     private TargetGender    targetGender;
@@ -68,15 +67,15 @@ public class ProductVariant extends BaseEntity {
             LocalDateTime   updatedAt
     ) {
         super(rowStatus, createdAt, updatedAt);
-        this.variantId      = Objects.requireNonNull(variantId, "El variantId no puede ser nulo");
-        this.product        = Objects.requireNonNull(product, "Se debe indicar un producto válido al que pertenece la variante");
-        this.color          = this.validateColor(color);
-        this.size           = this.validateSize(size);
-        this.targetGender   = this.validateTargetGender(targetGender);
-        this.variantDesc    = this.validateVariantDesc(variantDesc);
-        this.variantSku     = this.validateSKU(variantSku);
-        this.variantPrice   = this.validateAmountPrice(variantPrice);
-        this.variantStock   = this.validateStock(variantStock);
+        this.variantId      = variantId;
+        this.product        = product;
+        this.color          = color;
+        this.size           = size;
+        this.targetGender   = targetGender;
+        this.variantDesc    = variantDesc;
+        this.variantSku     = variantSku;
+        this.variantPrice   = variantPrice;
+        this.variantStock   = variantStock;
     }
 
     @Override
@@ -85,7 +84,7 @@ public class ProductVariant extends BaseEntity {
                 "{ Producto: %s, Categoría: %s, Para: %s, Color: %s, Talle: %s, Precio: %.2f, Stock: %d, Imágenes: %d, Estado: %s }",
                 this.product.getName(),
                 this.product.getCategory(),
-                targetGenderDecode(this.targetGender),
+                ProductVariantService.targetGenderDecode(this.targetGender),
                 this.color,
                 this.size,
                 this.variantPrice,
@@ -95,22 +94,77 @@ public class ProductVariant extends BaseEntity {
         );
     }
 
-    public static String targetGenderDecode(TargetGender tg) {
-        return switch(tg) {
-            case NINIAS     -> "Niñas";
-            case NINIOS     -> "Niños";
-            case HOMBRES    -> "Hombres";
-            case MUJERES    -> "Mujeres";
-            case UNISEX     -> "Unisex";
-        };
+//    UTIL FUNCTIONS
+    private VariantImage getImageById(UUID imageId) {
+        if (imageId == null) return null;
+
+        VariantImage dummy = null;
+        for (VariantImage img : this.images) {
+            if (img.getImageId().equals(imageId)) {
+                dummy = img;
+                break;
+            }
+        }
+        return dummy;
     }
+//    UTIL FUNCTIONS
+
+//    SETTERS
+    public void setId(UUID variantId) {
+        this.variantId = variantId;
+    }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+    public void setColor(Color color) {
+        this.color = color;
+        this.afterUpdate();
+    }
+    public void setSize(NumericSize size) {
+        this.size = size;
+        this.afterUpdate();
+    }
+    public void setTargetGender(TargetGender targetGender) {
+        this.targetGender = targetGender;
+        this.afterUpdate();
+    }
+    public void setDesc(String variantDesc) {
+        this.variantDesc = variantDesc;
+        this.afterUpdate();
+    }
+    public void setSku(String variantSku) {
+        this.variantSku = variantSku;
+        this.afterUpdate();
+    }
+    public void setPrice(BigDecimal variantPrice) {
+        this.variantPrice = variantPrice;
+        this.afterUpdate();
+    }
+    public void setStock(Integer variantStock) {
+        this.variantStock = variantStock;
+        this.afterUpdate();
+    }
+//    SETTERS
+
+//    GETTERS
+    public UUID                 getId           () { return this.variantId; }
+    public Product              getProduct      () { return this.product; }
+    public List<VariantImage>   getImages       () { return Collections.unmodifiableList(this.images); }
+    public Color                getColor        () { return this.color; }
+    public NumericSize          getSize         () { return this.size; }
+    public TargetGender         getTargetGender () { return this.targetGender; }
+    public String               getDesc         () { return this.variantDesc; }
+    public String               getSku          () { return this.variantSku; }
+    public BigDecimal           getPrice        () { return this.variantPrice; }
+    public Integer              getStock        () { return this.variantStock; }
+//    GETTERS
 
 //    COMPLEX FUNCTIONS
     public void addImage(VariantImage image) {
         if (image == null)
             throw new NullPointerException("La VariantImage ingresada no puede ser nulla.");
 
-        if (!image.getVariant().getVariantId().equals(this.variantId))
+        if (!image.getVariant().getId().equals(this.variantId))
             throw new IllegalArgumentException("La VariantImage ingresada no corresponde a esta variante.");
 
         if (this.images.stream().anyMatch(img ->
@@ -149,121 +203,5 @@ public class ProductVariant extends BaseEntity {
 
         image.setRowStatus(newStatus);
     }
-
-    public void incrementStock (Integer stock) {
-        this.variantStock += this.validateStock(stock);
-        this.afterUpdate();
-    }
-
-    public void decrementStock (Integer stock) {
-        this.variantStock -= ValidationUtils.requireSufficientQuantity(
-                this.variantStock,
-                stock,
-                "La cantidad ingresada para disminuir el stock no puede ser nula ni hacer que el resultado final deje a stock menor a cero."
-        );
-        this.afterUpdate();
-    }
 //    COMPLEX FUNCTIONS
-
-//    UTIL FUNCTIONS
-    private VariantImage getImageById(UUID imageId) {
-        if (imageId == null) return null;
-
-        VariantImage dummy = null;
-        for (VariantImage img : this.images) {
-            if (img.getImageId().equals(imageId)) {
-                dummy = img;
-                break;
-            }
-        }
-        return dummy;
-    }
-//    UTIL FUNCTIONS
-
-//    SETTERS
-    public void setId(UUID variantId) {
-        this.variantId = variantId;
-    }
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public void setColor(Color color) {
-        this.color = this.validateColor(color);
-        this.afterUpdate();
-    }
-
-    public void setSize(NumericSize size) {
-        this.size = this.validateSize(size);
-        this.afterUpdate();
-    }
-
-    public void setTargetGender(TargetGender targetGender) {
-        this.targetGender = this.validateTargetGender(targetGender);
-        this.afterUpdate();
-    }
-
-    public void setVariantDesc(String variantDesc) {
-        this.variantDesc = this.validateVariantDesc(variantDesc);
-        this.afterUpdate();
-    }
-
-    public void setVariantSku(String variantSku) {
-        this.variantSku = this.validateSKU(variantSku);
-        this.afterUpdate();
-    }
-
-    public void setVariantPrice(BigDecimal variantPrice) {
-        this.variantPrice = this.validateAmountPrice(variantPrice);
-        this.afterUpdate();
-    }
-
-    public void setVariantStock(Integer variantStock) {
-        this.variantStock = this.validateStock(variantStock);
-        this.afterUpdate();
-    }
-//    SETTERS
-
-//    VALIDACIONES
-    private Integer validateStock(Integer stock) {
-        return ValidationUtils.requireNonNegative(stock, "La cantidad ingresada para incrementar el stock no puede ser nula ni menor o igual a cero.");
-    }
-
-    private String validateSKU(String sku) {
-        return ValidationUtils.requireNonBlank(sku, "El SKU no puede ser nulo ni estar vacío.");
-    }
-
-    private Color validateColor(Color color) {
-        return Objects.requireNonNull(color, "color cannot be null");
-    }
-
-    private NumericSize validateSize(NumericSize size) {
-        return Objects.requireNonNull(size, "size cannot be null");
-    }
-
-    private TargetGender validateTargetGender(TargetGender targetGender) {
-        return Objects.requireNonNull(targetGender, "targetGender cannot be null");
-    }
-
-    private String validateVariantDesc(String variantDesc) {
-        return ValidationUtils.requireNonBlank(variantDesc, "La descripción larga del producto no puede estra vacía.");
-    }
-
-    private BigDecimal validateAmountPrice (BigDecimal amountPrice) {
-        return ValidationUtils.requireAmountGreaterThanZero(amountPrice, "El Precio no puede ser menor ni igual a cero.");
-    }
-//    VALIDACIONES
-
-//    GETTERS
-    public UUID                 getVariantId        () { return this.variantId; }
-    public Product              getProduct          () { return this.product; }
-    public List<VariantImage>   getImages           () { return Collections.unmodifiableList(this.images); }
-    public Color                getColor            () { return this.color; }
-    public NumericSize getSize             () { return this.size; }
-    public TargetGender         getTargetGender     () { return this.targetGender; }
-    public String               getVariantDesc      () { return this.variantDesc; }
-    public String               getVariantSku       () { return this.variantSku; }
-    public BigDecimal           getVariantPrice     () { return this.variantPrice; }
-    public Integer              getVariantStock     () { return this.variantStock; }
-//    GETTERS
 }

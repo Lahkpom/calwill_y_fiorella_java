@@ -70,8 +70,6 @@ public class Product extends BaseEntity{
     }
 
     // Getters y Setters
-    public List<ProductVariant> getVariants () { return Collections.unmodifiableList(this.variants); }
-
     public UUID     getId       () { return this.productId; }
     public Category getCategory () { return this.productCategory; }
     public String   getName     () { return this.productName; }
@@ -99,54 +97,21 @@ public class Product extends BaseEntity{
         this.afterUpdate();
     }
 
-    // Agregar objetos a la lista. No se hace Update, ya que los cambios no son del Product en sí mismo
-    public void addVariant(ProductVariant variant) {
-        if (variant == null) throw new NullPointerException("Variant cannot be null");
+    // ProductVariantRepository
+    public void saveVariant(ProductVariant variant) { this.variants.add(variant); }
 
-        if (variant.getVariantId() == null) variant.setId(UUID.randomUUID());
+    public List<ProductVariant> findAllVariants() { return Collections.unmodifiableList(this.variants); }
 
-        // Cuando se de este caso hay que ver de preguntarle al usuario si es que quiere cambiarle el Producto a la Variante
-        if (!variant.getProduct().getId().equals(this.productId)) throw new IllegalArgumentException("La productVariant ingresada no corresponde a una variante de este producto");
-
-        if (this.variants.stream().anyMatch(v -> v.getVariantId().equals(variant.getVariantId()))) throw new IllegalArgumentException("La vairante ya se encuentra ingresada en la lista de variantes de este producto");
-
-        this.variants.add(variant);
+    public Optional<ProductVariant> findVariant(UUID variantId) {
+        return this.variants.stream()
+                .filter(v -> v.getId().equals(variantId))
+                .findFirst();
+    }
+    public Optional<ProductVariant> findVariant(String variantSKU) {
+        return this.variants.stream()
+                .filter(v -> v.getSku().equalsIgnoreCase(variantSKU))
+                .findFirst();
     }
 
-    public ProductVariant addVariant(
-            Color           color,
-            NumericSize size,
-            TargetGender    targetGender,
-            String          variantDesc,
-            String          variantSku,
-            BigDecimal      variantPrice,
-            Integer         variantStock
-    ) {
-        if (variantSku == null || this.variants.stream().anyMatch(v -> v.getVariantSku().equals(variantSku))) throw new IllegalArgumentException("Ya existe en la lista de variantes una variante con la misma SKU.");
-
-        ProductVariant pv = new ProductVariant(this, color, size, targetGender, variantDesc, variantSku, variantPrice, variantStock);
-
-        this.variants.add(pv);
-
-        return pv;
-    }
-
-    public ProductVariant updateVariant(UUID variantId, ProductVariant newVariant) {
-        ProductVariant currentVariant = this.variants.stream().filter(v -> v.getVariantId().equals(variantId)).findFirst().orElseThrow(() -> new IllegalStateException("Variante no encontrado"));
-
-        currentVariant.setColor(newVariant.getColor());
-        currentVariant.setSize(newVariant.getSize());
-        currentVariant.setTargetGender(newVariant.getTargetGender());
-        currentVariant.setVariantDesc(newVariant.getVariantDesc());
-        currentVariant.setVariantSku(newVariant.getVariantSku());
-        currentVariant.setVariantPrice(newVariant.getVariantPrice());
-        currentVariant.setVariantStock(newVariant.getVariantStock());
-        currentVariant.setRowStatus(newVariant.getRowStatus());
-
-        return currentVariant;
-    }
-
-
-
-
+    public void delete(ProductVariant variant) { this.variants.remove(variant); }
 }

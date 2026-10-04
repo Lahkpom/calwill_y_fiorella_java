@@ -11,15 +11,16 @@ public class MainMenu {
     private final CustomerMenu  customerMenu;
 
     public MainMenu(
-            AuthService     authService,
-            UserService     userService,
-            ProductService  productService,
-            ColorService    colorService,
-            CartService     cartService
+            AuthService             authService,
+            UserService             userService,
+            ProductService          productService,
+            ProductVariantService   productVariantService,
+            ColorService            colorService,
+            CartService             cartService
     ) {
         this.menuHelper     = new MenuHelper(authService, this::render);
         AuthMenu authMenu   = new AuthMenu(authService, userService, menuHelper);
-        this.adminMenu      = new AdminMenu(productService, colorService, authMenu, menuHelper, this::render);
+        this.adminMenu      = new AdminMenu(productService, colorService, productVariantService, authMenu, menuHelper, this::render);
         this.customerMenu   = new CustomerMenu(productService, cartService, authMenu, menuHelper, this::render);
     }
 

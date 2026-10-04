@@ -70,7 +70,7 @@ public class CustomerMenu {
         int idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ", true);
 
         try {
-            List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getId()).getVariants();
+            List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getId()).findAllVariants();
 
             List<Integer> allowedVariantsOptions = ListPrinter.renderList("VARIANTES DISPONIBLES", variants, false);
 
@@ -115,7 +115,7 @@ public class CustomerMenu {
         for (int i = 0; i < userCart.size(); i++) {
             CartItem item = userCart.get(i);
             System.out.printf("Item %d. %s%n", i + 1, item);
-            total = total.add(item.getVariant().getVariantPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+            total = total.add(item.getVariant().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         }
         System.out.printf("Total: $%.2f%n", total);
 

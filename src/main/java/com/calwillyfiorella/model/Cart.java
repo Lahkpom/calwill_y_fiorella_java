@@ -27,7 +27,7 @@ public class Cart {
 
         if (variant.getRowStatus() != RowStatus.ACTIVE) throw new IllegalArgumentException("No puede ingresar una variante que no está ACTIVE al carrito de compras!");
 
-        checkStock(variant.getVariantStock(),  quantity);
+        checkStock(variant.getStock(),  quantity);
 
         this.cartItems.add(
                 new CartItem(
@@ -50,7 +50,7 @@ public class Cart {
     public void updateQuantity(Users user, ProductVariant variant, Integer quantity) {
         CartItem cartItem = this.getCartItem(user, variant);
 
-        checkStock(cartItem.getVariant().getVariantStock(), quantity);
+        checkStock(cartItem.getVariant().getStock(), quantity);
 
         cartItem.setQuantity(quantity);
     }
@@ -72,8 +72,8 @@ public class Cart {
 
         // Revisamos si el quantity guardado es mayor al stock actual. En cuyo caso ajustamos el quantity
         this.cartItems.forEach(item -> {
-            if (item.getUser().equals(user) && item.getQuantity() > item.getVariant().getVariantStock())
-                item.setQuantity(item.getVariant().getVariantStock());
+            if (item.getUser().equals(user) && item.getQuantity() > item.getVariant().getStock())
+                item.setQuantity(item.getVariant().getStock());
         });
 
         return this.cartItems.stream().filter(item -> item.getUser().equals(user)).toList();

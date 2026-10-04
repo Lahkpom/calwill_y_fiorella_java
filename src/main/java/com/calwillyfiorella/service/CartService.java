@@ -20,7 +20,7 @@ public class CartService {
     public void addItem(Users user, ProductVariant variant, Integer quantity) {
         Objects.requireNonNull(variant, "No puede ingresar una variante nula al carrito.");
 
-        checkStock(variant.getVariantStock(),  quantity);
+        checkStock(variant.getStock(),  quantity);
 
         cartRepository.findItem(user, variant)
                 .ifPresentOrElse(
@@ -28,10 +28,10 @@ public class CartService {
                             int newTotal = existingItem.getQuantity() + quantity;
 
                             try {
-                                checkStock(variant.getVariantStock(), newTotal);
+                                checkStock(variant.getStock(), newTotal);
                             } catch (InsufficientStockException e) {
                                 System.err.format("### El Item ingresado ya se encontraba en el carrito y al sumar las cantidades existente y nueva superan el stock disponible, por lo que se ajusta la cantidad al máximo permitido.");
-                                newTotal = existingItem.getVariant().getVariantStock();
+                                newTotal = existingItem.getVariant().getStock();
                             }
 
                             existingItem.setQuantity(newTotal);
@@ -62,7 +62,7 @@ public class CartService {
     private void updateQuantity(Optional<CartItem> itemOptional, Integer quantity) {
         CartItem cartItem = ifItemExists(itemOptional);
 
-        checkStock(cartItem.getVariant().getVariantStock(), quantity);
+        checkStock(cartItem.getVariant().getStock(), quantity);
         cartItem.setQuantity(quantity);
     }
 
@@ -101,12 +101,12 @@ public class CartService {
         for (CartItem item : rawItems) {
             ProductVariant variant = item.getVariant();
 
-            if (variant.getRowStatus() != RowStatus.ACTIVE || variant.getVariantStock() <= 0) {
+            if (variant.getRowStatus() != RowStatus.ACTIVE || variant.getStock() <= 0) {
                 cartRepository.delete(item);
                 continue;
             }
 
-            if (item.getQuantity() > variant.getVariantStock()) item.setQuantity(variant.getVariantStock());
+            if (item.getQuantity() > variant.getStock()) item.setQuantity(variant.getStock());
 
             validItems.add(item);
         }

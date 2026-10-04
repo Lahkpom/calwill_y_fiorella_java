@@ -23,6 +23,8 @@ public class ProductService {
     public void createProduct(Product product) {
         AuthService.checkActualUserIsAdmin();
 
+        Objects.requireNonNull(product);
+
         if (product.getId() == null) {
             product.setId(UUID.randomUUID());
             product.setRowStatus(RowStatus.ACTIVE);
@@ -44,6 +46,9 @@ public class ProductService {
 
     public void updateProduct(UUID productId, Product newProductData) {
         AuthService.checkActualUserIsAdmin();
+
+        Objects.requireNonNull(productId);
+        Objects.requireNonNull(newProductData);
 
         Product currentProductData = getProduct(productId);
 
@@ -92,7 +97,7 @@ public class ProductService {
         Optional<Product> existingProduct = this.productRepository.findProduct(productName);
 
         if (existingProduct.isPresent() && (currentProductId == null || !existingProduct.get().getId().equals(currentProductId)))
-            throw new ProductAlreadyExistException("El nombre del producto ya existe!");
+            throw new ProductAlreadyExistException("Ya existe un producto con el nombre " +  productName);
     }
 
     private void validateProductShortDesc(String productShortDesc) {
