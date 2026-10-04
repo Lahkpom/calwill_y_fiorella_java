@@ -8,7 +8,7 @@ import com.calwillyfiorella.util.DataSeeder;
 public class Main {
     public static String HYPHEN_SEPARATOR = "------------------------------------------------------------------------";
 
-    // * TODO - Hacer el prodcutVariant service para mover toda la lógica de la clase Product
+    // * TODO - Hacer el variantImage service para mover toda la lógica de la clase ProductVariant
     // * TODO - Generar otro menú en el admin para gestionar los usuarios existentes
     // * TODO - Revisar qué le pasa a la función AuthService::actualUserIsAdmin
     // * TODO - Desarrollar toda la parte de las ventas con las clases Sales y SaleItems
