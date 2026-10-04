@@ -20,33 +20,36 @@ public class CustomerMenu {
     private final CartService       cartService;
     private final AuthMenu          authMenu;
     private final MenuHelper        menuHelper;
+    private final Runnable          mainMenu;
 
     public CustomerMenu(
             ProductService  productService,
             CartService     cartService,
             AuthMenu        authMenu,
-            MenuHelper      menuHelper
+            MenuHelper      menuHelper,
+            Runnable        mainMenu
     ) {
         this.productService = Objects.requireNonNull(productService);
         this.cartService    = Objects.requireNonNull(cartService);
         this.authMenu       = Objects.requireNonNull(authMenu);
         this.menuHelper     = Objects.requireNonNull(menuHelper);
+        this.mainMenu       = Objects.requireNonNull(mainMenu);
     }
 
-    public void render(Runnable onBack) {
+    public void render() {
         if (AuthService.getActualUser() == null) {
-            authMenu.render(false, onBack);
+            authMenu.render(false, mainMenu);
             if (AuthService.getActualUser() == null) return;
         }
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Ver mi información"  , () -> authMenu.renderUserInfo(() -> render(onBack))),
+                MenuOption.of("Ver mi información"  , () -> authMenu.renderUserInfo(this::render)),
                 MenuOption.of("Ver Productos"       , this::renderProducts),
                 MenuOption.of("Ver mi Carrito"      , this::renderCartItems),
                 MenuOption.of("Ver mis Compras"     , () -> System.out.println("FUNCIÓN EN DESARROLLO"))
         );
 
-        menuHelper.renderMenuOptions(options, onBack);
+        menuHelper.renderMenuOptions(options, mainMenu);
     }
 
     private void renderProducts() {
@@ -54,13 +57,13 @@ public class CustomerMenu {
 
         List<Integer> allowedProductOptions = ListPrinter.renderList("CATÁLOGO DE PRODUCTOS", products, false);
 
-        if (allowedProductOptions.isEmpty()) render(() -> {});
+        if (allowedProductOptions.isEmpty()) render();
 
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver variantes de un producto", () -> renderProductVariants(products, allowedProductOptions))
         );
 
-        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, this::render);
     }
 
     private void renderProductVariants(List<Product> products, List<Integer> allowedProductOptions) {
@@ -105,7 +108,7 @@ public class CustomerMenu {
 
         if (userCart.isEmpty()) {
             System.out.println("El carrito está vacío.");
-            render(() -> {});
+            render();
         }
 
         BigDecimal total = BigDecimal.ZERO;
@@ -122,7 +125,7 @@ public class CustomerMenu {
                 MenuOption.of("Vaciar carrito"                  , this::clearCart),
                 MenuOption.of("Iniciar compra"                  , () -> this.renderProductCartStartBuying(userCart))
         );
-        menuHelper.renderMenuOptions(options, () -> render(() -> {}));
+        menuHelper.renderMenuOptions(options, this::render);
     }
     private void updateQuantity(List<CartItem> userCart) {
         int idx         = AuxiliarFunction.requireUserOption(userCart.size(), "Ingresar el número del item cuya cantidad desea modificar: ", true);
