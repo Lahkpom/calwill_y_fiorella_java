@@ -13,7 +13,6 @@ public class Main {
     // * TODO - Revisar qué le pasa a la función AuthService::actualUserIsAdmin
     // * TODO - Desarrollar toda la parte de las ventas con las clases Sales y SaleItems
     // * TODO - Hacer que cuando inactivo un producto también se inactiven sus variantes, y que si modifico las variantes de un producto este se reactive
-    // * TODO - Hay que mejorar la lógica del usuario para que se completen los campos más complejos que todavía no toqué
 
 
     public static void main(String[] args) {

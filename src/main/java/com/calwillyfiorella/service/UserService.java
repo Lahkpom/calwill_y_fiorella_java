@@ -2,7 +2,6 @@ package com.calwillyfiorella.service;
 
 import com.calwillyfiorella.exception.*;
 import com.calwillyfiorella.model.BaseEntity;
-import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.UserRole;
@@ -83,6 +82,22 @@ public class UserService {
     }
 
     public List<Users> getAllUsers() { return this.userRepository.findAll(); }
+
+    public void increaseFailedLoginsAttempt(UUID userId) {
+        Users user = getUser(userId);
+
+        user.setFailedLoginsAttempt(user.getFailedLoginsAttempt() + 1);
+
+        if (user.getFailedLoginsAttempt() == 3) {
+            user.setLockedUntil(LocalDateTime.now().plusMinutes(5));
+            System.err.println("Tiene 5 intentos de inicio de sesión fallidos. Se ha bloqueado su inicio de sesión por 5min.");
+        }
+    }
+    public void resetFailedLoginsAttempt(UUID userId) {
+        Users user = getUser(userId);
+        user.setFailedLoginsAttempt(0);
+        user.setLockedUntil(null);
+    }
 
     private void validateUserId(UUID userId) {
         Objects.requireNonNull(userId, "User id cannot not be null!");
