@@ -1,28 +1,38 @@
 package com.calwillyfiorella.ui;
 
-import com.calwillyfiorella.model.Color;
-import com.calwillyfiorella.model.Product;
-import com.calwillyfiorella.model.ProductVariant;
-import com.calwillyfiorella.model.enums.Category;
-import com.calwillyfiorella.model.enums.NumericSize;
-import com.calwillyfiorella.model.enums.TargetGender;
-import com.calwillyfiorella.service.AuthService;
-import com.calwillyfiorella.service.ColorService;
-import com.calwillyfiorella.service.ProductService;
-import com.calwillyfiorella.service.ProductVariantService;
-import com.calwillyfiorella.util.AuxiliarFunction;
-import com.calwillyfiorella.util.InputUtils;
-import com.calwillyfiorella.ui.utils.*;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.calwillyfiorella.exception.IsNotAnAdminException;
+import com.calwillyfiorella.exception.SaleDoesNotExistException;
+import com.calwillyfiorella.model.Color;
+import com.calwillyfiorella.model.Product;
+import com.calwillyfiorella.model.ProductVariant;
+import com.calwillyfiorella.model.Sale;
+import com.calwillyfiorella.model.enums.Category;
+import com.calwillyfiorella.model.enums.NumericSize;
+import com.calwillyfiorella.model.enums.PaymentStatus;
+import com.calwillyfiorella.model.enums.SaleStatus;
+import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.service.AuthService;
+import com.calwillyfiorella.service.ColorService;
+import com.calwillyfiorella.service.ProductService;
+import com.calwillyfiorella.service.ProductVariantService;
+import com.calwillyfiorella.service.SaleService;
+import com.calwillyfiorella.ui.utils.FormHelper;
+import com.calwillyfiorella.ui.utils.ListPrinter;
+import com.calwillyfiorella.ui.utils.MenuHelper;
+import com.calwillyfiorella.ui.utils.MenuOption;
+import com.calwillyfiorella.util.AuxiliarFunction;
+import com.calwillyfiorella.util.InputUtils;
+
 public class AdminMenu {
     private final ProductService        productService;
     private final ColorService          colorService;
     private final ProductVariantService productVariantService;
+    private final SaleService           saleService;
     private final AuthMenu              authMenu;
     private final MenuHelper            menuHelper;
     private final Runnable              mainMenu;
@@ -31,6 +41,7 @@ public class AdminMenu {
             ProductService          productService,
             ColorService            colorService,
             ProductVariantService   productVariantService,
+            SaleService             saleService,
             AuthMenu                authMenu,
             MenuHelper              menuHelper,
             Runnable                mainMenu
@@ -38,6 +49,7 @@ public class AdminMenu {
         this.productService         = Objects.requireNonNull(productService);
         this.colorService           = Objects.requireNonNull(colorService);
         this.productVariantService  = Objects.requireNonNull(productVariantService);
+        this.saleService            = Objects.requireNonNull(saleService);
         this.authMenu               = Objects.requireNonNull(authMenu);
         this.menuHelper             = Objects.requireNonNull(menuHelper);
         this.mainMenu               = Objects.requireNonNull(mainMenu);
@@ -52,12 +64,97 @@ public class AdminMenu {
                 MenuOption.of("Ver mi información"          , () -> authMenu.renderUserInfo(this::render)),
                 MenuOption.of("Gestionar Productos"         , this::renderAdminProducts),
                 MenuOption.of("Gestionar Colores"           , this::renderAdminColors),
-                MenuOption.of("Gestionar Ventas"            , () -> { System.out.println("FUNCIÓN EN DESARROLLO"); this.render(); }),
+                MenuOption.of("Gestionar Ventas"            , this::renderAdminSales),
                 MenuOption.of("Gestionar Usuarios"          , () -> { System.out.println("FUNCIÓN EN DESARROLLO"); this.render(); }),
                 MenuOption.of("Crear Usuario Administrador" , () -> authMenu.signUp(true))
         );
 
         menuHelper.renderMenuOptions(options, mainMenu);
+    }
+
+    private void renderAdminSales() {
+        List<Sale> sales = saleService.getAllSales();
+        if (sales.isEmpty()) {
+            MenuHelper.printMenuTitle("VENTAS");
+            System.out.println("No hay ventas registradas.");
+            menuHelper.renderMenuOptions(List.of(), this::render);
+            return;
+        }
+
+        List<Integer> saleOptions = ListPrinter.renderList("TODAS LAS VENTAS", sales, true);
+        menuHelper.renderMenuOptions(
+                List.of(MenuOption.of("Seleccionar una venta", () -> selectAdminSale(sales, saleOptions))),
+                this::render
+        );
+    }
+
+    private void selectAdminSale(List<Sale> sales, List<Integer> saleOptions) {
+        int selected = AuxiliarFunction.requireUserOption(saleOptions, "Número de la venta: ", true);
+        renderAdminSaleDetails(sales.get(selected - 1));
+    }
+
+    private void renderAdminSaleDetails(Sale sale) {
+        MenuHelper.printMenuTitle("DETALLE DE VENTA");
+        System.out.printf("Cliente: %s%nEmail: %s%nTeléfono: %s%n", sale.getCustomerName(), sale.getCustomerEmail(), sale.getCustomerPhone());
+        System.out.printf("Dirección: %s%nEstado: %s%nPago: %s (%s)%n", sale.getShippingAddress(), sale.getSaleStatus(), sale.getPaymentStatus(), sale.getPaymentMethod());
+        System.out.printf("Subtotal: %s%nEnvío: %s%nTotal: %s%nNotas: %s%n", sale.getSaleSubtotal(), sale.getShippingCost(), sale.getSaleTotal(), sale.getSaleNotes());
+        System.out.println("Artículos:");
+        sale.findAllItems().forEach(item -> System.out.printf("  - %s%n", item));
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Modificar notas", () -> editSaleNotes(sale)),
+                MenuOption.of("Modificar estado de venta", () -> editSaleStatus(sale)),
+                MenuOption.of("Modificar estado de pago", () -> editPaymentStatus(sale))
+        );
+        menuHelper.renderMenuOptions(options, this::renderAdminSales);
+    }
+
+    private void editSaleNotes(Sale sale) {
+        String notes = InputUtils.readString("Nuevas notas (vacío para conservar las actuales): ", false);
+        if (notes == null) {
+            renderAdminSaleDetails(sale);
+            return;
+        }
+
+        Sale changes = new Sale();
+        changes.setSaleNotes(notes);
+        updateSale(sale, changes);
+    }
+
+    private void editSaleStatus(Sale sale) {
+        SaleStatus[] statuses = SaleStatus.values();
+        MenuHelper.printMenuTitle("ESTADOS DE VENTA");
+        for (int i = 0; i < statuses.length; i++) {
+            System.out.printf("Opción %d. %s%n", i + 1, statuses[i]);
+        }
+        int selected = AuxiliarFunction.requireUserOption(statuses.length, "Nuevo estado de venta: ", true);
+
+        Sale changes = new Sale();
+        changes.setSaleStatus(statuses[selected - 1]);
+        updateSale(sale, changes);
+    }
+
+    private void editPaymentStatus(Sale sale) {
+        PaymentStatus[] statuses = PaymentStatus.values();
+        MenuHelper.printMenuTitle("ESTADOS DE PAGO");
+        for (int i = 0; i < statuses.length; i++) {
+            System.out.printf("Opción %d. %s%n", i + 1, statuses[i]);
+        }
+        int selected = AuxiliarFunction.requireUserOption(statuses.length, "Nuevo estado de pago: ", true);
+
+        Sale changes = new Sale();
+        changes.setPaymentStatus(statuses[selected - 1]);
+        updateSale(sale, changes);
+    }
+
+    private void updateSale(Sale sale, Sale changes) {
+        try {
+            saleService.updateSale(sale.getId(), changes);
+            System.out.println("La venta fue actualizada.");
+        } catch (NullPointerException | IsNotAnAdminException | SaleDoesNotExistException e) {
+            System.err.println("Error al actualizar la venta: " + e.getMessage());
+        }
+        renderAdminSaleDetails(sale);
     }
 
     private void renderAdminColors() {
