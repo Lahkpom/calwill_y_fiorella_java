@@ -4,6 +4,8 @@ import com.calwillyfiorella.exception.IsNotAnAdminException;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.repository.AuthRepository;
 
+import java.time.LocalDateTime;
+
 public class AuthService {
     private final UserService userService;
 
@@ -17,6 +19,8 @@ public class AuthService {
 
         if (isAdmin && !user.isAdmin())
             throw new IsNotAnAdminException("El usuario ingresado no posee rol de administrador.");
+
+        user.setLastLoginAt(LocalDateTime.now());
 
         AuthRepository.save(user);
     }
