@@ -47,7 +47,7 @@ public class UserService {
         validateUserPassword(newUserData.getPassword());
         validateUserName(newUserData.getName());
         newUserData.setPhone(validateUserPhone(newUserData.getPhone()));
-//        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
+        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
 
         this.userRepository.save(newUserData);
     }
@@ -59,14 +59,14 @@ public class UserService {
         validateUserPassword(newUserData.getPassword());
         validateUserName(newUserData.getName());
         newUserData.setPhone(validateUserPhone(newUserData.getPhone(), userId));
-//        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
+        validateFiledLoginAttempt(newUserData.getFailedLoginsAttempt());
         BaseEntity.validateRowStatus(newUserData.getRowStatus());
 
         currentUserData.setRole(newUserData.getRole());
         currentUserData.setPassword(newUserData.getPassword());
         currentUserData.setName(newUserData.getName());
         currentUserData.setPhone(newUserData.getPhone());
-//        currentUserData.setFailedLoginsAttempt(newUserData.getFailedLoginsAttempt());
+        currentUserData.setFailedLoginsAttempt(newUserData.getFailedLoginsAttempt());
         currentUserData.setRowStatus(newUserData.getRowStatus());
     }
 
@@ -97,6 +97,12 @@ public class UserService {
         Users user = getUser(userId);
         user.setFailedLoginsAttempt(0);
         user.setLockedUntil(null);
+    }
+
+    public boolean isAccountLocked(UUID userId) {
+        Users user = getUser(userId);
+
+        return user.getLockedUntil().isAfter(LocalDateTime.now());
     }
 
     private void validateUserId(UUID userId) {
@@ -144,7 +150,8 @@ public class UserService {
 
         return validPhone;
     }
-//    private void validateFiledLoginAttempt(Integer filedLoginAttempt) {
-//        ValidationUtils.requireNonNegative(filedLoginAttempt, "Filed login attempt cannot be negative");
-//    }
+    private void validateFiledLoginAttempt(Integer filedLoginAttempt) {
+        if (filedLoginAttempt != null)
+            ValidationUtils.requireNonNegative(filedLoginAttempt, "Filed login attempt cannot be negative");
+    }
 }

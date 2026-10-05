@@ -19,7 +19,7 @@ public class AuthService {
 
         try {
             if (user.getLockedUntil() != null) {
-                if (user.getLockedUntil().isAfter(LocalDateTime.now())) {
+                if (userService.isAccountLocked(user.getId())) {
                     throw new UserLockedException("La cuenta se encuentra bloqueada temporalmente.");
                 } else {
                     user.setLastLoginAt(LocalDateTime.now());
@@ -45,6 +45,7 @@ public class AuthService {
 
     public static Users getActualUser() { return AuthRepository.getActualUser(); }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean actualUserIsAdmin() {
         Users user = getActualUser();
         return user != null && user.isAdmin();
