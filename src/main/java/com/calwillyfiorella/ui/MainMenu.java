@@ -1,9 +1,16 @@
 package com.calwillyfiorella.ui;
 
-import com.calwillyfiorella.service.*;
-import com.calwillyfiorella.ui.utils.*;
-
 import java.util.List;
+
+import com.calwillyfiorella.service.AuthService;
+import com.calwillyfiorella.service.CartService;
+import com.calwillyfiorella.service.ColorService;
+import com.calwillyfiorella.service.ProductService;
+import com.calwillyfiorella.service.ProductVariantService;
+import com.calwillyfiorella.service.SaleService;
+import com.calwillyfiorella.service.UserService;
+import com.calwillyfiorella.ui.utils.MenuHelper;
+import com.calwillyfiorella.ui.utils.MenuOption;
 
 public class MainMenu {
     private final MenuHelper    menuHelper;
@@ -16,12 +23,13 @@ public class MainMenu {
             ProductService          productService,
             ProductVariantService   productVariantService,
             ColorService            colorService,
-            CartService             cartService
+            CartService             cartService,
+            SaleService             saleService
     ) {
         this.menuHelper     = new MenuHelper(authService, this::render);
         AuthMenu authMenu   = new AuthMenu(authService, userService, menuHelper);
-        this.adminMenu      = new AdminMenu(productService, colorService, productVariantService, authMenu, menuHelper, this::render);
-        this.customerMenu   = new CustomerMenu(productService, cartService, authMenu, menuHelper, this::render);
+        this.adminMenu      = new AdminMenu(productService, colorService, productVariantService, saleService, authMenu, menuHelper, this::render);
+        this.customerMenu   = new CustomerMenu(productService, cartService, saleService, authMenu, menuHelper, this::render);
     }
 
     public void render() {
@@ -35,69 +43,51 @@ public class MainMenu {
     }
 
     private void renderManual() {
-        com.calwillyfiorella.ui.utils.MenuHelper.printMenuTitle("MANUAL DEL SISTEMA");
+        MenuHelper.printMenuTitle("GUÍA DEL SISTEMA");
         System.out.format("""
-                -----------------------
-                About:
-                -----------------------
-                - Este sistema es para un e-commerce de venta de calzados.
-                - Contempla usuarios administradores y clientes.
-                - Permite CRUD de productos y paramétricas.
-                - Contempla un flujo de carrito de compras.
-                - Permite la compra de productos.
-                - Permite la gestión de las compras en curso.
-                - Permite ver estado actual de pedidos y ventas históricas.
-                - Cada clase posee un campo de estado, el cual puede tomar los valores 'ACTIVO', 'INACTIVO' o 'ELIMINADO'
-                    - Solo los Admins pueden modificar el estado de los registros.
-                    - No se realizan bajas lógicas a modo te tener una auditoría.
-                - La única clase que no sigue el punto anterior es la del carrito de compras. Esos sí se eliminan.
-                -----------------------
-                Inicio del sistema:
-                -----------------------
-                - Al iniciar la ejecución del sistema, se crean objetos por defecto para completar las listas de colores, talles, productos, usuarios, variantes e imágenes.
-                - Estos buscan emular haber sido precargados desde una base de datos y permiten una primer navegación más fluída.
-                -----------------------
-                Usuarios:
-                -----------------------
-                - En esta primera entrega se contemplan dos tipos de usuarios, Admins y Customers.
-                - Por defecto se brindan un usuario administrador { eMail: admin@admin.com, password: admin }, y un usuario cliente { eMail: cust@cust.com, password: cust }.
-                - El usuario ADMINISTRADOR:
-                    - Tiene permitido acceder al menú del CRUD de productos y gestión de ventas.
-                    - Crear otros usuarios administradores.
-                - El usuario CLIENTE:
-                    - Tiene permitido ver solo registros activos, agregar productos a su carrito, ver el estado de sus compras.
-                    - Puede crear su propio usuario (Customer por defecto).
-                -----------------------
-                Productos:
-                -----------------------
-                - Las reglas de negocio particulares de este sistema son:
-                - Los productos en sí son un pilar general, por ejemplo un producto 'Artículo_1' es dueño del nombre, descripción general, y de qué tipo es (actualmente solo existe el tipo 'calzado').
-                - Relacionado a estos pilares, tenemos las Variantes. Dónde un producto puede tener distintas variantes, las cuales poseen:
-                    - Color.
-                    - Talle.
-                    - Género objetivo (Verisón femenina o masculina de un mismo producto).
-                    - Descripción particular de la variante.
-                    - Precio.
-                    - Stock.
-                - El Main tiene una List<> de productos.
-                - Productos tiene una List<> de sus variantes.
-                - Cada variante tiene una List<> de sus imagenes.
-                -----------------------
-                Carrito de Compras:
-                -----------------------
-                - Cada variante puede ser agregada al carrito.
-                - Cada item del carrito es almacenado en una List<> en el Main.
-                - Cada item es asociado al usuario que se encuentra logeado.
-                - Cada usuario solo puede ver los items de su propio usuario.
-                - Cada usuario puede hacer una ABM de sus propios items.
-                -----------------------
-                Paramétricas:
-                -----------------------
-                - Hay dos tipos de paramétricas, algunas son fijas a través de enums y otras que son más versátiles tienene sus propias clases.
-                - Solo son modificables por los ADMIN.
-                - Los CLIENTE solo pueden ver los registros activos.
-                - Aquellos que tienen sus propias clases son COLORES y TALLES.
-                - Ambos se alojan en una List<> de cada uno en el Main.
+                PROPÓSITO
+                Este programa simula una tienda de calzado. Permite consultar productos,
+                administrar un carrito, registrar compras y dar seguimiento a las ventas.
+
+                ACCESO
+                Al ingresar, se puede elegir el sector de administración o el de clientes.
+                Para probar el sistema están disponibles estas cuentas:
+                  Administrador: admin@admin.com / admin
+                  Cliente:       cust@cust.com / cust
+
+                RECORRIDO DEL CLIENTE
+                1. Consultar el catálogo y elegir un producto para ver sus variantes.
+                2. Agregar variantes al carrito, cambiar cantidades, quitar artículos o vaciarlo.
+                3. Iniciar la compra indicando una dirección de envío y un medio de pago.
+                   El sistema registra los artículos y sus precios, calcula los importes
+                   y descuenta del stock las unidades compradas.
+                4. Consultar las compras propias y ver sus datos, artículos y estados.
+                   Una compra activa puede cancelarse desde su detalle.
+
+                TAREAS DEL ADMINISTRADOR
+                - Consultar, crear y editar productos.
+                - Crear y editar variantes, incluyendo color, talle, público, precio y stock.
+                - Consultar y mantener colores.
+                - Ver todas las ventas y sus artículos.
+                - Actualizar las notas, el estado de la venta y el estado del pago.
+                - Crear cuentas de administrador.
+
+                PRODUCTOS Y COMPRAS
+                Un producto reúne la información general del calzado. Sus variantes
+                representan las opciones disponibles, como color, talle, público, precio
+                y stock. Los clientes ven únicamente productos y variantes disponibles.
+                Cada cliente accede solo a su carrito y a sus propias compras; el
+                administrador puede consultar las ventas de todos los clientes.
+
+                DATOS DE DEMOSTRACIÓN
+                Cada inicio crea usuarios, productos, variantes y colores de ejemplo.
+                También se cargan compras de muestra y artículos en los carritos para
+                facilitar la exploración de ambos recorridos. Los cambios se conservan
+                durante la ejecución actual del programa.
+
+                ALCANCE ACTUAL
+                La gestión general de usuarios y la administración de imágenes todavía
+                no están disponibles. La cuenta de cliente de prueba ya viene creada.
                 """);
         render();
     }

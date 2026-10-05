@@ -1,18 +1,20 @@
 package com.calwillyfiorella.service;
 
-import com.calwillyfiorella.exception.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
+import com.calwillyfiorella.exception.IsNotAnAdminException;
+import com.calwillyfiorella.exception.UserAlreadyExistException;
+import com.calwillyfiorella.exception.UserDoesNotExistException;
 import com.calwillyfiorella.model.BaseEntity;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.UserRole;
 import com.calwillyfiorella.repository.UserRepository;
 import com.calwillyfiorella.util.ValidationUtils;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -22,7 +24,7 @@ public class UserService {
     public void createUser(Users newUserData) {
         // Valido estas dos primero porque se usan para descartar las siguientes situaciones
         validateUserRole(newUserData.getRole());
-        newUserData.setPhone(validateUsereMail(newUserData.geteMail()));
+        newUserData.setEmail(validateUsereMail(newUserData.geteMail()));
 
         if (newUserData.getRole() == UserRole.SUPER_ADMIN)
             throw new IllegalArgumentException("No se puede crear SUPER_ADMINs con este método!");

@@ -1,8 +1,12 @@
 package com.calwillyfiorella.repository;
 
-import com.calwillyfiorella.model.Sale;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import java.util.*;
+import com.calwillyfiorella.model.Sale;
 
 public class SaleRepository {
     private final List<Sale> sales;
@@ -19,10 +23,10 @@ public class SaleRepository {
                 .findFirst();
     }
 
-    public Optional<Sale> findByUserId(UUID userId) {
+    public List<Sale> findByUserId(UUID userId) {
         return this.sales.stream()
                 .filter(s -> s.getUser() != null && s.getUser().getId().equals(userId))
-                .findFirst();
+                .toList();
     }
 
     public Optional<Sale> findByCustomerEmail(String customerEmail) {

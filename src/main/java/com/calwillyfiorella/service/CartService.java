@@ -1,14 +1,18 @@
 package com.calwillyfiorella.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.calwillyfiorella.exception.CartItemDoesNotExistException;
 import com.calwillyfiorella.exception.InsufficientStockException;
+import com.calwillyfiorella.model.Cart;
 import com.calwillyfiorella.model.CartItem;
 import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.repository.CartRepository;
-
-import java.util.*;
 
 public class CartService {
     private final CartRepository cartRepository;
@@ -55,10 +59,6 @@ public class CartService {
         this.updateQuantity(cartRepository.findItem(user, variant), quantity);
     }
 
-    public void updateQuantity(UUID itemId, Integer quantity) {
-        this.updateQuantity(cartRepository.findItem(itemId), quantity);
-    }
-
     private void updateQuantity(Optional<CartItem> itemOptional, Integer quantity) {
         CartItem cartItem = ifItemExists(itemOptional);
 
@@ -68,18 +68,6 @@ public class CartService {
 
     public void removeItem(Users user, ProductVariant variant) {
         cartRepository.findItem(user, variant).ifPresent(cartRepository::delete);
-    }
-
-    public void removeItem(UUID itemId) {
-        cartRepository.findItem(itemId).ifPresent(cartRepository::delete);
-    }
-
-    private CartItem getItem(UUID itemId) {
-        return ifItemExists(cartRepository.findItem(itemId));
-    }
-
-    private CartItem getItem(Users user, ProductVariant variant) {
-        return ifItemExists(cartRepository.findItem(user, variant));
     }
 
     private CartItem ifItemExists(Optional<CartItem> itemOptional) {
@@ -92,13 +80,13 @@ public class CartService {
         );
     }
 
-    public List<CartItem> getUserItems(Users user) {
+    public Cart getUserCart(Users user) {
         Objects.requireNonNull(user, "El usuario no puede ser nulo.");
 
-        List<CartItem> rawItems = cartRepository.findByUser(user);
+        Cart cart = cartRepository.findByUser(user);
         List<CartItem> validItems = new ArrayList<>();
 
-        for (CartItem item : rawItems) {
+        for (CartItem item : cart.getItems()) {
             ProductVariant variant = item.getVariant();
 
             if (variant.getRowStatus() != RowStatus.ACTIVE || variant.getStock() <= 0) {
@@ -110,6 +98,6 @@ public class CartService {
 
             validItems.add(item);
         }
-        return validItems;
+        return new Cart(cart.getUserId(), validItems);
     }
 }

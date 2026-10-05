@@ -1,7 +1,17 @@
 package com.calwillyfiorella;
 
-import com.calwillyfiorella.repository.*;
-import com.calwillyfiorella.service.*;
+import com.calwillyfiorella.repository.CartRepository;
+import com.calwillyfiorella.repository.ColorRepository;
+import com.calwillyfiorella.repository.ProductRepository;
+import com.calwillyfiorella.repository.SaleRepository;
+import com.calwillyfiorella.repository.UserRepository;
+import com.calwillyfiorella.service.AuthService;
+import com.calwillyfiorella.service.CartService;
+import com.calwillyfiorella.service.ColorService;
+import com.calwillyfiorella.service.ProductService;
+import com.calwillyfiorella.service.ProductVariantService;
+import com.calwillyfiorella.service.SaleService;
+import com.calwillyfiorella.service.UserService;
 import com.calwillyfiorella.ui.MainMenu;
 import com.calwillyfiorella.util.DataSeeder;
 
@@ -22,6 +32,7 @@ public class Main {
         ProductRepository   productRepository   = new ProductRepository();
         ColorRepository     colorRepository     = new ColorRepository();
         CartRepository      cartRepository      = new CartRepository();
+        SaleRepository      saleRepository      = new SaleRepository();
 
         UserService             userService             = new UserService(userRepository);
         AuthService             authService             = new AuthService(userService);
@@ -29,11 +40,14 @@ public class Main {
         ProductVariantService   productVariantService   = new ProductVariantService(productService);
         ColorService            colorService            = new ColorService(colorRepository);
         CartService             cartService             = new CartService(cartRepository);
+        SaleService             saleService             = new SaleService(saleRepository);
 
         DataSeeder.seed(
                 userRepository,
                 productRepository,
-                colorRepository
+            colorRepository,
+            cartRepository,
+            saleService
         );
 
         MainMenu mainMenu = new MainMenu(
@@ -42,7 +56,8 @@ public class Main {
                 productService,
                 productVariantService,
                 colorService,
-                cartService
+                cartService,
+                saleService
         );
 
         mainMenu.render();
