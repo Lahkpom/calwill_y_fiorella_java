@@ -2,6 +2,7 @@ package com.calwillyfiorella.ui.utils;
 
 import com.calwillyfiorella.Main;
 import com.calwillyfiorella.model.BaseEntity;
+import com.calwillyfiorella.model.Sale;
 import com.calwillyfiorella.model.Users;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.util.AuxiliarFunction;
@@ -71,8 +72,8 @@ public final class FormHelper {
             // Ejecutar la lectura de los campos específicos de cada entidad
             T newEntityData = entityFormFiller.get();
 
-            // Leer el RowStatus común a todas las clases (Se excluye cuando se trata de la actualizaciónd e datos de un usuario).
-            if (!(newEntityData instanceof Users)) {
+            // Leer el RowStatus común a todas las clases (Se excluye cuando se trata de la actualizaciónd de datos de un usuario o de una venta).
+            if (!(newEntityData instanceof Users || newEntityData instanceof Sale)) {
                 RowStatus newRowStatus = RowStatus.ACTIVE;
 
                 if (isUpdate) {

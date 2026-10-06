@@ -135,6 +135,47 @@ public class Sale extends BaseEntity {
         );
     }
 
+    public String toStringComplete() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("""
+            {
+                ID          : (%s).
+                Cliente     : %s.
+                Email       : %s.
+                Teléfono    : %s.
+                Dirección   : %s.
+                Estado      : %s.
+                Pago        : %s (%s).
+                Subtotal    : $%s.-
+                Envío       : $%s.-
+                Total       : $%s.-
+                Notas       : %s.
+                Artículos   : (%d)
+            """.formatted(
+                this.saleId,
+                this.customerName,
+                this.customerEmail,
+                this.customerPhone,
+                this.shippingAddress,
+                this.saleStatus,
+                this.paymentStatus, this.paymentMethod,
+                this.saleSubtotal,
+                this.shippingCost,
+                this.saleTotal,
+                this.saleNotes != null ? this.saleNotes : "Sin notas",
+                this.saleQuantityItems
+        ));
+
+        findAllItems().forEach(item -> sb.append(
+                String.format("        - %s%n", item)
+        ));
+
+        sb.append("}");
+
+        return sb.toString();
+    }
+
     public UUID             getId               () { return saleId; }
     public Users            getUser             () { return user; }
     public String           getCustomerName     () { return customerName; }

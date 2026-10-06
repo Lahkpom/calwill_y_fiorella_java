@@ -7,10 +7,7 @@ import java.util.Objects;
 
 import com.calwillyfiorella.exception.IsNotAnAdminException;
 import com.calwillyfiorella.exception.SaleDoesNotExistException;
-import com.calwillyfiorella.model.Color;
-import com.calwillyfiorella.model.Product;
-import com.calwillyfiorella.model.ProductVariant;
-import com.calwillyfiorella.model.Sale;
+import com.calwillyfiorella.model.*;
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.PaymentStatus;
@@ -75,94 +72,98 @@ public class AdminMenu {
     private void renderAdminSales() {
         List<Sale> sales = saleService.getAllSales();
 
-        if (sales.isEmpty()) {
-            MenuHelper.printMenuTitle("VENTAS");
-            System.out.println("No hay ventas registradas.");
-            menuHelper.renderMenuOptions(List.of(), this::render);
-            return;
-        }
+        List<Integer> allowedOptions = ListPrinter.renderList("TODAS LAS VENTAS", sales, true);
 
-        List<Integer> saleOptions = ListPrinter.renderList("TODAS LAS VENTAS", sales, true);
+        List<MenuOption> options = new ArrayList<>();
 
-        menuHelper.renderMenuOptions(
-                List.of(MenuOption.of("Seleccionar una venta", () -> selectAdminSale(sales, saleOptions))),
-                this::render
-        );
-    }
-    private void selectAdminSale(List<Sale> sales, List<Integer> saleOptions) {
-        int selected = AuxiliarFunction.requireUserOption(saleOptions, "Número de la venta: ", true);
-        renderAdminSaleDetails(sales.get(selected - 1));
+        // Si no hay ventas para mostrar solo le damos las opciones del menú por defecto
+        if (!allowedOptions.isEmpty())
+            options.add(MenuOption.of("Ver detalles de una venta", () -> {
+                int selected = AuxiliarFunction.requireUserOption(allowedOptions, "Número de la venta: ", true);
+                renderAdminSaleDetails(sales.get(selected - 1));
+            }));
+
+        menuHelper.renderMenuOptions(options, this::render);
     }
     private void renderAdminSaleDetails(Sale sale) {
         MenuHelper.printMenuTitle("DETALLE DE VENTA");
-        System.out.printf("Cliente: %s%nEmail: %s%nTeléfono: %s%n", sale.getCustomerName(), sale.getCustomerEmail(), sale.getCustomerPhone());
-        System.out.printf("Dirección: %s%nEstado: %s%nPago: %s (%s)%n", sale.getShippingAddress(), sale.getSaleStatus(), sale.getPaymentStatus(), sale.getPaymentMethod());
-        System.out.printf("Subtotal: %s%nEnvío: %s%nTotal: %s%nNotas: %s%n", sale.getSaleSubtotal(), sale.getShippingCost(), sale.getSaleTotal(), sale.getSaleNotes());
-        System.out.println("Artículos:");
-        sale.findAllItems().forEach(item -> System.out.printf("  - %s%n", item));
+
+        System.out.println(sale.toStringComplete());
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Modificar notas", () -> editSaleNotes(sale)),
-                MenuOption.of("Modificar estado de venta", () -> editSaleStatus(sale)),
-                MenuOption.of("Modificar estado de pago", () -> editPaymentStatus(sale))
+              MenuOption.of("Actualizar venta", () -> updateSale(sale))
         );
+
         menuHelper.renderMenuOptions(options, this::renderAdminSales);
     }
-    private void editSaleNotes(Sale sale) {
-        String notes = InputUtils.readString("Nuevas notas (vacío para conservar las actuales): ", false);
-        if (notes == null) {
-            renderAdminSaleDetails(sale);
-            return;
-        }
-
-        Sale changes = new Sale();
-        changes.setSaleNotes(notes);
-        updateSale(sale, changes);
-    }
-    private void editSaleStatus(Sale sale) {
-        SaleStatus[] statuses = SaleStatus.values();
-        MenuHelper.printMenuTitle("ESTADOS DE VENTA");
-        for (int i = 0; i < statuses.length; i++) {
-            System.out.printf("Opción %d. %s%n", i + 1, statuses[i]);
-        }
-        int selected = AuxiliarFunction.requireUserOption(statuses.length, "Nuevo estado de venta: ", true);
-
-        Sale changes = new Sale();
-        changes.setSaleStatus(statuses[selected - 1]);
-        updateSale(sale, changes);
-    }
-    private void editPaymentStatus(Sale sale) {
-        PaymentStatus[] statuses = PaymentStatus.values();
-        MenuHelper.printMenuTitle("ESTADOS DE PAGO");
-        for (int i = 0; i < statuses.length; i++) {
-            System.out.printf("Opción %d. %s%n", i + 1, statuses[i]);
-        }
-        int selected = AuxiliarFunction.requireUserOption(statuses.length, "Nuevo estado de pago: ", true);
-
-        Sale changes = new Sale();
-        changes.setPaymentStatus(statuses[selected - 1]);
-        updateSale(sale, changes);
-    }
-    private void updateSale(Sale sale, Sale changes) {
+    private void updateSale(Sale currentSaleData) {
         try {
-            saleService.updateSale(sale.getId(), changes);
-            System.out.println("La venta fue actualizada.");
-        } catch (NullPointerException | IsNotAnAdminException | SaleDoesNotExistException e) {
+            Sale newSaleData = updateSaleForm(currentSaleData);
+
+            if (newSaleData == null)
+                throw new IllegalStateException("La venta devuelta por el formulario de actualización de ventas es un objeto nulo.");
+
+            newSaleData.setRowStatus(currentSaleData.getRowStatus());
+
+            if (newSaleData.getSaleNotes()      == null) newSaleData.setSaleNotes(currentSaleData.getSaleNotes());
+            if (newSaleData.getSaleStatus()     == null) newSaleData.setSaleStatus(currentSaleData.getSaleStatus());
+            if (newSaleData.getPaymentStatus()  == null) newSaleData.setPaymentStatus(currentSaleData.getPaymentStatus());
+
+            saleService.updateSale(currentSaleData.getId(), newSaleData);
+
+            System.out.println("La venta fue actualizada con éxito.");
+        } catch (Exception e) {
             System.err.println("Error al actualizar la venta: " + e.getMessage());
         }
-        renderAdminSaleDetails(sale);
+
+        renderAdminSaleDetails(currentSaleData);
+    }
+    private Sale updateSaleForm(Sale currentSaleData) {
+        boolean isUpdate = true;
+        boolean isStrict = false;
+
+        return FormHelper.executeCreateOrUpdateForm("INFORMACIÓN DE LA VENTA", isUpdate, currentSaleData, () -> {
+            String newNotes = InputUtils.readString(
+                    FormHelper.buildPrompt(
+                            "Notas",
+                            currentSaleData.getSaleNotes(),
+                            isUpdate
+                    ),
+                    isStrict
+            );
+            SaleStatus newSaleStatus = AuxiliarFunction.requireSaleStatus(
+                    FormHelper.buildPrompt(
+                            "Estado de Venta",
+                            currentSaleData.getSaleStatus(),
+                            isUpdate
+                    ),
+                    isStrict
+            );
+            PaymentStatus newPaymentStatus = AuxiliarFunction.requirePaymentStatus(
+                    FormHelper.buildPrompt(
+                            "Estado de Pago",
+                            currentSaleData.getPaymentStatus(),
+                            isUpdate
+                    ),
+                    isStrict
+            );
+
+            Sale sale = new Sale();
+            sale.setSaleNotes(newNotes);
+            sale.setSaleStatus(newSaleStatus);
+            sale.setPaymentStatus(newPaymentStatus);
+            return sale;
+        });
     }
 
     private void renderAdminColors() {
         List<Color> colors = colorService.getAll();
         List<Integer> allowedOptions = AuxiliarFunction.toListColors(colors, true);
 
-        boolean thereAreColors = !allowedOptions.isEmpty();
-
         List<MenuOption> options = new ArrayList<>();
 
         // Estas opciones solo si muestran si hay colores
-        if (thereAreColors) {
+        if (!allowedOptions.isEmpty()) {
             options.add(MenuOption.of("Editar un ProColorducto", () -> updateColor(colors, allowedOptions)));
         }
 

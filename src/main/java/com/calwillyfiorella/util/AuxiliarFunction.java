@@ -2,9 +2,8 @@ package com.calwillyfiorella.util;
 
 import com.calwillyfiorella.model.Color;
 import com.calwillyfiorella.model.ProductVariant;
-import com.calwillyfiorella.model.enums.NumericSize;
-import com.calwillyfiorella.model.enums.RowStatus;
-import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.model.Sale;
+import com.calwillyfiorella.model.enums.*;
 import com.calwillyfiorella.service.ProductVariantService;
 import com.calwillyfiorella.ui.utils.MenuHelper;
 import com.calwillyfiorella.ui.utils.ListPrinter;
@@ -148,5 +147,55 @@ public final class AuxiliarFunction {
             case 3 -> RowStatus.DELETED;
             default -> throw new IllegalStateException("Unexpected value: " + newStatus);
         };
+    }
+
+    /**
+     * Lista los estados de venta disponibles, solicita la selección del usuario y retorna la constante de SaleStatus elegida.
+     *
+     * @return SaleStatus seleccionado por el usuario.
+     */
+    public static SaleStatus requireSaleStatus(String prompt, boolean isStrict) {
+        MenuHelper.printMenuTitle("ESTADOS DE VENTA DISPONIBLES:");
+
+        SaleStatus[] statuses = SaleStatus.values();
+
+        for (int i = 0; i < statuses.length; i++) {
+            System.out.format(
+                    "Opción %d. %s%n",
+                    i + 1,
+                    statuses[i]
+            );
+        }
+
+        Integer selectedOption = AuxiliarFunction.requireUserOption(statuses.length, prompt, isStrict);
+
+        if (selectedOption == null) return null;
+
+        return statuses[selectedOption - 1];
+    }
+
+    /**
+     * Lista los estados de pago disponibles, solicita la selección del usuario y retorna la constante de PaymentStatus elegida.
+     *
+     * @return PaymentStatus seleccionado por el usuario.
+     */
+    public static PaymentStatus requirePaymentStatus(String prompt, boolean isStrict) {
+        MenuHelper.printMenuTitle("ESTADOS DE PAGO DISPONIBLES:");
+
+        PaymentStatus[] statuses = PaymentStatus.values();
+
+        for (int i = 0; i < statuses.length; i++) {
+            System.out.format(
+                    "Opción %d. %s%n",
+                    i + 1,
+                    statuses[i]
+            );
+        }
+
+        Integer selectedOption = AuxiliarFunction.requireUserOption(statuses.length, prompt, isStrict);
+
+        if (selectedOption == null) return null;
+
+        return statuses[selectedOption - 1];
     }
 }

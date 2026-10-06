@@ -52,7 +52,7 @@ Cada ejecución carga dos cuentas por defecto, un catálogo inicial de productos
 | Administrador | `admin@admin.com` | `admin` |
 | Cliente | `cust@cust.com` | `cust` |
 
-Estas credenciales son solo para probar la aplicación. No deben reutilizarse en un entorno real.
+Estas credenciales son solo para probar la aplicación.
 
 ## Tecnologías y diseño
 
@@ -107,4 +107,4 @@ Esta versión está pensada como una demostración funcional de flujos de comerc
 
 ## Autoría
 
-Proyecto personal de portfolio desarrollado por Calwill y Fiorella.
+Proyecto personal de portfolio desarrollado por Leonel Alejandro Hidalgo.
