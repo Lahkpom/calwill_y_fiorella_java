@@ -79,7 +79,7 @@ public class AdminMenu {
         // Si no hay ventas para mostrar solo le damos las opciones del menú por defecto
         if (!allowedOptions.isEmpty())
             options.add(MenuOption.of("Ver detalles de una venta", () -> {
-                int selected = AuxiliarFunction.requireUserOption(allowedOptions, "Número de la venta: ", true);
+                Integer selected = AuxiliarFunction.requireUserOption(allowedOptions, "Número de la venta: ", true);
                 renderAdminSaleDetails(sales.get(selected - 1));
             }));
 
@@ -164,17 +164,28 @@ public class AdminMenu {
 
         // Estas opciones solo si muestran si hay colores
         if (!allowedOptions.isEmpty()) {
-            options.add(MenuOption.of("Editar un ProColorducto", () -> updateColor(colors, allowedOptions)));
+            options.add(MenuOption.of("Ver detalle de un Color", () -> {
+                Integer selected = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color: ", true);
+                renderAdminColorDetails(colors.get(selected - 1));
+            }));
         }
 
         options.add(MenuOption.of("Crear un nuevo Color", this::createColor));
 
         menuHelper.renderMenuOptions(options, this::render);
     }
-    private void updateColor(List<Color> colors, List<Integer> allowedOptions) {
-        Integer colorIdx = AuxiliarFunction.requireUserOption(allowedOptions, "Número del color: ", false);
-        Color currentColorData = colors.get(colorIdx - 1);
+    public void renderAdminColorDetails(Color color) {
+        MenuHelper.printMenuTitle("DETALLE DEL COLOR");
 
+        System.out.println(color.toStringComplete());
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Actualizar Color", () -> updateColor(color))
+        );
+
+        menuHelper.renderMenuOptions(options, this::renderAdminColors);
+    }
+    private void updateColor(Color currentColorData) {
         try {
             Color newColorData = createOrUpdateColorForm(true, currentColorData);
 

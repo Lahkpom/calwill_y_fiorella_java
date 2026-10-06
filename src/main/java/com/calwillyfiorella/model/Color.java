@@ -44,7 +44,28 @@ public class Color extends BaseEntity {
 
     @Override
     public String toString() {
-        return String.format("{ Color: %s, Cod Hex: %s, Status: %s }", this.colorName, this.colorCode, this.rowStatus);
+        return "{ Color: %s, Cod Hex: %s, Status: %s }".formatted(this.colorName, this.colorCode, this.rowStatus);
+    }
+
+    public String toStringComplete() {
+        return """
+            {
+                ID          : (%d).
+                Nombre      : %s.
+                Descripción : %s.
+                Estado      : %s.
+                Fecha Inicio: %td/%<tm/%<tY (%<tT).
+                Última Mod  : %S.
+            }""".formatted(
+                this.colorId,
+                this.colorName,
+                this.colorDesc,
+                this.colorCode,
+                super.createdAt,
+                (super.updatedAt != null)
+                        ? "%td/%<tm/%<tY (%<tT)".formatted(super.updatedAt)
+                        : "Sin modificaciones"
+        );
     }
 
     public void setId(Integer id) {

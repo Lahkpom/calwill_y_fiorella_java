@@ -141,6 +141,8 @@ public class Sale extends BaseEntity {
         sb.append("""
             {
                 ID          : (%s).
+                Fecha Inicio: %td/%<tm/%<tY (%<tT).
+                Última Mod  : %S.
                 Cliente     : %s.
                 Email       : %s.
                 Teléfono    : %s.
@@ -154,6 +156,10 @@ public class Sale extends BaseEntity {
                 Artículos   : (%d)
             """.formatted(
                 this.saleId,
+                super.createdAt,
+                (super.updatedAt != null)
+                        ? "%td/%<tm/%<tY (%<tT)".formatted(super.updatedAt)
+                        : "Sin modificaciones",
                 this.customerName,
                 this.customerEmail,
                 this.customerPhone,
