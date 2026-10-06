@@ -9,20 +9,18 @@ import com.calwillyfiorella.model.ProductVariant;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
+import com.calwillyfiorella.repository.ProductVariantRepository;
 import com.calwillyfiorella.util.ValidationUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * No tiene ProductVariantRepository ya que cada producto es owner de su propia lista de variantes
- * Se utiliza el ProductService para traer al producto con el que se esté trabajando y ahí llamar a sus funciones internas
- */
 public class ProductVariantService {
-    private final ProductService productService;
+    private final ProductVariantRepository productVariantRepository;
 
     public static String targetGenderDecode(TargetGender tg) {
         return switch(tg) {
@@ -34,15 +32,15 @@ public class ProductVariantService {
         };
     }
 
-    public ProductVariantService(ProductService productService) { this.productService = productService; }
+    public ProductVariantService(ProductVariantRepository productVariantRepository) { this.productVariantRepository = productVariantRepository; }
 
-    public void addVariant(UUID productId, ProductVariant newVariantData) {
+    public void addVariant(ProductVariant newVariantData, Product currentProduct) {
         AuthService.checkActualUserIsAdmin();
 
-        Objects.requireNonNull(productId        , "ProductId cannot be null.");
-        Objects.requireNonNull(newVariantData   , "Variant cannot be null.");
+        Objects.requireNonNull(newVariantData, "Variant cannot be null.");
 
-        Product currentProduct = this.productService.getProduct(productId);
+        if (currentProduct == null && newVariantData.getProduct() == null)
+            throw new IllegalArgumentException("No se indicó a qué product corresponde la variante.");
 
         if (newVariantData.getId() == null) {
             newVariantData.setId(UUID.randomUUID());
@@ -50,7 +48,7 @@ public class ProductVariantService {
             newVariantData.setCreatedAt(LocalDateTime.now());
             newVariantData.setUpdatedAt(null);
         } else {
-            validateVariantId(currentProduct, newVariantData.getId());
+            validateVariantId(newVariantData.getId());
             BaseEntity.validateRowStatus(newVariantData.getRowStatus());
             BaseEntity.validateCreatedAt(newVariantData.getCreatedAt());
         }
@@ -64,45 +62,30 @@ public class ProductVariantService {
         validateColor(newVariantData.getColor());
         validateSize(newVariantData.getSize());
         validateTargetGender(newVariantData.getTargetGender());
-        validateSKU(currentProduct, newVariantData.getSku()); // Este hay que ver que sea único
+        validateSKU(newVariantData.getSku()); // Este hay que ver que sea único
         validatePrice(newVariantData.getPrice());
         validateStock(newVariantData.getStock());
 
-        currentProduct.saveVariant(newVariantData);
+        this.productVariantRepository.saveVariant(newVariantData);
     }
 
-    public ProductVariant addVariant( UUID productId, Color color, NumericSize size, TargetGender targetGender, String variantDesc, String variantSku, BigDecimal variantPrice, Integer variantStock) {
-        Product product = this.productService.getProduct(productId);
-
-        if (variantSku == null || product.findAllVariants().stream().anyMatch(v -> v.getSku().equals(variantSku))) throw new IllegalArgumentException("Ya existe en la lista de variantes una variante con la misma SKU.");
-
-        ProductVariant pv = new ProductVariant(product, color, size, targetGender, variantDesc, variantSku, variantPrice, variantStock);
-
-        product.saveVariant(pv);
-
-        return pv;
-    }
-
-    public ProductVariant updateVariant(UUID productId, UUID variantId, ProductVariant newVariantData) {
+    public ProductVariant updateVariant(UUID variantId, ProductVariant newVariantData) {
         AuthService.checkActualUserIsAdmin();
 
-        Objects.requireNonNull(productId        , "ProductId cannot be null.");
         Objects.requireNonNull(variantId        , "VariantId cannot be null.");
         Objects.requireNonNull(newVariantData   , "newVariantData cannot be null.");
 
-        Product currentProduct = this.productService.getProduct(productId);
+        ProductVariant currentVariant = this.productVariantRepository
+                .findVariant(variantId)
+                .orElseThrow(ProductVariantDoesNotExistException::new);
 
-        ProductVariant currentVariant = currentProduct.findVariant(variantId).orElseThrow(ProductVariantDoesNotExistException::new);
-
-        validateVariantId(currentProduct, newVariantData.getId());
-
-        validateVariantProduct(currentProduct.getId(), newVariantData);
         validateColor(newVariantData.getColor());
         validateSize(newVariantData.getSize());
         validateTargetGender(newVariantData.getTargetGender());
-        validateSKU(currentProduct, newVariantData.getSku(), currentVariant.getId());
+        validateSKU(newVariantData.getSku(), currentVariant.getId());
         validatePrice(newVariantData.getPrice());
         validateStock(newVariantData.getStock());
+        BaseEntity.validateRowStatus(newVariantData.getRowStatus());
 
         currentVariant.setColor(newVariantData.getColor());
         currentVariant.setSize(newVariantData.getSize());
@@ -116,8 +99,12 @@ public class ProductVariantService {
         return currentVariant;
     }
 
-    private void validateVariantId(Product product, UUID variantId) {
-        if (product.findVariant(variantId).isPresent())
+    public List<ProductVariant> getAllVariants() { return this.productVariantRepository.findAllVariants(); }
+
+    public List<ProductVariant> getAllVariantsOf(UUID productIs) { return this.productVariantRepository.findAllVariantsOf(productIs); }
+
+    private void validateVariantId(UUID variantId) {
+        if (this.productVariantRepository.findVariant(variantId).isPresent())
             throw new ProductAlreadyExistException();
     }
     private void validateVariantProduct(UUID currentProductId, ProductVariant newVariantData) {
@@ -133,13 +120,13 @@ public class ProductVariantService {
     private void validateTargetGender(TargetGender targetGender) {
         Objects.requireNonNull(targetGender, "targetGender cannot be null");
     }
-    private void validateSKU(Product product, String sku) {
-        validateSKU(product, sku, null);
+    private void validateSKU(String sku) {
+        validateSKU(sku, null);
     }
-    private void validateSKU(Product product, String sku, UUID currentVariantId) {
+    private void validateSKU(String sku, UUID currentVariantId) {
         ValidationUtils.requireNonBlank(sku, "El SKU no puede ser nulo ni estar vacío.");
 
-        Optional<ProductVariant> existingProduct = product.findVariant(sku);
+        Optional<ProductVariant> existingProduct = this.productVariantRepository.findVariant(sku);
 
         if (existingProduct.isPresent() && (currentVariantId == null || !existingProduct.get().getId().equals(currentVariantId)))
             throw new ProductAlreadyExistException("Ya existe una variante en la lista de productos con el SKU: " + sku);

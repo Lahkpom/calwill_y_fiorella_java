@@ -56,7 +56,7 @@ public class ProductVariant extends BaseEntity {
             UUID            variantId,
             Product         product,
             Color           color,
-            NumericSize size,
+            NumericSize     size,
             TargetGender    targetGender,
             String          variantDesc,
             String          variantSku,
@@ -91,6 +91,41 @@ public class ProductVariant extends BaseEntity {
                 this.variantStock,
                 this.images.stream().filter(img -> img.getRowStatus() == RowStatus.ACTIVE).count(),
                 this.rowStatus
+        );
+    }
+
+    public String toStringComplete() {
+        return """
+            {
+                ID          : (%s).
+                Producto    : %s.
+                Color       : %s.
+                Talle       : %s.
+                Para        : %s.
+                Descripción : %s.
+                SKU         : %s.
+                Stock       : %d.
+                Precio      : %s.
+                Imágenes    : %d.
+                Estado      : %s.
+                Fecha Inicio: %td/%<tm/%<tY (%<tT).
+                Última Mod  : %S.
+            }""".formatted(
+                this.variantId,
+                this.product,
+                this.color,
+                this.size,
+                ProductVariantService.targetGenderDecode(this.targetGender),
+                this.variantDesc,
+                this.variantSku,
+                this.variantStock,
+                this.variantPrice,
+                this.images.stream().filter(img -> img.getRowStatus() == RowStatus.ACTIVE).count(),
+                super.rowStatus,
+                super.createdAt,
+                (super.updatedAt != null)
+                        ? "%td/%<tm/%<tY (%<tT)".formatted(super.updatedAt)
+                        : "Sin modificaciones"
         );
     }
 

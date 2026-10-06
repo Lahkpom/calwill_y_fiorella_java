@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class Product extends BaseEntity{
-    private final List<ProductVariant>  variants = new ArrayList<>();
-
     private UUID        productId;
     private Category    productCategory;
     private String      productName;
@@ -61,11 +59,36 @@ public class Product extends BaseEntity{
     @Override
     public String toString() {
         return String.format(
-                "{ Nombre: %s, Categoría: %s, Variantes: %d, Estado: %s }",
+                "{ Nombre: %s, Categoría: %s, Descripción Corta: %s, Estado: %s }",
                 this.productName,
                 this.productCategory,
-                this.variants.stream().filter(v -> v.getRowStatus() == RowStatus.ACTIVE).count(),
+                this.productShortDesc,
                 this.rowStatus
+        );
+    }
+
+    public String toStringComplete(int variantQuantity) {
+        return """
+            {
+                ID          : (%s).
+                Nombre      : %s.
+                Desc. Corta : %s.
+                Desc. Larga : %s.
+                Variantes   : %d.
+                Estado      : %s.
+                Fecha Inicio: %td/%<tm/%<tY (%<tT).
+                Última Mod  : %S.
+            }""".formatted(
+                this.productId,
+                this.productName,
+                this.productShortDesc,
+                this.productLongDesc,
+                variantQuantity,
+                super.rowStatus,
+                super.createdAt,
+                (super.updatedAt != null)
+                        ? "%td/%<tm/%<tY (%<tT)".formatted(super.updatedAt)
+                        : "Sin modificaciones"
         );
     }
 
@@ -96,22 +119,4 @@ public class Product extends BaseEntity{
         this.productLongDesc = productLongDesc;
         this.afterUpdate();
     }
-
-    // ProductVariantRepository
-    public void saveVariant(ProductVariant variant) { this.variants.add(variant); }
-
-    public List<ProductVariant> findAllVariants() { return Collections.unmodifiableList(this.variants); }
-
-    public Optional<ProductVariant> findVariant(UUID variantId) {
-        return this.variants.stream()
-                .filter(v -> v.getId().equals(variantId))
-                .findFirst();
-    }
-    public Optional<ProductVariant> findVariant(String variantSKU) {
-        return this.variants.stream()
-                .filter(v -> v.getSku().equalsIgnoreCase(variantSKU))
-                .findFirst();
-    }
-
-    public void delete(ProductVariant variant) { this.variants.remove(variant); }
 }

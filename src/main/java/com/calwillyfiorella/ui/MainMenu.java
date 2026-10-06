@@ -29,7 +29,7 @@ public class MainMenu {
         this.menuHelper     = new MenuHelper(authService, this::render);
         AuthMenu authMenu   = new AuthMenu(authService, userService, menuHelper);
         this.adminMenu      = new AdminMenu(productService, colorService, productVariantService, saleService, authMenu, menuHelper, this::render);
-        this.customerMenu   = new CustomerMenu(productService, cartService, saleService, authMenu, menuHelper, this::render);
+        this.customerMenu   = new CustomerMenu(productService, productVariantService, cartService, saleService, authMenu, menuHelper, this::render);
     }
 
     public void render() {

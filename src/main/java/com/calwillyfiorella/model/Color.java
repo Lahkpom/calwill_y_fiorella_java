@@ -61,6 +61,7 @@ public class Color extends BaseEntity {
                 this.colorName,
                 this.colorDesc,
                 this.colorCode,
+                super.rowStatus,
                 super.createdAt,
                 (super.updatedAt != null)
                         ? "%td/%<tm/%<tY (%<tT)".formatted(super.updatedAt)

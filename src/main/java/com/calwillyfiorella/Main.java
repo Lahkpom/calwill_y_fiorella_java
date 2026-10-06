@@ -1,10 +1,6 @@
 package com.calwillyfiorella;
 
-import com.calwillyfiorella.repository.CartRepository;
-import com.calwillyfiorella.repository.ColorRepository;
-import com.calwillyfiorella.repository.ProductRepository;
-import com.calwillyfiorella.repository.SaleRepository;
-import com.calwillyfiorella.repository.UserRepository;
+import com.calwillyfiorella.repository.*;
 import com.calwillyfiorella.service.AuthService;
 import com.calwillyfiorella.service.CartService;
 import com.calwillyfiorella.service.ColorService;
@@ -26,16 +22,17 @@ public class Main {
 
 
     public static void main(String[] args) {
-        UserRepository      userRepository      = new UserRepository();
-        ProductRepository   productRepository   = new ProductRepository();
-        ColorRepository     colorRepository     = new ColorRepository();
-        CartRepository      cartRepository      = new CartRepository();
-        SaleRepository      saleRepository      = new SaleRepository();
+        UserRepository              userRepository              = new UserRepository();
+        ProductRepository           productRepository           = new ProductRepository();
+        ProductVariantRepository    productVariantRepository    = new ProductVariantRepository();
+        ColorRepository             colorRepository             = new ColorRepository();
+        CartRepository              cartRepository              = new CartRepository();
+        SaleRepository              saleRepository              = new SaleRepository();
 
         UserService             userService             = new UserService(userRepository);
         AuthService             authService             = new AuthService(userService);
         ProductService          productService          = new ProductService(productRepository);
-        ProductVariantService   productVariantService   = new ProductVariantService(productService);
+        ProductVariantService   productVariantService   = new ProductVariantService(productVariantRepository);
         ColorService            colorService            = new ColorService(colorRepository);
         CartService             cartService             = new CartService(cartRepository);
         SaleService             saleService             = new SaleService(saleRepository);
@@ -43,6 +40,7 @@ public class Main {
         DataSeeder.seed(
                 userRepository,
                 productRepository,
+                productVariantRepository,
                 colorRepository,
                 cartRepository,
                 saleService

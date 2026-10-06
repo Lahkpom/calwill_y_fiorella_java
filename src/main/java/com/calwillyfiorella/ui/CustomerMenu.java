@@ -14,10 +14,7 @@ import com.calwillyfiorella.model.enums.PaymentMethod;
 import com.calwillyfiorella.model.enums.PaymentStatus;
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.SaleStatus;
-import com.calwillyfiorella.service.AuthService;
-import com.calwillyfiorella.service.CartService;
-import com.calwillyfiorella.service.ProductService;
-import com.calwillyfiorella.service.SaleService;
+import com.calwillyfiorella.service.*;
 import com.calwillyfiorella.ui.utils.ListPrinter;
 import com.calwillyfiorella.ui.utils.MenuHelper;
 import com.calwillyfiorella.ui.utils.MenuOption;
@@ -25,27 +22,30 @@ import com.calwillyfiorella.util.AuxiliarFunction;
 import com.calwillyfiorella.util.InputUtils;
 
 public class CustomerMenu {
-    private final ProductService    productService;
-    private final CartService       cartService;
-    private final SaleService       saleService;
-    private final AuthMenu          authMenu;
-    private final MenuHelper        menuHelper;
-    private final Runnable          mainMenu;
+    private final ProductService        productService;
+    private final ProductVariantService productVariantService;
+    private final CartService           cartService;
+    private final SaleService           saleService;
+    private final AuthMenu              authMenu;
+    private final MenuHelper            menuHelper;
+    private final Runnable              mainMenu;
 
     public CustomerMenu(
-            ProductService  productService,
-            CartService     cartService,
-            SaleService     saleService,
-            AuthMenu        authMenu,
-            MenuHelper      menuHelper,
-            Runnable        mainMenu
+            ProductService          productService,
+            ProductVariantService   productVariantService,
+            CartService             cartService,
+            SaleService             saleService,
+            AuthMenu                authMenu,
+            MenuHelper              menuHelper,
+            Runnable                mainMenu
     ) {
-        this.productService = Objects.requireNonNull(productService);
-        this.cartService    = Objects.requireNonNull(cartService);
-        this.saleService    = Objects.requireNonNull(saleService);
-        this.authMenu       = Objects.requireNonNull(authMenu);
-        this.menuHelper     = Objects.requireNonNull(menuHelper);
-        this.mainMenu       = Objects.requireNonNull(mainMenu);
+        this.productService         = Objects.requireNonNull(productService);
+        this.productVariantService  = Objects.requireNonNull(productVariantService);
+        this.cartService            = Objects.requireNonNull(cartService);
+        this.saleService            = Objects.requireNonNull(saleService);
+        this.authMenu               = Objects.requireNonNull(authMenu);
+        this.menuHelper             = Objects.requireNonNull(menuHelper);
+        this.mainMenu               = Objects.requireNonNull(mainMenu);
     }
 
     public void render() {
@@ -82,7 +82,7 @@ public class CustomerMenu {
         int idx = AuxiliarFunction.requireUserOption(allowedProductOptions, "Número del producto: ", true);
 
         try {
-            List<ProductVariant> variants = productService.getProduct(products.get(idx - 1).getId()).findAllVariants();
+            List<ProductVariant> variants = this.productVariantService.getAllVariantsOf(products.get(idx - 1).getId());
 
             List<Integer> allowedVariantsOptions = ListPrinter.renderList("VARIANTES DISPONIBLES", variants, false);
 

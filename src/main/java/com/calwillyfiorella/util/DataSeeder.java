@@ -20,10 +20,7 @@ import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.model.enums.SaleStatus;
 import com.calwillyfiorella.model.enums.TargetGender;
 import com.calwillyfiorella.model.enums.UserRole;
-import com.calwillyfiorella.repository.CartRepository;
-import com.calwillyfiorella.repository.ColorRepository;
-import com.calwillyfiorella.repository.ProductRepository;
-import com.calwillyfiorella.repository.UserRepository;
+import com.calwillyfiorella.repository.*;
 import com.calwillyfiorella.service.SaleService;
 
 public final class DataSeeder {
@@ -33,18 +30,20 @@ public final class DataSeeder {
     /**
      * Se simula inyección de la DB a las List de cada Repository
      *
-     * @param userRepository    userRepository
-     * @param productRepository productRepository
-     * @param colorRepository   colorRepository
-     * @param cartRepository    cartRepository
-     * @param saleService       saleService
+     * @param userRepository            userRepository
+     * @param productRepository         productRepository
+     * @param productVariantRepository  productVariantRepository
+     * @param colorRepository           colorRepository
+     * @param cartRepository            cartRepository
+     * @param saleService               saleService
      */
     public static void seed(
-            UserRepository      userRepository,
-            ProductRepository   productRepository,
-            ColorRepository     colorRepository,
-            CartRepository      cartRepository,
-            SaleService         saleService
+            UserRepository              userRepository,
+            ProductRepository           productRepository,
+            ProductVariantRepository    productVariantRepository,
+            ColorRepository             colorRepository,
+            CartRepository              cartRepository,
+            SaleService                 saleService
     ) {
         // Usuarios iniciales
         Users admin = new Users(
@@ -105,8 +104,8 @@ public final class DataSeeder {
                         new BigDecimal("11000"),
                         50
         );
-        art1.saveVariant(variant1);
-        art1.saveVariant(variant2);
+        productVariantRepository.saveVariant(variant1);
+        productVariantRepository.saveVariant(variant2);
 
         Product art2 = new Product(
                 Category.CALZADO,
@@ -134,8 +133,8 @@ public final class DataSeeder {
                         new BigDecimal("13000"),
                         50
         );
-        art2.saveVariant(variant3);
-        art2.saveVariant(variant4);
+        productVariantRepository.saveVariant(variant3);
+        productVariantRepository.saveVariant(variant4);
 
         productRepository.save(art1);
         productRepository.save(art2);
