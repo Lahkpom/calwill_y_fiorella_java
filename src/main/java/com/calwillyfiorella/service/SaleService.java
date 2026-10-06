@@ -54,12 +54,16 @@ public class SaleService {
         validatePaymentStatus(newSaleData.getPaymentStatus());
 
         SaleTotals totals = calculateSaleTotals(saleItems, newSaleData.getShippingCost());
-    adjustStockForSale(saleItems);
+
+        adjustStockForSale(saleItems);
+
         List.copyOf(newSaleData.findAllItems()).forEach(newSaleData::delete);
+
         saleItems.forEach(item -> {
             item.setSale(newSaleData);
             newSaleData.saveItem(item);
         });
+
         applySaleTotals(newSaleData, totals);
 
         this.saleRepository.save(newSaleData);
@@ -71,12 +75,14 @@ public class SaleService {
 
         for (SaleItem item : saleItems) {
             ProductVariant variant = Objects.requireNonNull(
-                    item.getProductVariant(), "Sale item variant cannot be null");
+                    item.getProductVariant(),
+                    "Sale item variant cannot be null"
+            );
+
             UUID variantId = Objects.requireNonNull(variant.getId(), "Variant id cannot be null");
 
-            if (variant.getRowStatus() != RowStatus.ACTIVE) {
+            if (variant.getRowStatus() != RowStatus.ACTIVE)
                 throw new InsufficientStockException("No se puede vender una variante que no está activa.");
-            }
 
             variantsById.putIfAbsent(variantId, variant);
             quantitiesByVariantId.merge(variantId, item.getSaleItemQuantity(), Math::addExact);
@@ -85,11 +91,14 @@ public class SaleService {
         for (Map.Entry<UUID, Integer> entry : quantitiesByVariantId.entrySet()) {
             ProductVariant variant = variantsById.get(entry.getKey());
             Integer stock = variant.getStock();
-            if (stock == null || stock < entry.getValue()) {
+
+            if (stock == null || stock < entry.getValue())
                 throw new InsufficientStockException(
-                        "El stock disponible no alcanza para completar la compra de la variante "
-                                + variant.getSku() + ".");
-            }
+                        String.format(
+                                "El stock disponible no alcanza para completar la compra de la variante %s.",
+                                variant.getSku()
+                        )
+                );
         }
 
         for (Map.Entry<UUID, Integer> entry : quantitiesByVariantId.entrySet()) {
@@ -99,16 +108,19 @@ public class SaleService {
     }
 
     public void updateSale(UUID saleId, Sale newSaleData) {
+        AuthService.checkActualUserIsAdmin();
+
         Objects.requireNonNull(saleId, "Sale id cannot be null");
         Objects.requireNonNull(newSaleData, "Sale data cannot be null");
-        AuthService.checkActualUserIsAdmin();
 
         Sale currentSale = getSaleBySaleId(saleId);
         if (newSaleData.getSaleNotes() != null) currentSale.setSaleNotes(newSaleData.getSaleNotes());
+
         if (newSaleData.getSaleStatus() != null) {
             validateSaleStatus(newSaleData.getSaleStatus());
             currentSale.setSaleStatus(newSaleData.getSaleStatus());
         }
+
         if (newSaleData.getPaymentStatus() != null) {
             validatePaymentStatus(newSaleData.getPaymentStatus());
             currentSale.setPaymentStatus(newSaleData.getPaymentStatus());
@@ -120,20 +132,18 @@ public class SaleService {
         Objects.requireNonNull(customer, "Customer cannot be null");
 
         Users actualUser = AuthService.getActualUser();
-        if (actualUser == null || !actualUser.getId().equals(customer.getId())) {
+        if (actualUser == null || !actualUser.getId().equals(customer.getId()))
             throw new SecurityException("La sesión actual no corresponde al cliente.");
-        }
 
         Sale sale = getSaleBySaleId(saleId);
-        if (sale.getUser() == null || !sale.getUser().getId().equals(customer.getId())) {
+        if (sale.getUser() == null || !sale.getUser().getId().equals(customer.getId()))
             throw new SecurityException("No puedes cancelar una compra de otro usuario.");
-        }
-        if (sale.getRowStatus() != RowStatus.ACTIVE) {
+
+        if (sale.getRowStatus() != RowStatus.ACTIVE)
             throw new IllegalStateException("Solo se pueden cancelar compras activas.");
-        }
-        if (sale.getSaleStatus() == SaleStatus.CANCELADO) {
+
+        if (sale.getSaleStatus() == SaleStatus.CANCELADO)
             throw new IllegalStateException("La compra ya está cancelada.");
-        }
 
         sale.setSaleStatus(SaleStatus.CANCELADO);
     }
@@ -166,8 +176,8 @@ public class SaleService {
         return ValidationUtils.requireValidEmail(customerEmail);
     }
 
-    private String validateShippingAddress(String shippingAddress) {
-        return ValidationUtils.requireNonBlank(shippingAddress, "Shipping address cannot be blank.");
+    private void validateShippingAddress(String shippingAddress) {
+        ValidationUtils.requireNonBlank(shippingAddress, "Shipping address cannot be blank.");
     }
 
     private void validateSaleStatus(SaleStatus saleStatus) {
@@ -192,21 +202,30 @@ public class SaleService {
 
         for (SaleItem item : saleItems) {
             Objects.requireNonNull(item, "Sale item cannot be null");
+
             BigDecimal unitPrice = ValidationUtils.requireAmountGreaterThanZero(
-                    item.getSaleItemUnitPrice(), "Sale item unit price must be greater than zero");
+                    item.getSaleItemUnitPrice(),
+                    "Sale item unit price must be greater than zero"
+            );
+
             int itemQuantity = ValidationUtils.requireNonNegative(
-                    item.getSaleItemQuantity(), "Sale item quantity must be greater than zero", true);
-            BigDecimal itemSubtotal = unitPrice.multiply(BigDecimal.valueOf(itemQuantity))
-                    .setScale(2, RoundingMode.HALF_UP);
+                    item.getSaleItemQuantity(),
+                    "Sale item quantity must be greater than zero",
+                    true
+            );
+
+            BigDecimal itemSubtotal = unitPrice.multiply(BigDecimal.valueOf(itemQuantity)).setScale(2, RoundingMode.HALF_UP);
 
             quantity = Math.addExact(quantity, itemQuantity);
             subtotal = subtotal.add(itemSubtotal);
         }
 
         ValidationUtils.requireNonNegative(quantity, "Sale must contain at least one product", true);
+
         double discountPercent = quantity >= 3 ? 10.0 : 0.0;
-        BigDecimal discount = subtotal.multiply(BigDecimal.valueOf(discountPercent / 100))
-                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal discount = subtotal.multiply(BigDecimal.valueOf(discountPercent / 100)).setScale(2, RoundingMode.HALF_UP);
+
         BigDecimal total = subtotal.subtract(discount)
                 .add(shippingCost == null ? BigDecimal.ZERO : shippingCost)
                 .setScale(2, RoundingMode.HALF_UP);
@@ -215,7 +234,9 @@ public class SaleService {
             item.setSaleItemSubtotal(item.getSaleItemUnitPrice()
                 .multiply(BigDecimal.valueOf(item.getSaleItemQuantity()))
                 .setScale(2, RoundingMode.HALF_UP));
+
             if (item.getId() == null) item.setId(UUID.randomUUID());
+
             if (item.getCreatedAt() == null) item.setCreatedAt(LocalDateTime.now());
         }
 

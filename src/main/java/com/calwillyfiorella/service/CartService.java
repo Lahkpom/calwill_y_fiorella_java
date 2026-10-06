@@ -84,13 +84,14 @@ public class CartService {
         Objects.requireNonNull(user, "El usuario no puede ser nulo.");
 
         Cart cart = cartRepository.findByUser(user);
-        List<CartItem> validItems = new ArrayList<>();
+        List<CartItem> validItems   = new ArrayList<>();
+        List<CartItem> invalidItems = new ArrayList<>();
 
         for (CartItem item : cart.getItems()) {
             ProductVariant variant = item.getVariant();
 
             if (variant.getRowStatus() != RowStatus.ACTIVE || variant.getStock() <= 0) {
-                cartRepository.delete(item);
+                invalidItems.add(item);
                 continue;
             }
 
@@ -98,6 +99,10 @@ public class CartService {
 
             validItems.add(item);
         }
+
+        // Eliminamos del carrito los que no pasaron la validación
+        invalidItems.forEach(cartRepository::delete);
+
         return new Cart(cart.getUserId(), validItems);
     }
 }

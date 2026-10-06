@@ -45,9 +45,9 @@ public class Main {
         DataSeeder.seed(
                 userRepository,
                 productRepository,
-            colorRepository,
-            cartRepository,
-            saleService
+                colorRepository,
+                cartRepository,
+                saleService
         );
 
         MainMenu mainMenu = new MainMenu(

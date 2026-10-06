@@ -63,9 +63,9 @@ public class AdminMenu {
         List<MenuOption> options = List.of(
                 MenuOption.of("Ver mi información"          , () -> authMenu.renderUserInfo(this::render)),
                 MenuOption.of("Gestionar Productos"         , this::renderAdminProducts),
-                MenuOption.of("Gestionar Colores"           , this::renderAdminColors),
                 MenuOption.of("Gestionar Ventas"            , this::renderAdminSales),
-                MenuOption.of("Gestionar Usuarios"          , () -> { System.out.println("FUNCIÓN EN DESARROLLO"); this.render(); }),
+                MenuOption.of("Gestionar Usuarios"          , () -> { System.err.println("FUNCIÓN EN DESARROLLO"); this.render(); }),
+                MenuOption.of("Gestionar Colores"           , this::renderAdminColors),
                 MenuOption.of("Crear Usuario Administrador" , () -> authMenu.signUp(true))
         );
 
@@ -74,6 +74,7 @@ public class AdminMenu {
 
     private void renderAdminSales() {
         List<Sale> sales = saleService.getAllSales();
+
         if (sales.isEmpty()) {
             MenuHelper.printMenuTitle("VENTAS");
             System.out.println("No hay ventas registradas.");
@@ -82,17 +83,16 @@ public class AdminMenu {
         }
 
         List<Integer> saleOptions = ListPrinter.renderList("TODAS LAS VENTAS", sales, true);
+
         menuHelper.renderMenuOptions(
                 List.of(MenuOption.of("Seleccionar una venta", () -> selectAdminSale(sales, saleOptions))),
                 this::render
         );
     }
-
     private void selectAdminSale(List<Sale> sales, List<Integer> saleOptions) {
         int selected = AuxiliarFunction.requireUserOption(saleOptions, "Número de la venta: ", true);
         renderAdminSaleDetails(sales.get(selected - 1));
     }
-
     private void renderAdminSaleDetails(Sale sale) {
         MenuHelper.printMenuTitle("DETALLE DE VENTA");
         System.out.printf("Cliente: %s%nEmail: %s%nTeléfono: %s%n", sale.getCustomerName(), sale.getCustomerEmail(), sale.getCustomerPhone());
@@ -108,7 +108,6 @@ public class AdminMenu {
         );
         menuHelper.renderMenuOptions(options, this::renderAdminSales);
     }
-
     private void editSaleNotes(Sale sale) {
         String notes = InputUtils.readString("Nuevas notas (vacío para conservar las actuales): ", false);
         if (notes == null) {
@@ -120,7 +119,6 @@ public class AdminMenu {
         changes.setSaleNotes(notes);
         updateSale(sale, changes);
     }
-
     private void editSaleStatus(Sale sale) {
         SaleStatus[] statuses = SaleStatus.values();
         MenuHelper.printMenuTitle("ESTADOS DE VENTA");
@@ -133,7 +131,6 @@ public class AdminMenu {
         changes.setSaleStatus(statuses[selected - 1]);
         updateSale(sale, changes);
     }
-
     private void editPaymentStatus(Sale sale) {
         PaymentStatus[] statuses = PaymentStatus.values();
         MenuHelper.printMenuTitle("ESTADOS DE PAGO");
@@ -146,7 +143,6 @@ public class AdminMenu {
         changes.setPaymentStatus(statuses[selected - 1]);
         updateSale(sale, changes);
     }
-
     private void updateSale(Sale sale, Sale changes) {
         try {
             saleService.updateSale(sale.getId(), changes);

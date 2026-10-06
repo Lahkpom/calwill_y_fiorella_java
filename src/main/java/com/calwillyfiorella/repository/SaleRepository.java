@@ -31,7 +31,7 @@ public class SaleRepository {
 
     public Optional<Sale> findByCustomerEmail(String customerEmail) {
         return this.sales.stream()
-                .filter(s -> s.getCustomerEmail().equals(customerEmail))
+                .filter(s -> s.getCustomerEmail().equalsIgnoreCase(customerEmail))
                 .findFirst();
     }
 }

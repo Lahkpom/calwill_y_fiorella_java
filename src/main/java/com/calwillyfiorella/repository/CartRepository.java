@@ -20,7 +20,7 @@ public class CartRepository {
 
     public Cart findByUser(Users user) {
         List<CartItem> userItems = this.cart.stream()
-                .filter(item -> item.getUser().equals(user))
+                .filter(item -> item.getUser() != null && item.getUser().equals(user))
                 .toList();
         return new Cart(user.getId(), userItems);
     }

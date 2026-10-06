@@ -7,8 +7,8 @@ import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.util.ValidationUtils;
 
 public class CartItem {
-    private Users             user;
-    private ProductVariant    variant;
+    private final Users             user;
+    private final ProductVariant    variant;
 
     private Integer quantity;
 
@@ -41,14 +41,14 @@ public class CartItem {
         return ValidationUtils.requireNonNegative(quantity, "La cantidad ingresada no puede ser menor a cero", true);
     }
 
-    public Users getUser() { return this.user; }
-    public ProductVariant getVariant() { return this.variant; }
-    public Integer getQuantity() { return this.quantity; }
+    public Users            getUser     () { return this.user; }
+    public ProductVariant   getVariant  () { return this.variant; }
+    public Integer          getQuantity () { return this.quantity; }
 
     public BigDecimal getSubtotal() {
-        if (variant == null || variant.getPrice() == null || quantity == null) {
+        if (variant == null || variant.getPrice() == null || quantity == null)
             return BigDecimal.ZERO;
-        }
+
         return variant.getPrice().multiply(BigDecimal.valueOf(quantity));
     }
 }
