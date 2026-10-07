@@ -2,19 +2,18 @@ package com.calwillyfiorella.model;
 
 import com.calwillyfiorella.model.enums.RowStatus;
 import com.calwillyfiorella.service.ProductVariantService;
-import com.calwillyfiorella.util.ValidationUtils;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.Objects;
 
 public class VariantImage extends BaseEntity{
-    private final UUID              imageId;
-    private final ProductVariant    variant;
-    private final String            imageUrl;
+    private UUID            imageId;
+    private ProductVariant  variant;
+    private String          imageUrl;
+    private Integer         imageOrder;
 
-    private Integer imageOrder;
+    public VariantImage() {}
 
     public VariantImage(
             ProductVariant variant,
@@ -47,48 +46,62 @@ public class VariantImage extends BaseEntity{
 
         this.imageId    = Objects.requireNonNull(imageId, "imageId cannot be null");
         this.variant    = Objects.requireNonNull(variant, "Variant cannot be null");
-        this.imageUrl   = isValidUrl(imageUrl) ? imageUrl : null;
-        this.imageOrder = this.validateImageOrder(imageOrder);
+        this.imageUrl   = imageUrl;
+        this.imageOrder = imageOrder;
     }
 
     @Override
     public String toString() {
-        return String.format(
-                "Producto: %s - Categoría: %s - Para: %s - Color: %s - Talle: %s - Precio: %s - URL Imagen: %s - Orden Imagen: %d - Estado: %s",
-                this.variant.getProduct().getName(),
-                this.variant.getProduct().getCategory(),
-                ProductVariantService.targetGenderDecode(this.variant.getTargetGender()),
-                this.variant.getColor().getName(),
-                this.variant.getSize(),
-                this.variant.getPrice(),
-                this.imageUrl,
-                this.imageOrder,
-                this.rowStatus
+        return "{ Orden Imagen: %d, Estado: %s, URL Imagen: %s }"
+                .formatted(
+                        this.imageOrder,
+                        super.rowStatus,
+                        this.imageUrl
+                );
+    }
+
+    public String toStringComplete() {
+        return """
+                {
+                    ID          : (%s).
+                    Producto    : %s.
+                    Variante    : %s.
+                    Imágen Nro  : %d.
+                    URL         : %s.
+                    Estado      : %s.
+                    Fecha Inicio: %td/%<tm/%<tY (%<tT).
+                    Última Mod  : %S.
+                }""".formatted(
+                        this.imageId,
+                        this.variant.getProduct(),
+                        this.variant,
+                        this.imageOrder,
+                        this.imageUrl,
+                        super.rowStatus,
+                        super.createdAt,
+                        (super.updatedAt != null)
+                                ? "%td/%<tm/%<tY (%<tT)".formatted(super.updatedAt)
+                                : "Sin modificaciones"
         );
     }
 
-    private boolean isValidUrl(String url) {
-        if (url == null || url.isBlank()) return false;
-        try {
-            URI parsed = URI.create(url);
-            String scheme = parsed.getScheme();
-            return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+    public void setId(UUID imageId) {
+        this.imageId = imageId;
     }
-
-    private Integer validateImageOrder(Integer imageOrder) {
-        return ValidationUtils.requireNonNegative(imageOrder, "imageOrder cannot be null or minus than zero.");
+    public void setVariant(ProductVariant variant) {
+        this.variant = variant;
     }
-
-    public void setImageOrder(Integer imageOrder) {
-        this.imageOrder = this.validateImageOrder(imageOrder);
+    public void setUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+        this.afterUpdate();
+    }
+    public void setOrder(Integer imageOrder) {
+        this.imageOrder = imageOrder;
         this.afterUpdate();
     }
 
-    public UUID             getImageId      () { return this.imageId; }
-    public ProductVariant   getVariant      () { return this.variant; }
-    public String           getImageUrl     () { return this.imageUrl; }
-    public Integer          getImageOrder   () { return this.imageOrder; }
+    public UUID             getId       () { return this.imageId; }
+    public ProductVariant   getVariant  () { return this.variant; }
+    public String           getUrl      () { return this.imageUrl; }
+    public Integer          getOrder    () { return this.imageOrder; }
 }

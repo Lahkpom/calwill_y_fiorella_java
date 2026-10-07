@@ -80,18 +80,18 @@ public class ProductVariant extends BaseEntity {
 
     @Override
     public String toString() {
-        return String.format(
-                "{ Producto: %s, Categoría: %s, Para: %s, Color: %s, Talle: %s, Precio: %.2f, Stock: %d, Imágenes: %d, Estado: %s }",
-                this.product.getName(),
-                this.product.getCategory(),
-                ProductVariantService.targetGenderDecode(this.targetGender),
-                this.color,
-                this.size,
-                this.variantPrice,
-                this.variantStock,
-                this.images.stream().filter(img -> img.getRowStatus() == RowStatus.ACTIVE).count(),
-                this.rowStatus
-        );
+        return "{ Producto: %s, Categoría: %s, Para: %s, Color: %s, Talle: %s, Precio: %.2f, Stock: %d, Imágenes: %d, Estado: %s }"
+                .formatted(
+                        this.product.getName(),
+                        this.product.getCategory(),
+                        ProductVariantService.targetGenderDecode(this.targetGender),
+                        this.color,
+                        this.size,
+                        this.variantPrice,
+                        this.variantStock,
+                        this.images.stream().filter(img -> img.getRowStatus() == RowStatus.ACTIVE).count(),
+                        this.rowStatus
+                );
     }
 
     public String toStringComplete() {
@@ -129,22 +129,6 @@ public class ProductVariant extends BaseEntity {
         );
     }
 
-//    UTIL FUNCTIONS
-    private VariantImage getImageById(UUID imageId) {
-        if (imageId == null) return null;
-
-        VariantImage dummy = null;
-        for (VariantImage img : this.images) {
-            if (img.getImageId().equals(imageId)) {
-                dummy = img;
-                break;
-            }
-        }
-        return dummy;
-    }
-//    UTIL FUNCTIONS
-
-//    SETTERS
     public void setId(UUID variantId) {
         this.variantId = variantId;
     }
@@ -179,12 +163,9 @@ public class ProductVariant extends BaseEntity {
         this.variantStock = variantStock;
         this.afterUpdate();
     }
-//    SETTERS
 
-//    GETTERS
     public UUID                 getId           () { return this.variantId; }
     public Product              getProduct      () { return this.product; }
-    public List<VariantImage>   getImages       () { return Collections.unmodifiableList(this.images); }
     public Color                getColor        () { return this.color; }
     public NumericSize          getSize         () { return this.size; }
     public TargetGender         getTargetGender () { return this.targetGender; }
@@ -192,51 +173,14 @@ public class ProductVariant extends BaseEntity {
     public String               getSku          () { return this.variantSku; }
     public BigDecimal           getPrice        () { return this.variantPrice; }
     public Integer              getStock        () { return this.variantStock; }
-//    GETTERS
 
-//    COMPLEX FUNCTIONS
-    public void addImage(VariantImage image) {
-        if (image == null)
-            throw new NullPointerException("La VariantImage ingresada no puede ser nulla.");
+    // VARIANT IMAGES
+    public void saveImage(VariantImage variantImage) { this.images.add(variantImage); }
 
-        if (!image.getVariant().getId().equals(this.variantId))
-            throw new IllegalArgumentException("La VariantImage ingresada no corresponde a esta variante.");
+    public List<VariantImage> findAllImages() { return Collections.unmodifiableList(this.images); }
 
-        if (this.images.stream().anyMatch(img ->
-                (
-                        image.getImageId().equals(img.getImageId())
-                ) || (
-                        image.getImageUrl().equalsIgnoreCase(img.getImageUrl())
-                )
-        )) throw new IllegalArgumentException("La VariantImage ingresada ya se encuentra en la Lista de esta variante");
+    public Optional<VariantImage> findImageById (UUID imageId) { return this.images.stream().filter(img -> imageId.equals(img.getId())).findFirst(); }
 
-        this.images.add(image);
-    }
+    public void deleteImageById (UUID imageId) { this.images.removeIf(img -> imageId.equals(img.getId())); }
 
-    public VariantImage addImage(String imageUrl) {
-        if (this.images.stream().anyMatch(img -> img.getImageUrl().equalsIgnoreCase(imageUrl)))
-            throw new IllegalArgumentException("La imagen ingresada ya existe en la lista de esta variante.");
-
-        VariantImage vi = new VariantImage(this, imageUrl, this.images.size() + 1);
-
-        this.images.add(vi);
-
-        return vi;
-    }
-
-    public boolean removeImage(UUID imageId) {
-        return this.images.removeIf(img -> imageId.equals(img.getImageId()));
-    }
-
-    public void changeImageStatus(UUID imageId, RowStatus newStatus) {
-        VariantImage image = this.getImageById(imageId);
-
-        if (image == null)
-            throw new IllegalArgumentException("La URL ingresada no corresponde a una imagen de esta variante.");
-
-        if (image.getRowStatus() == newStatus) return;
-
-        image.setRowStatus(newStatus);
-    }
-//    COMPLEX FUNCTIONS
 }

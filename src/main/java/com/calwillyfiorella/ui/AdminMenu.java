@@ -375,15 +375,11 @@ public class AdminMenu {
         List<MenuOption> options = new ArrayList<>();
 
         // Estas opciones solo si muestran si hay variantes dentro del producto
-        if (!allowedVariantOptions.isEmpty()) {
+        if (!allowedVariantOptions.isEmpty())
             options.add(MenuOption.of("Ver Detalles de una Variante", () -> {
                 Integer variantIdx = AuxiliarFunction.requireUserOption(allowedVariantOptions, "Número de la variante: ", true);
                 renderAdminProductVariantDetails(product, variants.get(variantIdx - 1));
             }));
-            options.add(MenuOption.of("Gestionar las Imágenes de una Variante", () -> {
-                System.out.println("MÓDULO EN DESARROLLO"); renderAdminVariants(product);
-            }));
-        }
 
         options.add(MenuOption.of("Crear una nueva Variante", () -> createVariant(product)));
 
@@ -395,8 +391,8 @@ public class AdminMenu {
         System.out.println(productVariant.toStringComplete());
 
         List<MenuOption> options = List.of(
-                MenuOption.of("Actualizar Variante"         , () -> updateVariant(product, productVariant)),
-                MenuOption.of("Gestionar las Imágenes de una Variante", () -> { System.out.println("MÓDULO EN DESARROLLO"); renderAdminVariants(product); })
+                MenuOption.of("Actualizar Variante"                     , () -> updateVariant(product, productVariant)),
+                MenuOption.of("Gestionar las Imágenes de la Variante"   , () -> renderAdminImages(productVariant))
         );
 
         menuHelper.renderMenuOptions(options, this::renderAdminProducts);
@@ -433,7 +429,7 @@ public class AdminMenu {
             if (newVariantData == null)
                 throw new IllegalStateException("La variante devuelta por el formulario de creación de variantes es un objeto nulo.");
 
-            productVariantService.addVariant(newVariantData, product);
+            productVariantService.addVariant(product.getId(), newVariantData);
 
             System.out.println("La variante fue creada con éxito.");
         } catch (Exception e) {
@@ -514,6 +510,73 @@ public class AdminMenu {
             variant.setPrice(newPrice);
             variant.setStock(newStock);
             return variant;
+        });
+    }
+
+    private void renderAdminImages(ProductVariant variant) {
+        List<VariantImage> images = this.productVariantService.getAllImages(variant.getId());
+
+        List<Integer> allowedOptions = ListPrinter.renderList("IMÁGENES DE LA VARIANTE", images, true);
+
+        List<MenuOption> options = new ArrayList<>();
+
+        // Estas opciones solo si muestran si hay variantes dentro del producto
+        if (!allowedOptions.isEmpty())
+            options.add(MenuOption.of("Ver Detalles de la Imágen", () -> {
+                Integer idx = AuxiliarFunction.requireUserOption(allowedOptions, "Número de la imágen: ", true);
+                renderAdminImageDetails(variant, images.get(idx - 1));
+            }));
+
+        options.add(MenuOption.of("Crear una nueva Imagen", () -> createImage(variant)));
+
+        menuHelper.renderMenuOptions(options, () -> this.renderAdminImages(variant));
+    }
+    private void renderAdminImageDetails(ProductVariant variant, VariantImage image) {
+        MenuHelper.printMenuTitle("DETALLE DE LA IMAGEN");
+
+        System.out.println(image.toStringComplete());
+
+        List<MenuOption> options = List.of(
+                MenuOption.of("Actualizar Imagen", () -> {
+                    System.err.println("FUNCIÓN EN DESARROLLO");
+                    this.renderAdminImages(variant);
+                })
+        );
+
+        menuHelper.renderMenuOptions(options, () -> this.renderAdminImages(variant));
+    }
+    private void createImage(ProductVariant variant) {
+        try {
+            VariantImage newImageData = createOrUpdateImageForm(false, null);
+
+            if (newImageData == null)
+                throw new IllegalStateException("La imagen devuelta por el formulario de creación de imágenes es un objeto nulo.");
+
+            this.productVariantService.addImage(variant.getId(), newImageData);
+
+            System.out.println("La imagen fue creada con éxito.");
+        } catch (Exception e) {
+            System.err.println("Error al crear la imagen: " + e.getMessage());
+        }
+
+        this.renderAdminImages(variant);
+    }
+    private VariantImage createOrUpdateImageForm(boolean isUpdate, VariantImage currentImageData) {
+        boolean isStrict = !isUpdate;
+
+        return FormHelper.executeCreateOrUpdateForm("IMAGEN", isUpdate, currentImageData, () -> {
+            String newURL = InputUtils.readString(
+                    FormHelper.buildPrompt(
+                            "URL",
+                            isUpdate ? currentImageData.getUrl() : null,
+                            isUpdate
+                    ),
+                    isStrict
+            );
+
+            VariantImage image = new VariantImage();
+            image.setUrl(newURL);
+            return image;
         });
     }
 }

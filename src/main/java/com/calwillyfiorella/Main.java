@@ -14,7 +14,7 @@ import com.calwillyfiorella.util.DataSeeder;
 public class Main {
     public static String HYPHEN_SEPARATOR = "------------------------------------------------------------------------";
 
-    // * TODO - Separar las responsabilidades entre Product y ProductVariant
+    // * TODO - Ver cómo mejorar los métodos toStringComplete de modo que los llamados a los atributos de BaseEntity queden centralizados
     // * TODO - Unificar las responsabilidades entre ProductVariant y VariantImage como está hecho entre Sale y SaleItem
     // * TODO - Generar otro menú en el admin para gestionar los usuarios existentes (Solo deberían poder verlo los SUPER_ADMIN)
     // * TODO - Hacer el variantImage service para mover toda la lógica de la clase ProductVariant
@@ -32,7 +32,7 @@ public class Main {
         UserService             userService             = new UserService(userRepository);
         AuthService             authService             = new AuthService(userService);
         ProductService          productService          = new ProductService(productRepository);
-        ProductVariantService   productVariantService   = new ProductVariantService(productVariantRepository);
+        ProductVariantService   productVariantService   = new ProductVariantService(productVariantRepository, productService    );
         ColorService            colorService            = new ColorService(colorRepository);
         CartService             cartService             = new CartService(cartRepository);
         SaleService             saleService             = new SaleService(saleRepository);

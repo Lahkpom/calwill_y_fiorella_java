@@ -5,13 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.calwillyfiorella.model.CartItem;
-import com.calwillyfiorella.model.Color;
-import com.calwillyfiorella.model.Product;
-import com.calwillyfiorella.model.ProductVariant;
-import com.calwillyfiorella.model.Sale;
-import com.calwillyfiorella.model.SaleItem;
-import com.calwillyfiorella.model.Users;
+import com.calwillyfiorella.model.*;
 import com.calwillyfiorella.model.enums.Category;
 import com.calwillyfiorella.model.enums.NumericSize;
 import com.calwillyfiorella.model.enums.PaymentMethod;
@@ -107,6 +101,36 @@ public final class DataSeeder {
         productVariantRepository.saveVariant(variant1);
         productVariantRepository.saveVariant(variant2);
 
+        variant1.saveImage(
+                new VariantImage(
+                        variant1,
+                        "http://prueba.com/1",
+                        1
+                )
+        );
+        variant1.saveImage(
+                new VariantImage(
+                        variant1,
+                        "http://prueba.com/2",
+                        2
+                )
+        );
+
+        variant2.saveImage(
+                new VariantImage(
+                        variant2,
+                        "http://prueba.com/1",
+                        1
+                )
+        );
+        variant2.saveImage(
+                new VariantImage(
+                        variant2,
+                        "http://prueba.com/2",
+                        2
+                )
+        );
+
         Product art2 = new Product(
                 Category.CALZADO,
                 "Artículo_2",
@@ -135,6 +159,36 @@ public final class DataSeeder {
         );
         productVariantRepository.saveVariant(variant3);
         productVariantRepository.saveVariant(variant4);
+
+        variant3.saveImage(
+                new VariantImage(
+                        variant3,
+                        "http://prueba.com/1",
+                        1
+                )
+        );
+        variant3.saveImage(
+                new VariantImage(
+                        variant3,
+                        "http://prueba.com/2",
+                        2
+                )
+        );
+
+        variant4.saveImage(
+                new VariantImage(
+                        variant4,
+                        "http://prueba.com/1",
+                        1
+                )
+        );
+        variant4.saveImage(
+                new VariantImage(
+                        variant4,
+                        "http://prueba.com/2",
+                        2
+                )
+        );
 
         productRepository.save(art1);
         productRepository.save(art2);
